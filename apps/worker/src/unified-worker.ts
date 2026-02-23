@@ -34,6 +34,18 @@ type RunJobPayload = {
 const JOB_TYPES: QueueJobType[] = [JobType.PROCESS_AI_RUN];
 
 const decodeRunResult = Schema.decodeUnknownSync(RunResultSchema);
+export const INVALID_COMPLETED_RUN_RESULT_ERROR =
+  'Run completed with invalid result payload';
+const RUN_RESULT_DECODE_SOURCE_PATH =
+  'apps/worker/src/unified-worker.ts:onJobComplete';
+
+const toParseErrorSummary = (error: unknown): string => {
+  const message = formatError(error);
+  const firstLine = message.split('\n')[0]?.trim();
+  return firstLine && firstLine.length > 0
+    ? firstLine
+    : 'invalid run result payload';
+};
 
 const runSystemPrompt = `You are an async background AI assistant.
 
@@ -86,14 +98,59 @@ const decodePayload = (
   return Effect.succeed({ userId, prompt, threadId });
 };
 
-const parseRunResult = (value: unknown): RunResult | null => {
-  if (value == null) return null;
+type ParsedRunResult = {
+  readonly result: RunResult | null;
+  readonly parseErrorSummary: string | null;
+};
+
+const parseRunResult = (value: unknown): ParsedRunResult => {
+  if (value == null) {
+    return {
+      result: null,
+      parseErrorSummary: 'missing result payload',
+    };
+  }
 
   try {
-    return decodeRunResult(value);
-  } catch {
-    return null;
+    return {
+      result: decodeRunResult(value),
+      parseErrorSummary: null,
+    };
+  } catch (error) {
+    return {
+      result: null,
+      parseErrorSummary: toParseErrorSummary(error),
+    };
   }
+};
+
+const logRunResultDecodeFailure = (jobId: string, parseErrorSummary: string) => {
+  Effect.runSync(
+    Effect.logWarning('run.result.decode_failed').pipe(
+      Effect.annotateLogs('queue.job.id', jobId),
+      Effect.annotateLogs('source.path', RUN_RESULT_DECODE_SOURCE_PATH),
+      Effect.annotateLogs('parse.error.summary', parseErrorSummary),
+    ),
+  );
+};
+
+export const handleCompletedRun = (
+  publishEvent: PublishEvent | undefined,
+  userId: string,
+  job: Job<RunJobPayload>,
+): void => {
+  const parsed = parseRunResult(job.result);
+
+  if (parsed.result) {
+    emitRunCompleted(publishEvent, userId, job.id, parsed.result);
+    return;
+  }
+
+  if (parsed.parseErrorSummary) {
+    logRunResultDecodeFailure(job.id, parsed.parseErrorSummary);
+  }
+
+  emitRunFailed(publishEvent, userId, job.id, INVALID_COMPLETED_RUN_RESULT_ERROR);
 };
 
 const processAiRunJob = (
@@ -178,10 +235,7 @@ export function createUnifiedWorker(config: UnifiedWorkerConfig): Worker {
         : job.createdBy;
 
     if (job.status === JobStatus.COMPLETED) {
-      const result = parseRunResult(job.result);
-      if (result) {
-        emitRunCompleted(config.publishEvent, userId, job.id, result);
-      }
+      handleCompletedRun(config.publishEvent, userId, job);
       return;
     }
 
