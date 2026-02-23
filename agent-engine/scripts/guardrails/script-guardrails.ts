@@ -8,6 +8,7 @@ export const ENTRY_SCRIPT_PATHS = [
   'agent-engine/scripts/workflow-memory/sync-git.ts',
   'agent-engine/scripts/workflow-memory/retrieve.ts',
   'agent-engine/scripts/workflow-memory/compact-memory.ts',
+  'agent-engine/scripts/workflow-memory/bootstrap-coverage.ts',
   'agent-engine/scripts/workflow-memory/check-coverage.ts',
   'agent-engine/scripts/workflow-memory/replay-scenarios.ts',
   'agent-engine/scripts/guardrails/lint-scripts.ts',
@@ -23,6 +24,8 @@ export const REQUIRED_PACKAGE_SCRIPTS: Record<string, string> = {
   'workflow-memory:sync': 'pnpm exec tsx agent-engine/scripts/workflow-memory/sync-git.ts',
   'workflow-memory:retrieve': 'pnpm exec tsx agent-engine/scripts/workflow-memory/retrieve.ts',
   'workflow-memory:compact': 'pnpm exec tsx agent-engine/scripts/workflow-memory/compact-memory.ts',
+  'workflow-memory:bootstrap':
+    'pnpm exec tsx agent-engine/scripts/workflow-memory/bootstrap-coverage.ts',
   'workflow-memory:coverage': 'pnpm exec tsx agent-engine/scripts/workflow-memory/check-coverage.ts',
   'workflow-memory:coverage:strict':
     'pnpm exec tsx agent-engine/scripts/workflow-memory/check-coverage.ts --strict',

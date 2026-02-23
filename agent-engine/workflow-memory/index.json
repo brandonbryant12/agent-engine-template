@@ -1,5 +1,68 @@
 [
   {
+    "id": "2026-02-23-architecture-adr-guard-bootstrap-initialization-2026-02-1",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Architecture + ADR Guard",
+    "title": "Bootstrap initialization seed (2026-02)",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "workflow-memory",
+      "bootstrap",
+      "initialization",
+      "seeded",
+      "memory-form:parametric",
+      "memory-function:working",
+      "memory-dynamics:write"
+    ],
+    "eventFile": "events/2026-02.jsonl",
+    "source": "bootstrap",
+    "isInitialization": true
+  },
+  {
+    "id": "2026-02-23-docs-knowledge-drift-bootstrap-initialization-2026-02-1",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Docs + Knowledge Drift",
+    "title": "Bootstrap initialization seed (2026-02)",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "workflow-memory",
+      "bootstrap",
+      "initialization",
+      "seeded",
+      "memory-form:parametric",
+      "memory-function:working",
+      "memory-dynamics:write"
+    ],
+    "eventFile": "events/2026-02.jsonl",
+    "source": "bootstrap",
+    "isInitialization": true
+  },
+  {
+    "id": "2026-02-23-feature-delivery-bootstrap-initialization-2026-02-1",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Bootstrap initialization seed (2026-02)",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "workflow-memory",
+      "bootstrap",
+      "initialization",
+      "seeded",
+      "memory-form:parametric",
+      "memory-function:working",
+      "memory-dynamics:write"
+    ],
+    "eventFile": "events/2026-02.jsonl",
+    "source": "bootstrap",
+    "isInitialization": true
+  },
+  {
     "id": "2026-02-23-periodic-scans-best-practice-researcher-baseline-macro-scan-repo-tooling-and-pi",
     "date": "2026-02-23",
     "month": "2026-02",
@@ -32,5 +95,26 @@
     "recency": 1,
     "confidence": 0.88,
     "eventFile": "events/2026-02.jsonl"
+  },
+  {
+    "id": "2026-02-23-self-improvement-bootstrap-initialization-2026-02-1",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Self-Improvement",
+    "title": "Bootstrap initialization seed (2026-02)",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "workflow-memory",
+      "bootstrap",
+      "initialization",
+      "seeded",
+      "memory-form:parametric",
+      "memory-function:working",
+      "memory-dynamics:write"
+    ],
+    "eventFile": "events/2026-02.jsonl",
+    "source": "bootstrap",
+    "isInitialization": true
   }
 ]

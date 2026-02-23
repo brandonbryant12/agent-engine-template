@@ -54,6 +54,7 @@
     "workflow-memory:sync": "pnpm exec tsx agent-engine/scripts/workflow-memory/sync-git.ts",
     "workflow-memory:retrieve": "pnpm exec tsx agent-engine/scripts/workflow-memory/retrieve.ts",
     "workflow-memory:compact": "pnpm exec tsx agent-engine/scripts/workflow-memory/compact-memory.ts",
+    "workflow-memory:bootstrap": "pnpm exec tsx agent-engine/scripts/workflow-memory/bootstrap-coverage.ts",
     "workflow-memory:coverage": "pnpm exec tsx agent-engine/scripts/workflow-memory/check-coverage.ts",
     "workflow-memory:coverage:strict": "pnpm exec tsx agent-engine/scripts/workflow-memory/check-coverage.ts --strict",
     "scenario:validate": "pnpm exec tsx agent-engine/scripts/workflow-memory/replay-scenarios.ts",
