@@ -3,7 +3,7 @@ import { ValidationError } from '@orpc/contract';
 import { streamToEventIterator } from '@orpc/server';
 import { withCurrentUser, type User } from '@repo/auth/policy';
 import { hasHttpProtocol, type LogLevel } from '@repo/db/error-protocol';
-import { Effect, Match, pipe } from 'effect';
+import { Cause, Effect, Match, Option, pipe } from 'effect';
 import type { ServerRuntime, SharedServices } from './runtime';
 
 /**
@@ -163,6 +163,33 @@ const logError = (
   }
 };
 
+type FailureClass = 'typed-failure' | 'defect' | 'interrupt' | 'unknown';
+
+const classifyFailureClass = <E>(cause: Cause.Cause<E>): FailureClass => {
+  if (Cause.isInterruptedOnly(cause)) {
+    return 'interrupt';
+  }
+  if (Cause.isDie(cause)) {
+    return 'defect';
+  }
+  if (Cause.isFailure(cause)) {
+    return 'typed-failure';
+  }
+  return 'unknown';
+};
+
+const logUnexpectedCauseFallback = <E>(
+  cause: Cause.Cause<E>,
+  requestId?: string,
+): void => {
+  const failureClass = classifyFailureClass(cause);
+  console.error('[effect-handler] Falling back to INTERNAL_ERROR', {
+    'request.id': requestId ?? null,
+    failureClass,
+    cause: Cause.pretty(cause, { renderErrorCause: true }),
+  });
+};
+
 /**
  * Generic error handler that reads HTTP protocol from error class.
  * Works with any error that implements HttpErrorProtocol via static properties.
@@ -293,16 +320,24 @@ export const handleEffectWithProtocol = <A, E extends { _tag: string }>(
 
   return runtime.runPromise(
     scopedEffect.pipe(
-      Effect.catchAll((error: E) =>
+      Effect.catchAllCause((cause) =>
         Effect.sync(() => {
-          // Check for custom handler first
-          const customHandler = customHandlers?.[error._tag];
-          if (customHandler) {
-            return customHandler(error);
+          const failureOption = Cause.failureOption(cause);
+          if (Option.isSome(failureOption)) {
+            const error = failureOption.value;
+
+            // Check for custom handler first
+            const customHandler = customHandlers?.[error._tag];
+            if (customHandler) {
+              return customHandler(error);
+            }
+
+            // Use generic protocol-based handler
+            return handleTaggedError(error, errors, options.requestId);
           }
 
-          // Use generic protocol-based handler
-          return handleTaggedError(error, errors, options.requestId);
+          logUnexpectedCauseFallback(cause, options.requestId);
+          return throwInternalError(errors, 'An unexpected error occurred');
         }),
       ),
     ),
