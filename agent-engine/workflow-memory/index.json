@@ -97,6 +97,34 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-23-periodic-scans-best-practice-researcher-macro-scan-architecture-boundaries",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "best-practice-researcher: macro scan (architecture-boundaries)",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "best-practice-researcher",
+      "architecture-boundaries",
+      "memory",
+      "workflow-memory",
+      "guardrail",
+      "memory-form:external",
+      "memory-function:semantic",
+      "memory-function:episodic",
+      "memory-function:working",
+      "memory-dynamics:retrieve",
+      "memory-dynamics:write"
+    ],
+    "importance": 0.89,
+    "recency": 1,
+    "confidence": 0.9,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-self-improvement-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
