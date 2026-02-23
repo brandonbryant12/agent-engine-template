@@ -1,5 +1,6 @@
 import { appContract } from '../../../packages/api/src/contracts/index.ts';
 import path from 'node:path';
+import { JSONSchema, Schema } from 'effect';
 import { generatedRoot, stableSortObject, writeUtf8 } from './utils';
 
 type ContractOperation = {
@@ -10,6 +11,7 @@ type ContractOperation = {
   readonly summary: string;
   readonly description: string;
   readonly streaming: boolean;
+  readonly inputSchema?: unknown;
 };
 
 type OpenApiOperation = {
@@ -17,6 +19,14 @@ type OpenApiOperation = {
   readonly tags?: readonly string[];
   readonly summary?: string;
   readonly description?: string;
+  readonly requestBody?: {
+    required: boolean;
+    content: {
+      'application/json': {
+        schema: Record<string, unknown>;
+      };
+    };
+  };
   readonly responses: Record<string, unknown>;
 };
 
@@ -36,6 +46,8 @@ const asRecord = (value: unknown): Record<string, unknown> | null => {
   }
   return value as Record<string, unknown>;
 };
+
+const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);
 
 const csvCell = (value: string): string => value.replaceAll('|', '\\|');
 
@@ -83,6 +95,7 @@ const collectContractOperations = (
         description:
           typeof route.description === 'string' ? route.description : '',
         streaming: isStreamingOutput(meta?.outputSchema),
+        inputSchema: meta?.inputSchema,
       });
     }
   }
@@ -95,6 +108,33 @@ const collectContractOperations = (
   }
 
   return operations;
+};
+
+const toRequestBody = (
+  method: string,
+  inputSchema: unknown,
+): OpenApiOperation['requestBody'] | undefined => {
+  if (!BODY_METHODS.has(method)) {
+    return undefined;
+  }
+
+  if (!Schema.isSchema(inputSchema)) {
+    return undefined;
+  }
+
+  try {
+    const schema = stableSortObject(JSONSchema.make(inputSchema));
+    return {
+      required: true,
+      content: {
+        'application/json': {
+          schema,
+        },
+      },
+    };
+  } catch {
+    return undefined;
+  }
 };
 
 const toOpenApiOperation = (operation: ContractOperation): OpenApiOperation => {
@@ -115,6 +155,7 @@ const toOpenApiOperation = (operation: ContractOperation): OpenApiOperation => {
     tags: operation.tags.length > 0 ? operation.tags : undefined,
     summary: operation.summary || undefined,
     description: operation.description || undefined,
+    requestBody: toRequestBody(operation.method, operation.inputSchema),
     responses: {
       '200': {
         description: 'Successful response',
@@ -145,7 +186,7 @@ const buildOpenApiDocument = (
       title: 'Agent Engine Template API (Spec Snapshot)',
       version: '1.0.0',
       description:
-        'Generated from oRPC contract metadata. Request/response schemas are intentionally omitted in this initial snapshot.',
+        'Generated from oRPC contract metadata. Request schemas are included when Effect Standard Schemas are available.',
     },
     servers: [{ url: '/api' }],
     paths,

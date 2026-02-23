@@ -35,7 +35,7 @@
     "start": "turbo run start",
     "test": "vitest run",
     "test:scripts": "vitest run --config agent-engine/scripts/vitest.config.ts",
-    "test:invariants": "vitest run packages/api/src/server/__tests__/effect-handler.invariants.test.ts packages/api/src/server/__tests__/error-assertions.invariants.test.ts packages/api/src/server/__tests__/chat-handler.invariants.test.ts packages/api/src/server/__tests__/router-handler.invariants.test.ts packages/testing/src/__tests__/docs-invariants.test.ts",
+    "test:invariants": "vitest run packages/api/src/server/__tests__/effect-handler.invariants.test.ts packages/api/src/server/__tests__/error-assertions.invariants.test.ts packages/api/src/server/__tests__/chat-handler.invariants.test.ts packages/api/src/server/__tests__/router-handler.invariants.test.ts packages/api/src/contracts/__tests__/chat-contract.invariants.test.ts packages/testing/src/__tests__/docs-invariants.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:coverage:api": "pnpm --filter @repo/api test:coverage",

@@ -1,6 +1,6 @@
 {
   "info": {
-    "description": "Generated from oRPC contract metadata. Request/response schemas are intentionally omitted in this initial snapshot.",
+    "description": "Generated from oRPC contract metadata. Request schemas are included when Effect Standard Schemas are available.",
     "title": "Agent Engine Template API (Spec Snapshot)",
     "version": "1.0.0"
   },
@@ -9,6 +9,88 @@
     "/chat/general": {
       "post": {
         "operationId": "chat.general",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "additionalProperties": false,
+                "properties": {
+                  "messages": {
+                    "description": "an array of at most 100 item(s)",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "description": "a string at most 128 character(s) long",
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                          "title": "maxLength(128)",
+                          "type": "string"
+                        },
+                        "parts": {
+                          "description": "an array of at most 64 item(s)",
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "text": {
+                                "description": "a string at most 8000 character(s) long",
+                                "maxLength": 8000,
+                                "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                                "title": "maxLength(8000)",
+                                "type": "string"
+                              },
+                              "type": {
+                                "description": "a string at most 64 character(s) long",
+                                "maxLength": 64,
+                                "minLength": 1,
+                                "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                                "title": "maxLength(64)",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ],
+                            "type": "object"
+                          },
+                          "maxItems": 64,
+                          "minItems": 1,
+                          "title": "maxItems(64)",
+                          "type": "array"
+                        },
+                        "role": {
+                          "enum": [
+                            "system",
+                            "user",
+                            "assistant"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "role",
+                        "parts"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 100,
+                    "minItems": 1,
+                    "title": "maxItems(100)",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "messages"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "content": {
@@ -63,6 +145,38 @@
       "post": {
         "description": "Queue a background AI run and track progress via SSE.",
         "operationId": "runs.create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "additionalProperties": false,
+                "properties": {
+                  "prompt": {
+                    "description": "a string at most 4000 character(s) long",
+                    "maxLength": 4000,
+                    "minLength": 1,
+                    "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                    "title": "maxLength(4000)",
+                    "type": "string"
+                  },
+                  "threadId": {
+                    "description": "a string at most 128 character(s) long",
+                    "maxLength": 128,
+                    "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                    "title": "maxLength(128)",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "prompt"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful response"

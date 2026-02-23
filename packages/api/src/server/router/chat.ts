@@ -1,4 +1,5 @@
 import { streamGeneralChat } from '@repo/ai/chat';
+import type { UIMessage } from 'ai';
 import {
   handleEffectStreamWithProtocol,
 } from '../effect-handler';
@@ -10,7 +11,9 @@ const chatRouter = {
       handleEffectStreamWithProtocol(
         context.runtime,
         context.user,
-        streamGeneralChat({ messages: input.messages }),
+        streamGeneralChat({
+          messages: input.messages as unknown as UIMessage[],
+        }),
         errors,
         { requestId: context.requestId, span: 'api.chat.general' },
       ),
