@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="${READY_FOR_DEV_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
 POLL_SECONDS="${READY_FOR_DEV_POLL_SECONDS:-300}"
 LABEL_NAME="${READY_FOR_DEV_LABEL:-ready-for-dev}"
+ISSUE_AUTHOR="${READY_FOR_DEV_ISSUE_AUTHOR:-brandonbryant12}"
 MODEL_NAME="${READY_FOR_DEV_MODEL:-gpt-5.3-codex}"
 STATE_DIR="${READY_FOR_DEV_STATE_DIR:-$HOME/.cache/agent-engine-template/ready-for-dev-loop}"
 REMOTE_URL="${READY_FOR_DEV_REMOTE_URL:-$(git -C "$REPO_ROOT" remote get-url origin)}"
@@ -79,7 +80,7 @@ acquire_lock() {
 ensure_runner_repo() {
   if [ ! -d "$RUNNER_REPO_DIR/.git" ]; then
     log "INFO" "$C_INFO" "Cloning runner repo into $RUNNER_REPO_DIR"
-    git clone "$REMOTE_URL" "$RUNNER_REPO_DIR"
+    git clone --quiet "$REMOTE_URL" "$RUNNER_REPO_DIR"
     return
   fi
 
@@ -91,9 +92,9 @@ next_ready_issue() {
     --repo "$REPO_SLUG" \
     --state open \
     --label "$LABEL_NAME" \
-    --limit 1 \
-    --json number \
-    --jq '.[0].number // empty'
+    --limit 100 \
+    --json number,author \
+    --jq 'map(select(.author.login == env.READY_FOR_DEV_ISSUE_AUTHOR)) | sort_by(.number) | .[0].number // empty'
 }
 
 cleanup_cycle() {
@@ -116,7 +117,7 @@ run_cycle() {
   print_line
   log "INFO" "$C_INFO" "Cycle start for issue #$issue_number"
   log "INFO" "$C_INFO" "Preparing isolated worktree: $worktree_dir"
-  git -C "$RUNNER_REPO_DIR" fetch origin main
+  git -C "$RUNNER_REPO_DIR" fetch --quiet origin main
   git -C "$RUNNER_REPO_DIR" worktree add -B "$branch_name" "$worktree_dir" origin/main >/dev/null
 
   trap 'cleanup_cycle "$worktree_dir" "$branch_name"' RETURN
@@ -126,6 +127,7 @@ run_cycle() {
   codex exec \
     --cd "$worktree_dir" \
     --model "$MODEL_NAME" \
+    --sandbox danger-full-access \
     --dangerously-bypass-approvals-and-sandbox \
     "$(cat "$PROMPT_FILE")" 2>&1 | tee "$run_log"
   rc=${PIPESTATUS[0]}
@@ -161,13 +163,16 @@ Execution contract:
 - Treat the playbook as source of truth for selection, implementation, validation, merge, and cleanup.
 - If no actionable `ready-for-dev` issues remain after playbook triage, finish as a no-op run and exit cleanly.
 EOF
+printf '%s\n' "- Additional hard constraint: only implement issues where issue author login is '$ISSUE_AUTHOR'. Skip all others as non-actionable." >>"$PROMPT_FILE"
 
 ensure_runner_repo
 REPO_SLUG="$(cd "$REPO_ROOT" && gh repo view --json nameWithOwner --jq '.nameWithOwner')"
+export READY_FOR_DEV_ISSUE_AUTHOR="$ISSUE_AUTHOR"
 print_line
 log "INFO" "$C_INFO" "Ready-for-dev runner started"
 log "INFO" "$C_INFO" "Repo: $REPO_SLUG"
 log "INFO" "$C_INFO" "Label: $LABEL_NAME"
+log "INFO" "$C_INFO" "Author filter: $ISSUE_AUTHOR"
 log "INFO" "$C_INFO" "Poll interval: ${POLL_SECONDS}s"
 log "INFO" "$C_INFO" "State dir: $STATE_DIR"
 log "INFO" "$C_INFO" "Runner logs: $RUNNER_LOGS_DIR"
@@ -177,12 +182,12 @@ while true; do
   issue_number="$(next_ready_issue)"
 
   if [ -z "$issue_number" ]; then
-    log "WARN" "$C_WARN" "No open '$LABEL_NAME' issues found. Sleeping for ${POLL_SECONDS}s."
+    log "WARN" "$C_WARN" "No open '$LABEL_NAME' issues found for author '$ISSUE_AUTHOR'. Sleeping for ${POLL_SECONDS}s."
     sleep "$POLL_SECONDS"
     continue
   fi
 
-  log "INFO" "$C_INFO" "Found open '$LABEL_NAME' issue #$issue_number"
+  log "INFO" "$C_INFO" "Found open '$LABEL_NAME' issue #$issue_number (author=$ISSUE_AUTHOR)"
   if ! run_cycle "$issue_number"; then
     log "WARN" "$C_WARN" "Cycle failed. Sleeping for ${POLL_SECONDS}s before retry."
     sleep "$POLL_SECONDS"
