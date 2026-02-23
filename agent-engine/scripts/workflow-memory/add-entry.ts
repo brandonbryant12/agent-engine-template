@@ -27,6 +27,8 @@ const MEMORY_FUNCTION_PREFIX = "memory-function:";
 const MEMORY_DYNAMICS_PREFIX = "memory-dynamics:";
 const CAPABILITY_PREFIX = "capability:";
 const FAILURE_PREFIX = "failure:";
+const PERIODIC_SCANS_WORKFLOW = "Periodic Scans";
+const BEST_PRACTICE_RESEARCHER_TAG = "best-practice-researcher";
 
 const MEMORY_FORM_VALUES = new Set(["parametric", "external"]);
 const MEMORY_FUNCTION_VALUES = new Set(["semantic", "episodic", "working"]);
@@ -75,7 +77,11 @@ const USAGE = `Usage:
     [--scenario-check <check-name>] \\
     [--scenario-verdict pass|fail] \\
     [--scenario-pattern <pattern-name>] \\
-    [--scenario-severity low|medium|high|critical]
+    [--scenario-severity low|medium|high|critical] \\
+    [--scan-walk-mode <mode>] \\
+    [--scan-scope <scope>] \\
+    [--scan-domain <domain>] \\
+    [--scan-signal <signal>]
 
 Scenario flags:
   When any --scenario-* flag is provided, --scenario-skill and --scenario-verdict
@@ -343,6 +349,44 @@ function buildScenario(args) {
   };
 }
 
+function parseScanValue(raw, flagName) {
+  if (raw === undefined) {
+    return "";
+  }
+
+  const normalized = String(raw).trim().toLowerCase();
+  if (!normalized) {
+    throw new Error(`Invalid ${flagName}: expected a non-empty value.`);
+  }
+
+  return normalized;
+}
+
+function buildScanMetadata(args) {
+  const walkMode = parseScanValue(args.scan_walk_mode, "--scan-walk-mode");
+  const scope = parseScanValue(args.scan_scope, "--scan-scope");
+  const domain = parseScanValue(args.scan_domain, "--scan-domain");
+  const signal = parseScanValue(args.scan_signal, "--scan-signal");
+
+  const provided = [walkMode, scope, domain, signal].filter(Boolean);
+  if (provided.length === 0) {
+    return undefined;
+  }
+
+  if (provided.length !== 4) {
+    throw new Error(
+      "Structured scan metadata requires all scan flags together: --scan-walk-mode, --scan-scope, --scan-domain, --scan-signal.",
+    );
+  }
+
+  return {
+    walkMode,
+    scope,
+    domain,
+    signal,
+  };
+}
+
 function buildEvent(args) {
   const date = args.date ?? new Date().toISOString().slice(0, 10);
   if (!validateDate(date)) {
@@ -410,6 +454,17 @@ function buildEvent(args) {
   };
 
   const scenario = buildScenario(args);
+  const scan = buildScanMetadata(args);
+
+  if (
+    workflow === PERIODIC_SCANS_WORKFLOW &&
+    tags.includes(BEST_PRACTICE_RESEARCHER_TAG) &&
+    !scan
+  ) {
+    throw new Error(
+      `Periodic Scans entries tagged "${BEST_PRACTICE_RESEARCHER_TAG}" must include structured scan metadata via --scan-walk-mode, --scan-scope, --scan-domain, and --scan-signal.`,
+    );
+  }
 
   return {
     id,
@@ -428,6 +483,7 @@ function buildEvent(args) {
     tags,
     ...scoring,
     ...(scenario ? { scenario } : {}),
+    ...(scan ? { scan } : {}),
     source: (args.source ?? "manual").trim(),
     createdAt: new Date().toISOString(),
   };
@@ -472,6 +528,7 @@ async function main() {
     ...(typeof event.recency === "number" ? { recency: event.recency } : {}),
     ...(typeof event.confidence === "number" ? { confidence: event.confidence } : {}),
     ...(event.scenario ? { hasScenario: true, scenarioSkill: event.scenario.skill } : {}),
+    ...(event.scan ? { scan: event.scan } : {}),
     eventFile: path.join("events", `${month}.jsonl`),
   };
 

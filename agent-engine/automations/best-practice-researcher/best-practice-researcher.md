@@ -81,8 +81,13 @@ Append concise run memory including:
 - related issues and new issue URLs
 - signal score 1-5
 - followability delta
+- structured scan metadata for Periodic Scans events:
+  - `--scan-walk-mode`
+  - `--scan-scope`
+  - `--scan-domain`
+  - `--scan-signal`
 - append at least one structured event:
-  - `pnpm workflow-memory:add-entry --workflow "Periodic Scans" ...`
+  - `pnpm workflow-memory:add-entry --workflow "Periodic Scans" --tags best-practice-researcher,... --scan-walk-mode weighted-random --scan-scope <macro|meso|micro> --scan-domain <domain> --scan-signal <1-5> ...`
 - commit and push memory append artifacts after each run:
   - `pnpm workflow-memory:sync --message "chore(workflow-memory): best-practice-researcher run memory"`
 - if `workflow-memory:sync` reports non-fast-forward, allow it to auto-rebase
