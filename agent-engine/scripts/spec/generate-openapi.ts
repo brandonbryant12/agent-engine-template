@@ -12,6 +12,13 @@ type ContractOperation = {
   readonly description: string;
   readonly streaming: boolean;
   readonly inputSchema?: unknown;
+  readonly errorResponses: readonly ContractErrorResponse[];
+};
+
+type ContractErrorResponse = {
+  readonly code: string;
+  readonly status: number;
+  readonly message?: string;
 };
 
 type OpenApiOperation = {
@@ -49,7 +56,31 @@ const asRecord = (value: unknown): Record<string, unknown> | null => {
 
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);
 
+const ORPC_ERROR_STATUS_FALLBACKS: Readonly<Record<string, number>> = {
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  METHOD_NOT_SUPPORTED: 405,
+  NOT_ACCEPTABLE: 406,
+  TIMEOUT: 408,
+  CONFLICT: 409,
+  PAYLOAD_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
+  UNPROCESSABLE_CONTENT: 422,
+  TOO_MANY_REQUESTS: 429,
+  CLIENT_CLOSED_REQUEST: 499,
+  INTERNAL_SERVER_ERROR: 500,
+  NOT_IMPLEMENTED: 501,
+  BAD_GATEWAY: 502,
+  SERVICE_UNAVAILABLE: 503,
+  GATEWAY_TIMEOUT: 504,
+};
+
 const csvCell = (value: string): string => value.replaceAll('|', '\\|');
+
+const fallbackErrorStatus = (code: string): number =>
+  ORPC_ERROR_STATUS_FALLBACKS[code] ?? 500;
 
 const isStreamingOutput = (outputSchema: unknown): boolean => {
   const schemaRecord = asRecord(outputSchema);
@@ -61,6 +92,39 @@ const isStreamingOutput = (outputSchema: unknown): boolean => {
   return Object.getOwnPropertySymbols(standard).some((symbol) =>
     String(symbol).includes('EVENT_ITERATOR'),
   );
+};
+
+const collectErrorResponses = (
+  errorMap: unknown,
+): readonly ContractErrorResponse[] => {
+  const errorMapRecord = asRecord(errorMap);
+  if (!errorMapRecord) return [];
+
+  const responses: ContractErrorResponse[] = [];
+
+  for (const [code, config] of Object.entries(errorMapRecord)) {
+    const configRecord = asRecord(config);
+    const configuredStatus =
+      typeof configRecord?.status === 'number' &&
+      Number.isInteger(configRecord.status)
+        ? configRecord.status
+        : undefined;
+    const status = configuredStatus ?? fallbackErrorStatus(code);
+
+    // Error responses should only contribute non-2xx statuses.
+    if (status >= 200 && status < 300) continue;
+
+    responses.push({
+      code,
+      status,
+      message:
+        typeof configRecord?.message === 'string'
+          ? configRecord.message
+          : undefined,
+    });
+  }
+
+  return responses;
 };
 
 const collectContractOperations = (
@@ -96,6 +160,7 @@ const collectContractOperations = (
           typeof route.description === 'string' ? route.description : '',
         streaming: isStreamingOutput(meta?.outputSchema),
         inputSchema: meta?.inputSchema,
+        errorResponses: collectErrorResponses(meta?.errorMap),
       });
     }
   }
@@ -137,6 +202,47 @@ const toRequestBody = (
   }
 };
 
+const buildErrorResponses = (
+  errorResponses: readonly ContractErrorResponse[],
+): Record<string, unknown> => {
+  const grouped = new Map<number, { codes: string[]; messages: string[] }>();
+
+  for (const errorResponse of errorResponses) {
+    const existing = grouped.get(errorResponse.status);
+    if (existing) {
+      existing.codes.push(errorResponse.code);
+      if (errorResponse.message) {
+        existing.messages.push(errorResponse.message);
+      }
+      continue;
+    }
+
+    grouped.set(errorResponse.status, {
+      codes: [errorResponse.code],
+      messages: errorResponse.message ? [errorResponse.message] : [],
+    });
+  }
+
+  const sortedEntries = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
+  const responses: Record<string, unknown> = {};
+
+  for (const [status, aggregate] of sortedEntries) {
+    const codes = [...new Set(aggregate.codes)];
+    const messages = [...new Set(aggregate.messages)];
+
+    const description =
+      messages.length === 1
+        ? messages[0]
+        : codes.length === 1
+          ? `${codes[0]} error response`
+          : `Error responses: ${codes.join(', ')}`;
+
+    responses[String(status)] = { description };
+  }
+
+  return responses;
+};
+
 const toOpenApiOperation = (operation: ContractOperation): OpenApiOperation => {
   const responseContent = operation.streaming
     ? {
@@ -150,6 +256,8 @@ const toOpenApiOperation = (operation: ContractOperation): OpenApiOperation => {
       }
     : {};
 
+  const errorResponses = buildErrorResponses(operation.errorResponses);
+
   return {
     operationId: operation.operationId,
     tags: operation.tags.length > 0 ? operation.tags : undefined,
@@ -161,6 +269,7 @@ const toOpenApiOperation = (operation: ContractOperation): OpenApiOperation => {
         description: 'Successful response',
         ...responseContent,
       },
+      ...errorResponses,
     },
   };
 };
