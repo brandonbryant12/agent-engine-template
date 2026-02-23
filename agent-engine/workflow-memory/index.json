@@ -97,6 +97,26 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-23-periodic-scans-best-practice-researcher-meso-backend-stale-recovery",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "best-practice-researcher: meso scan (backend-patterns-effect-use-case-repository)",
+    "severity": "high",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "best-practice-researcher",
+      "backend-patterns-effect-use-case-repository",
+      "worker-reliability"
+    ],
+    "importance": 0.9,
+    "recency": 1,
+    "confidence": 0.91,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-self-improvement-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
