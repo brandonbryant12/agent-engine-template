@@ -1,12 +1,15 @@
 import type {
   JobId,
   JobStatus as DbJobStatus,
-  JobType as DbJobType,
 } from '@repo/db/schema';
 
 export type JobStatus = DbJobStatus;
 
-export type JobType = DbJobType[keyof DbJobType];
+export const QueueJobType = {
+  PROCESS_AI_RUN: 'process-ai-run',
+} as const;
+
+export type JobType = (typeof QueueJobType)[keyof typeof QueueJobType];
 
 export interface Job<TPayload = unknown, TResult = unknown> {
   readonly id: JobId;

@@ -24,6 +24,19 @@ Required for all agent-authored backend changes.
 | Chat routes avoid direct `runtime.runPromise` | Bypassing shared handler pipeline |
 | Chat handlers define `api.chat.*` spans | Missing or inconsistent tracing |
 
+### API Router Handler Invariants
+<!-- enforced-by: invariant-test -->
+
+**File:** `packages/api/src/server/__tests__/router-handler.invariants.test.ts`
+
+| Rule | What It Prevents |
+|---|---|
+| Every handler router file must be covered by explicit invariant rules | Missing coverage when routers are added/renamed |
+| No direct `runtime.runPromise` calls in handler routers | Bypassing shared protocol pipeline |
+| No `@repo/db/schema` imports in handler routers unless allowlisted | API-to-DB boundary drift |
+| Effect-backed handlers must use standardized helper pipeline | Inconsistent protocol mapping and telemetry behavior |
+| Handler spans must use `api.*` naming, or explicit SSE exemption rationale | Missing/implicit observability contracts |
+
 ### Error Assertion Invariants
 <!-- enforced-by: invariant-test -->
 
