@@ -101,6 +101,27 @@
               }
             },
             "description": "Successful response"
+          },
+          "401": {
+            "description": "Missing user session. Please log in!"
+          },
+          "403": {
+            "description": "You do not have enough permission to perform this action."
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "description": "INPUT_VALIDATION_FAILED error response"
+          },
+          "429": {
+            "description": "Too many requests. Please try again later."
+          },
+          "500": {
+            "description": "An internal error occurred. Please try again later."
+          },
+          "502": {
+            "description": "An external service is currently unavailable."
           }
         },
         "tags": [
@@ -121,6 +142,27 @@
               }
             },
             "description": "Successful response"
+          },
+          "401": {
+            "description": "Missing user session. Please log in!"
+          },
+          "403": {
+            "description": "You do not have enough permission to perform this action."
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "description": "INPUT_VALIDATION_FAILED error response"
+          },
+          "429": {
+            "description": "Too many requests. Please try again later."
+          },
+          "500": {
+            "description": "An internal error occurred. Please try again later."
+          },
+          "502": {
+            "description": "An external service is currently unavailable."
           }
         },
         "tags": [
@@ -135,6 +177,27 @@
         "responses": {
           "200": {
             "description": "Successful response"
+          },
+          "401": {
+            "description": "Missing user session. Please log in!"
+          },
+          "403": {
+            "description": "You do not have enough permission to perform this action."
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "description": "INPUT_VALIDATION_FAILED error response"
+          },
+          "429": {
+            "description": "Too many requests. Please try again later."
+          },
+          "500": {
+            "description": "An internal error occurred. Please try again later."
+          },
+          "502": {
+            "description": "An external service is currently unavailable."
           }
         },
         "summary": "List runs",
@@ -180,6 +243,27 @@
         "responses": {
           "200": {
             "description": "Successful response"
+          },
+          "401": {
+            "description": "Missing user session. Please log in!"
+          },
+          "403": {
+            "description": "You do not have enough permission to perform this action."
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "description": "INPUT_VALIDATION_FAILED error response"
+          },
+          "429": {
+            "description": "Too many requests. Please try again later."
+          },
+          "500": {
+            "description": "An internal error occurred. Please try again later."
+          },
+          "502": {
+            "description": "An external service is currently unavailable."
           }
         },
         "summary": "Create run",
