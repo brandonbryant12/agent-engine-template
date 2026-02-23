@@ -15,6 +15,9 @@
     "docker:down:minimal": "sh ./scripts/docker-down-minimal.sh",
     "docker:up:full": "sh ./scripts/docker-up-full.sh",
     "docker:down:full": "sh ./scripts/docker-down-full.sh",
+    "best-practice-researcher:loop": "bash ./scripts/best-practice-researcher-loop.sh",
+    "best-practices-researcher:loop": "bash ./scripts/best-practice-researcher-loop.sh",
+    "automation:best-practice-researcher:loop": "bash ./scripts/best-practice-researcher-loop.sh",
     "ready-for-dev:loop": "bash ./scripts/ready-for-dev-loop.sh",
     "automation:ready-for-dev:loop": "bash ./scripts/ready-for-dev-loop.sh",
     "dev": "turbo watch dev --continue",
@@ -79,7 +82,8 @@
   },
   "pnpm": {
     "overrides": {
-      "@eslint/eslintrc>ajv": "6.12.6"
+      "@eslint/eslintrc>ajv": "6.12.6",
+      "@exodus/bytes": "1.8.0"
     }
   }
 }

@@ -131,6 +131,29 @@ Optional environment overrides:
 - `READY_FOR_DEV_MODEL` (default `gpt-5.3-codex`)
 - `READY_FOR_DEV_REMOTE_URL` (defaults to `origin` URL from the current repo)
 
+## Best-Practice Researcher Loop Runner
+
+Continuously run one Codex `best-practice-researcher` cycle, then sleep
+15 minutes between runs.
+
+```bash
+pnpm best-practice-researcher:loop
+```
+
+Alias:
+- `pnpm best-practices-researcher:loop`
+
+Behavior:
+- Runs Codex in an external state directory (`~/.cache/...`) using throwaway git worktrees.
+- Keeps the primary checkout clean by avoiding researcher runs in the main repo directory.
+- Writes per-run logs under `~/.cache/agent-engine-template/best-practice-researcher-loop/logs`.
+
+Optional environment overrides:
+- `BEST_PRACTICE_RESEARCHER_POLL_SECONDS` (default `900`)
+- `BEST_PRACTICE_RESEARCHER_STATE_DIR`
+- `BEST_PRACTICE_RESEARCHER_MODEL` (default `gpt-5.3-codex`)
+- `BEST_PRACTICE_RESEARCHER_REMOTE_URL` (defaults to `origin` URL from the current repo)
+
 ## Using It As a Template
 
 1. Create a new repo from this template.
