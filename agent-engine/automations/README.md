@@ -59,20 +59,25 @@ This creates stability plus adaptation:
 3. `product-vision-researcher`
 - Research-only strategic lane for long-horizon product direction.
 - Scans internal product surfaces plus external AI/market movement, prioritizing Gemini and Google API opportunities.
-- Creates/updates product opportunity issues labeled `product-vision` for human prioritization.
+- Creates/updates product opportunity issues labeled `product-vision` for evaluator triage.
 
 4. `product-owner-reviewer`
 - Research-only tactical lane for UX and journey coherence across current features.
 - Reviews onboarding, creation, generation, approval, and recovery flows for clarity and friction.
-- Creates/updates UX/product-owner improvement issues for human prioritization.
+- Creates/updates UX/product-owner improvement issues for evaluator triage.
 
-5. `ready-for-dev-executor`
-- Human-in-the-loop coding lane.
-- Implements human-approved `ready-for-dev` issues with bounded per-run aggregation.
+5. `issue-evaluator`
+- Repository stewardship triage lane for all open issues.
+- Replaces manual issue approval by applying exactly one decision label per issue: `ready-for-dev`, `rejected`, or `human-eval-needed`.
+- Uses explicit value-vs-complexity and maintainability criteria, while deferring preference-heavy ambiguity to humans.
+
+6. `ready-for-dev-executor`
+- Label-gated coding lane.
+- Implements `ready-for-dev` issues with bounded per-run aggregation.
 - Can conservatively bundle multiple small, tightly related `ready-for-dev` issues into one coherent PR when manageable in a single context.
 - Branches from latest `origin/main`, runs core validation gates, and auto-merges on success.
 
-6. `sanity-check`
+7. `sanity-check`
 - Hourly memory-driven periodic scan lane spanning macro-to-micro sanity checks.
 - Can move directly from high-confidence bounded findings to implementation, PR, and auto-merge in one run.
 - Uses workflow routing to pick the correct execution contract for each fix.
@@ -162,9 +167,9 @@ External research is encouraged, but only through filters:
 2. `agent-engine-researcher` finds agent-engine improvement opportunities.
 3. `product-vision-researcher` finds strategic product-direction and roadmap opportunities.
 4. `product-owner-reviewer` finds tactical UX/journey and story-cohesion opportunities.
-5. `sanity-check` performs hourly memory-driven scans and directly ships bounded high-confidence fixes.
-6. Human approves selected researcher issues by adding `ready-for-dev`.
-7. `ready-for-dev-executor` implements and merges approved issues after gates, selecting 1..N with conservative bundling in one PR.
+5. `issue-evaluator` reviews all open issues and applies one decision label per issue (`ready-for-dev`, `rejected`, `human-eval-needed`).
+6. `sanity-check` performs hourly memory-driven scans and directly ships bounded high-confidence fixes.
+7. `ready-for-dev-executor` implements and merges `ready-for-dev` issues after gates, selecting 1..N with conservative bundling in one PR.
 
 ## Research Logging
 
@@ -184,6 +189,7 @@ Push wrapper updates from repo mirror to local runtime:
 ```bash
 cp agent-engine/automations/best-practice-researcher/best-practice-researcher.toml ~/.codex/automations/best-practice-researcher/automation.toml
 cp agent-engine/automations/ready-for-dev-executor/ready-for-dev-executor.toml ~/.codex/automations/ready-for-dev-executor/automation.toml
+cp agent-engine/automations/issue-evaluator/issue-evaluator.toml ~/.codex/automations/issue-evaluator/automation.toml
 cp agent-engine/automations/agent-engine-researcher/agent-engine-researcher.toml ~/.codex/automations/agent-engine-researcher/automation.toml
 cp agent-engine/automations/product-vision-researcher/product-vision-researcher.toml ~/.codex/automations/product-vision-researcher/automation.toml
 cp agent-engine/automations/product-owner-reviewer/product-owner-reviewer.toml ~/.codex/automations/product-owner-reviewer/automation.toml
@@ -195,6 +201,7 @@ Pull runtime wrappers back into repo mirror (verification only):
 ```bash
 cp ~/.codex/automations/best-practice-researcher/automation.toml agent-engine/automations/best-practice-researcher/best-practice-researcher.toml
 cp ~/.codex/automations/ready-for-dev-executor/automation.toml agent-engine/automations/ready-for-dev-executor/ready-for-dev-executor.toml
+cp ~/.codex/automations/issue-evaluator/automation.toml agent-engine/automations/issue-evaluator/issue-evaluator.toml
 cp ~/.codex/automations/agent-engine-researcher/automation.toml agent-engine/automations/agent-engine-researcher/agent-engine-researcher.toml
 cp ~/.codex/automations/product-vision-researcher/automation.toml agent-engine/automations/product-vision-researcher/product-vision-researcher.toml
 cp ~/.codex/automations/product-owner-reviewer/automation.toml agent-engine/automations/product-owner-reviewer/product-owner-reviewer.toml

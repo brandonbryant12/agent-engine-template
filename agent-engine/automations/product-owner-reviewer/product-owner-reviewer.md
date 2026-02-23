@@ -53,10 +53,10 @@ Issue policy:
   - Concrete UX Evidence (current-state repo references + proposed target-state)
   - Cohesion Impact (how this aligns story/terminology across adjacent surfaces)
   - Acceptance Criteria
-  - Human Approval Gate: implementation only after a human adds the `ready-for-dev` label.
+  - Issue Evaluation Gate: implementation only after `issue-evaluator` (or explicit human override) applies the `ready-for-dev` label.
 - If external docs/research are cited, include a `References` section with direct clickable URLs and short relevance notes.
 - Add labels `product-owner` and `codex-automation` when available.
-- Do not add `ready-for-dev` from this automation; only humans apply that label when an issue is approved for implementation.
+- Do not add `ready-for-dev` from this automation; `issue-evaluator` is the default label authority (humans may override when needed).
 
 Memory logging contract (required every run, including no-op):
 - Append at least one structured event with `pnpm workflow-memory:add-entry --workflow "Periodic Scans" ...`.

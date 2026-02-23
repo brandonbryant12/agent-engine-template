@@ -5,15 +5,15 @@ Source of truth: this file is authoritative for lane behavior.
 
 ## Instructions
 
-Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for the full run. Role: human-in-the-loop implementation lane for any repository issue explicitly approved with `ready-for-dev`. Execute all code-writing work from a dedicated git worktree, never from the primary checkout.
+Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for the full run. Role: approval-gated implementation lane for any repository issue explicitly labeled `ready-for-dev`. Execute all code-writing work from a dedicated git worktree, never from the primary checkout.
 
 Scope and approval:
 - GitHub interaction policy: use `gh` CLI for all GitHub interactions in this run (issue/PR queries, comments, labels, reactions, merges, metadata). Do not use browser/manual edits or non-`gh` GitHub clients.
-- Ensure the label `ready-for-dev` exists in this repository using `gh label create ready-for-dev --color 0E8A16 --description "Human-approved and ready for implementation automation" --force`.
+- Ensure the label `ready-for-dev` exists in this repository using `gh label create ready-for-dev --color 0E8A16 --description "Approved and ready for implementation automation" --force`.
 - Triage open GitHub issues labeled `ready-for-dev` in this repository.
-- This lane is the single implementation executor for issues originating from both research lanes (`best-practice-researcher` and `agent-engine-researcher`) once humans approve with `ready-for-dev`.
+- This lane is the single implementation executor for issues marked `ready-for-dev`, including issues approved by `issue-evaluator` and any explicit human approvals.
 - Use GitHub REST-style commands for triage (`gh issue list`, `gh issue view --json`, `gh api repos/...`) and do not depend on `gh api graphql` for issue selection.
-- Human approval gate is label-based only: implement only issues explicitly marked with the `ready-for-dev` label.
+- Approval gate is label-based only: implement only issues explicitly marked with the `ready-for-dev` label.
 - Optional guidance comments on issues not yet labeled `ready-for-dev` are allowed and do not consume execution capacity.
 
 Selection and bounded aggregation (`1..N` issues per run):
@@ -25,11 +25,11 @@ Selection and bounded aggregation (`1..N` issues per run):
   - maintain one coherent implementation narrative (same subsystem/root-cause class)
   - do not bundle if scope/risk becomes hard to reason about in one context
   - keep to one PR per run
-- Skip issues already linked to an open PR or recently processed in memory without new human approval signal.
+- Skip issues already linked to an open PR or recently processed in memory without new approval signal.
 - Before final selection, run an actionability screen on candidates and skip any candidate that fails one of these checks:
   - no longer open, missing `ready-for-dev`, or assigned status changed since list call (re-check with `gh issue view --json state,labels`)
   - already linked to an open PR
-  - recently processed in automation memory without new human approval signal
+  - recently processed in automation memory without new approval signal
   - already implemented on `main` based on concrete code evidence mapped to issue acceptance criteria
 - For "already implemented on `main`" candidates, do not run implementation preflight/gates; instead:
   - post a concise evidence comment with file path(s) and line references

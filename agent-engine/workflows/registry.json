@@ -54,6 +54,7 @@
         "agent-engine-researcher",
         "product-vision-researcher",
         "product-owner-reviewer",
+        "issue-evaluator",
         "sanity-check"
       ],
       "docsPath": "agent-engine/workflows/periodic-scans/README.md"

@@ -18,6 +18,7 @@ Runs recurring per-PR, daily, weekly, and monthly quality scans to detect system
 - [`agent-engine-researcher`](../../automations/agent-engine-researcher/agent-engine-researcher.md): continuous agent-engine/self-improvement research scan lane.
 - [`product-vision-researcher`](../../automations/product-vision-researcher/product-vision-researcher.md): strategic product-direction lane that turns roadmap opportunities into `product-vision` issues.
 - [`product-owner-reviewer`](../../automations/product-owner-reviewer/product-owner-reviewer.md): day-to-day UX/journey coherence lane that opens tactical product-owner improvements.
+- [`issue-evaluator`](../../automations/issue-evaluator/issue-evaluator.md): repository stewardship lane that evaluates all open issues and applies `ready-for-dev`, `rejected`, or `human-eval-needed`.
 - [`sanity-check`](../../automations/sanity-check/sanity-check.md): hourly memory-driven scan lane that can directly implement and merge bounded high-confidence fixes.
 
 ## How It Works

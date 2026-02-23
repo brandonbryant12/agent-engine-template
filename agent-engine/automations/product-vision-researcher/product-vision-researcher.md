@@ -61,7 +61,7 @@ Issue policy:
   - Gemini/Google API Alignment (how the idea uses or benefits from Google-first AI strategy)
   - Prior Idea Debate (prior issue linkage + keep/amend/reject decision + rationale)
   - Acceptance Criteria
-  - Human Approval Gate: implementation only after a human adds the `ready-for-dev` label.
+  - Issue Evaluation Gate: implementation only after `issue-evaluator` (or explicit human override) applies the `ready-for-dev` label.
 - If external docs/release notes/research are cited, include a `References` section with direct clickable URLs and short relevance notes.
 - For any issue influenced by external papers or reports, include a Research Trace section with:
   - Source link(s)
@@ -69,7 +69,7 @@ Issue policy:
   - Planned adaptation in this codebase (not generic advice)
   - Requirement that implementers append [`research/implemented-ideas.md`](../../../research/implemented-ideas.md) when shipped
 - Add labels `product-vision` and `codex-automation` when available.
-- Do not add `ready-for-dev` from this automation; only humans apply that label when an issue is approved for implementation.
+- Do not add `ready-for-dev` from this automation; `issue-evaluator` is the default label authority (humans may override when needed).
 
 Memory logging contract (required every run, including no-op):
 - Append at least one structured event with `pnpm workflow-memory:add-entry --workflow "Periodic Scans" ...`.

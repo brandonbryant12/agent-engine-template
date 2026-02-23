@@ -131,10 +131,36 @@ Optional environment overrides:
 - `READY_FOR_DEV_MODEL` (default `gpt-5.3-codex`)
 - `READY_FOR_DEV_REMOTE_URL` (defaults to `origin` URL from the current repo)
 
+## Issue Evaluator Loop Runner
+
+Continuously run one Codex `issue-evaluator` cycle, then sleep 5 minutes
+between runs.
+
+```bash
+pnpm issue-evaluator:loop
+```
+
+Alias:
+- `pnpm automation:issue-evaluator:loop`
+
+Behavior:
+- Runs Codex in an external state directory (`~/.cache/...`) using throwaway git worktrees.
+- Evaluates all open GitHub issues and applies one stewardship decision label per issue:
+  - `ready-for-dev`
+  - `rejected`
+  - `human-eval-needed`
+- Writes per-run logs under `~/.cache/agent-engine-template/issue-evaluator-loop/logs`.
+
+Optional environment overrides:
+- `ISSUE_EVALUATOR_POLL_SECONDS` (default `300`)
+- `ISSUE_EVALUATOR_STATE_DIR`
+- `ISSUE_EVALUATOR_MODEL` (default `gpt-5.3-codex`)
+- `ISSUE_EVALUATOR_REMOTE_URL` (defaults to `origin` URL from the current repo)
+
 ## Best-Practice Researcher Loop Runner
 
 Continuously run one Codex `best-practice-researcher` cycle, then sleep
-15 minutes between runs.
+5 minutes between runs.
 
 ```bash
 pnpm best-practice-researcher:loop
@@ -149,7 +175,7 @@ Behavior:
 - Writes per-run logs under `~/.cache/agent-engine-template/best-practice-researcher-loop/logs`.
 
 Optional environment overrides:
-- `BEST_PRACTICE_RESEARCHER_POLL_SECONDS` (default `900`)
+- `BEST_PRACTICE_RESEARCHER_POLL_SECONDS` (default `300`)
 - `BEST_PRACTICE_RESEARCHER_STATE_DIR`
 - `BEST_PRACTICE_RESEARCHER_MODEL` (default `gpt-5.3-codex`)
 - `BEST_PRACTICE_RESEARCHER_REMOTE_URL` (defaults to `origin` URL from the current repo)

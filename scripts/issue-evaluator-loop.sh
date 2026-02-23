@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT="${BEST_PRACTICE_RESEARCHER_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
-POLL_SECONDS="${BEST_PRACTICE_RESEARCHER_POLL_SECONDS:-300}"
-MODEL_NAME="${BEST_PRACTICE_RESEARCHER_MODEL:-gpt-5.3-codex}"
-STATE_DIR="${BEST_PRACTICE_RESEARCHER_STATE_DIR:-$HOME/.cache/agent-engine-template/best-practice-researcher-loop}"
-REMOTE_URL="${BEST_PRACTICE_RESEARCHER_REMOTE_URL:-$(git -C "$REPO_ROOT" remote get-url origin)}"
+REPO_ROOT="${ISSUE_EVALUATOR_REPO_ROOT:-$(git rev-parse --show-toplevel)}"
+POLL_SECONDS="${ISSUE_EVALUATOR_POLL_SECONDS:-300}"
+MODEL_NAME="${ISSUE_EVALUATOR_MODEL:-gpt-5.3-codex}"
+STATE_DIR="${ISSUE_EVALUATOR_STATE_DIR:-$HOME/.cache/agent-engine-template/issue-evaluator-loop}"
+REMOTE_URL="${ISSUE_EVALUATOR_REMOTE_URL:-$(git -C "$REPO_ROOT" remote get-url origin)}"
 RUNNER_REPO_DIR="$STATE_DIR/repo"
 RUNNER_WORKTREES_DIR="$STATE_DIR/worktrees"
 RUNNER_LOGS_DIR="$STATE_DIR/logs"
 LOCK_DIR="$STATE_DIR/lock"
-PROMPT_FILE="$STATE_DIR/best-practice-researcher.prompt.txt"
+PROMPT_FILE="$STATE_DIR/issue-evaluator.prompt.txt"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET='\033[0m'
@@ -99,12 +99,12 @@ run_cycle() {
   local rc=0
 
   run_ts="$(date -u '+%Y%m%d-%H%M%S')"
-  branch_name="codex/best-practice-researcher-loop-${run_ts}"
+  branch_name="codex/issue-evaluator-loop-${run_ts}"
   worktree_dir="$RUNNER_WORKTREES_DIR/$branch_name"
   run_log="$RUNNER_LOGS_DIR/run-${run_ts}.log"
 
   print_line
-  log "INFO" "$C_INFO" "Best-practice-researcher cycle start"
+  log "INFO" "$C_INFO" "Issue-evaluator cycle start"
   log "INFO" "$C_INFO" "Preparing isolated worktree: $worktree_dir"
   git -C "$RUNNER_REPO_DIR" fetch --quiet origin main
   git -C "$RUNNER_REPO_DIR" worktree add -B "$branch_name" "$worktree_dir" origin/main >/dev/null
@@ -143,32 +143,31 @@ mkdir -p "$STATE_DIR" "$RUNNER_WORKTREES_DIR" "$RUNNER_LOGS_DIR"
 acquire_lock
 trap release_lock EXIT INT TERM
 
-cat >"$PROMPT_FILE" <<'EOF'
+cat >"$PROMPT_FILE" <<'EOF_PROMPT'
 Use gpt-5.3-codex with reasoning effort xhigh.
 
 Execution contract:
-- Execute one full `best-practice-researcher` research run.
+- Execute one full `issue-evaluator` run.
 - Keep reasoning effort at xhigh throughout the run; do not downgrade reasoning depth.
 - Execute in a dedicated git worktree rooted at this repository for isolation.
 - Repository playbook is the source of truth for this lane.
-- Read and execute `agent-engine/automations/best-practice-researcher/best-practice-researcher.md` in the repository root before making decisions.
-- Follow the playbook's random-walk, memory-diversity, research, and issue policies exactly.
-- If this wrapper conflicts with the playbook, follow the playbook.
+- Read and execute `agent-engine/automations/issue-evaluator/issue-evaluator.md` in the repository root before making decisions.
+- Evaluate all open GitHub issues and assign one decision label per issue: `ready-for-dev`, `rejected`, or `human-eval-needed`.
+- Act as repository steward: optimize for practical functionality, strong engineering practices, and controlled complexity.
 - Advisory-only lane: do not implement repository code/docs changes and do not open PRs.
 - Exception: every run must append workflow memory and run `pnpm workflow-memory:sync` to commit/push memory artifacts.
-- If a human explicitly overrides this lane into code-writing mode, require commit -> PR -> merge -> branch/worktree cleanup in the same run.
+- If this wrapper conflicts with the playbook, follow the playbook.
 - Keep run output concise and include:
-  - chosen path (scope + domain) and why selected from memory
-  - top ranked recommendations with concrete repo evidence
-  - duplicate-check outcome (issues/PRs searched and reuse decisions)
-  - issue actions taken (created/updated/skipped) with URLs
+  - total issues evaluated
+  - decision counts by label
+  - issue actions taken (changed/unchanged/commented) with URLs
   - memory append summary
-EOF
+EOF_PROMPT
 
 ensure_runner_repo
 REPO_SLUG="$(cd "$REPO_ROOT" && gh repo view --json nameWithOwner --jq '.nameWithOwner')"
 print_line
-log "INFO" "$C_INFO" "Best-practice-researcher loop runner started"
+log "INFO" "$C_INFO" "Issue-evaluator loop runner started"
 log "INFO" "$C_INFO" "Repo: $REPO_SLUG"
 log "INFO" "$C_INFO" "Poll interval: ${POLL_SECONDS}s"
 log "INFO" "$C_INFO" "State dir: $STATE_DIR"

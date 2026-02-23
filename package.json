@@ -18,6 +18,8 @@
     "best-practice-researcher:loop": "bash ./scripts/best-practice-researcher-loop.sh",
     "best-practices-researcher:loop": "bash ./scripts/best-practice-researcher-loop.sh",
     "automation:best-practice-researcher:loop": "bash ./scripts/best-practice-researcher-loop.sh",
+    "issue-evaluator:loop": "bash ./scripts/issue-evaluator-loop.sh",
+    "automation:issue-evaluator:loop": "bash ./scripts/issue-evaluator-loop.sh",
     "ready-for-dev:loop": "bash ./scripts/ready-for-dev-loop.sh",
     "automation:ready-for-dev:loop": "bash ./scripts/ready-for-dev-loop.sh",
     "dev": "turbo watch dev --continue",

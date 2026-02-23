@@ -54,7 +54,7 @@ Issue policy:
   - Recommendation Metadata (rank, impact, effort, confidence)
   - Concrete Repo Scenario (current-state snippet + failure/improvement snippet)
   - Acceptance Criteria
-  - Human Approval Gate: implementation only after a human adds the `ready-for-dev` label.
+  - Issue Evaluation Gate: implementation only after `issue-evaluator` (or explicit human override) applies the `ready-for-dev` label.
 - Prefer adding a `References` section when external docs/research materially strengthen the recommendation.
 - If external docs/release notes/papers are cited, the `References` section is required and must include direct clickable URLs with short per-link relevance notes (no placeholder text without links).
 - For any issue influenced by external papers, include a Research Trace section with:
@@ -63,7 +63,7 @@ Issue policy:
   - Planned adaptation in this codebase (not generic advice)
   - Requirement that implementers append [`research/implemented-ideas.md`](../../../research/implemented-ideas.md) when shipped
 - Add labels `best-practice-researcher` and `codex-automation` when available.
-- Do not add `ready-for-dev` from this automation; only humans apply that label when an issue is approved for implementation.
+- Do not add `ready-for-dev` from this automation; `issue-evaluator` is the default label authority (humans may override when needed).
 - Do not add `self-improvement` from this automation.
 
 Append concise run memory including:
