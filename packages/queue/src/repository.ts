@@ -1,8 +1,8 @@
-import { eq, and, asc, sql } from '@repo/db';
+import { eq, and, asc, desc, sql } from '@repo/db';
 import { Db, withDb } from '@repo/db/effect';
 import { job, JobStatus } from '@repo/db/schema';
 import { Effect, Layer } from 'effect';
-import type { Job, JobType } from './types';
+import type { GetJobsByUserOptions, Job, JobType } from './types';
 import type { DatabaseInstance } from '@repo/db/client';
 import { QueueError, JobNotFoundError, JobProcessingError } from './errors';
 import { Queue, type QueueService } from './service';
@@ -113,18 +113,30 @@ const makeQueueService = Effect.gen(function* () {
       ),
     );
 
-  const getJobsByUser: QueueService['getJobsByUser'] = (userId, type) =>
+  const getJobsByUser: QueueService['getJobsByUser'] = (userId, options) =>
     runQuery(
       'getJobsByUser',
       async (db) => {
+        const {
+          type,
+          limit,
+          sortByCreatedAt = 'asc',
+        }: GetJobsByUserOptions = options ?? {};
         const conditions = [eq(job.createdBy, userId)];
         if (type) conditions.push(eq(job.type, type));
 
-        const rows = await db
+        const orderedQuery = db
           .select()
           .from(job)
           .where(and(...conditions))
-          .orderBy(asc(job.createdAt));
+          .orderBy(
+            sortByCreatedAt === 'desc' ? desc(job.createdAt) : asc(job.createdAt),
+          );
+
+        const rows =
+          typeof limit === 'number'
+            ? await orderedQuery.limit(limit)
+            : await orderedQuery;
 
         return rows.map(mapRowToJob);
       },

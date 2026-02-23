@@ -1,0 +1,1 @@
+CREATE INDEX "job_createdBy_type_createdAt_idx" ON "job" USING btree ("createdBy","type","createdAt");

@@ -88,10 +88,11 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
 export const listRunsUseCase = ({ user, input }: ListRunsUseCaseInput) =>
   Effect.gen(function* () {
     const queue = yield* Queue;
-    const jobs = yield* queue.getJobsByUser(user.id, QueueJobType.PROCESS_AI_RUN);
-    const runs = jobs
-      .map((job) => toRunOutput(job as Job<RunPayload>))
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const jobs = yield* queue.getJobsByUser(user.id, {
+      type: QueueJobType.PROCESS_AI_RUN,
+      limit: input.limit,
+      sortByCreatedAt: 'desc',
+    });
 
-    return input.limit ? runs.slice(0, input.limit) : runs;
+    return jobs.map((job) => toRunOutput(job as Job<RunPayload>));
   });
