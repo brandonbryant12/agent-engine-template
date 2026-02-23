@@ -162,6 +162,44 @@ describe.skipIf(!POSTGRES_URL)('Queue atomic job claim (integration)', () => {
     expect(processed!.id).toBe(first.id);
   });
 
+  it('lists jobs using explicit descending order and limit', async () => {
+    await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.enqueue(JobType.PROCESS_AI_RUN, { order: 1 }, testUserId),
+      ),
+    );
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    const second = await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.enqueue(JobType.PROCESS_AI_RUN, { order: 2 }, testUserId),
+      ),
+    );
+
+    await new Promise((r) => setTimeout(r, 10));
+
+    const third = await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.enqueue(JobType.PROCESS_AI_RUN, { order: 3 }, testUserId),
+      ),
+    );
+
+    const listed = await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.getJobsByUser(testUserId, {
+          type: JobType.PROCESS_AI_RUN,
+          sortByCreatedAt: 'desc',
+          limit: 2,
+        }),
+      ),
+    );
+
+    expect(listed).toHaveLength(2);
+    expect(listed[0]!.id).toBe(third.id);
+    expect(listed[1]!.id).toBe(second.id);
+  });
+
   it('concurrent claims do not process the same job twice', async () => {
     // Enqueue a single job
     await runEffect(

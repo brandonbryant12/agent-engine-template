@@ -51,6 +51,11 @@ export const job = pgTable(
   },
   (table) => [
     index('job_createdBy_idx').on(table.createdBy),
+    index('job_createdBy_type_createdAt_idx').on(
+      table.createdBy,
+      table.type,
+      table.createdAt,
+    ),
     index('job_status_idx').on(table.status),
     index('job_type_status_idx').on(table.type, table.status),
   ],

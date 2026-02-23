@@ -4,7 +4,12 @@ import type {
   JobNotFoundError,
   JobProcessingError,
 } from './errors';
-import type { Job, JobType, JobStatus } from './types';
+import type {
+  GetJobsByUserOptions,
+  Job,
+  JobType,
+  JobStatus,
+} from './types';
 import type { JobId } from '@repo/db/schema';
 import type { Effect } from 'effect';
 
@@ -21,7 +26,7 @@ export interface QueueService {
 
   readonly getJobsByUser: (
     userId: string,
-    type?: JobType,
+    options?: GetJobsByUserOptions,
   ) => Effect.Effect<Job[], QueueError>;
 
   readonly updateJobStatus: (

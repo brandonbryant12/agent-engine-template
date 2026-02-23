@@ -10,6 +10,13 @@ export const QueueJobType = {
 } as const;
 
 export type JobType = (typeof QueueJobType)[keyof typeof QueueJobType];
+export type JobSortOrder = 'asc' | 'desc';
+
+export interface GetJobsByUserOptions {
+  readonly type?: JobType;
+  readonly limit?: number;
+  readonly sortByCreatedAt?: JobSortOrder;
+}
 
 export interface Job<TPayload = unknown, TResult = unknown> {
   readonly id: JobId;

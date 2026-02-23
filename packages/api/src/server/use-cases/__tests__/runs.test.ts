@@ -116,22 +116,16 @@ describe('runs use-cases', () => {
     expect(error.message).toBe('queue unavailable');
   });
 
-  it('scopes list runs to user ownership and applies descending order + limit', async () => {
+  it('scopes list runs to user ownership and delegates order + limit to queue', async () => {
     let listUserId: string | undefined;
-    let listType: string | undefined;
+    let listOptions: Parameters<QueueService['getJobsByUser']>[1] | undefined;
 
     const queue = createMockQueueService({
-      getJobsByUser: (userId, type) => {
+      getJobsByUser: (userId, options) => {
         listUserId = userId;
-        listType = type;
+        listOptions = options;
 
         return Effect.succeed([
-          createJob({
-            id: 'job_old' as Job['id'],
-            payload: { prompt: 'older' },
-            createdAt: new Date('2026-02-20T00:00:00.000Z'),
-            updatedAt: new Date('2026-02-20T00:00:00.000Z'),
-          }),
           createJob({
             id: 'job_new' as Job['id'],
             payload: { prompt: 'newer' },
@@ -150,7 +144,11 @@ describe('runs use-cases', () => {
     );
 
     expect(listUserId).toBe(TEST_USER.id);
-    expect(listType).toBe(QueueJobType.PROCESS_AI_RUN);
+    expect(listOptions).toEqual({
+      type: QueueJobType.PROCESS_AI_RUN,
+      limit: 1,
+      sortByCreatedAt: 'desc',
+    });
     expect(runs).toHaveLength(1);
     expect(runs[0]?.id).toBe('job_new');
   });
