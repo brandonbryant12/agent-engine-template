@@ -12,7 +12,7 @@ import {
   type RunOutput,
   type RunResult,
 } from '../../contracts/runs';
-import { ssePublisher } from '../publisher';
+import { SSEPublisher } from '../sse-publisher-service';
 
 type RunJob = TypedJob<typeof QueueJobType.PROCESS_AI_RUN>;
 
@@ -129,6 +129,7 @@ const toRunOutput = (
 export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
   Effect.gen(function* () {
     const queue = yield* Queue;
+    const publisher = yield* SSEPublisher;
 
     const created = yield* queue.enqueue(
       QueueJobType.PROCESS_AI_RUN,
@@ -145,15 +146,13 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
       CREATE_RUN_SOURCE_PATH,
     );
 
-    yield* Effect.sync(() =>
-      ssePublisher.publish(user.id, {
-        type: 'run_queued',
-        runId: run.id,
-        prompt: run.prompt,
-        threadId: run.threadId,
-        timestamp: new Date().toISOString(),
-      }),
-    );
+    yield* publisher.publish(user.id, {
+      type: 'run_queued',
+      runId: run.id,
+      prompt: run.prompt,
+      threadId: run.threadId,
+      timestamp: new Date().toISOString(),
+    });
 
     return run;
   });

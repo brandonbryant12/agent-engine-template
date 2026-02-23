@@ -7,6 +7,10 @@ import { ManagedRuntime, Layer, Logger } from 'effect';
 import type { StorageConfig } from './orpc';
 import type { DatabaseInstance } from '@repo/db/client';
 import type { Storage } from '@repo/storage';
+import {
+  SSEPublisherLive,
+  type SSEPublisher,
+} from './sse-publisher-service';
 import { createStorageLayer } from './storage-factory';
 
 /**
@@ -21,7 +25,8 @@ export type SharedServices =
   | Policy
   | Storage
   | Queue
-  | AI;
+  | AI
+  | SSEPublisher;
 
 /**
  * Configuration for creating the server runtime.
@@ -53,6 +58,7 @@ export const createSharedLayers = (
   const policyLayer = DatabasePolicyLive.pipe(Layer.provide(dbLayer));
   const queueLayer = QueueLive.pipe(Layer.provide(dbLayer));
   const storageLayer = createStorageLayer(config.storageConfig);
+  const ssePublisherLayer = SSEPublisherLive;
 
   const aiLayer: Layer.Layer<AI> = config.useMockAI
     ? MockAIWithLatency
@@ -66,6 +72,7 @@ export const createSharedLayers = (
     queueLayer,
     storageLayer,
     aiLayer,
+    ssePublisherLayer,
     loggerLayer,
   );
 };
