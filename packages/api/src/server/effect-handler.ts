@@ -18,6 +18,22 @@ export interface HandleEffectOptions {
   requestId?: string;
 }
 
+export const ENDUSER_ID_SPAN_ATTRIBUTE = 'enduser.id' as const;
+
+export const buildHandlerSpanAttributes = ({
+  attributes,
+  requestId,
+  user,
+}: {
+  attributes?: Record<string, string | number | boolean>;
+  requestId?: string;
+  user: User | null;
+}): Record<string, string | number | boolean> => ({
+  ...(attributes ?? {}),
+  ...(requestId ? { 'request.id': requestId } : {}),
+  ...(user ? { [ENDUSER_ID_SPAN_ATTRIBUTE]: user.id } : {}),
+});
+
 /**
  * Error factory function signature.
  * Compatible with oRPC's ORPCErrorConstructorMapItem which uses rest params
@@ -263,10 +279,11 @@ export const handleEffectWithProtocol = <A, E extends { _tag: string }>(
 ): Promise<A> => {
   const tracedEffect = effect.pipe(
     Effect.withSpan(options.span, {
-      attributes: {
-        ...options.attributes,
-        ...(options.requestId ? { 'request.id': options.requestId } : {}),
-      },
+      attributes: buildHandlerSpanAttributes({
+        attributes: options.attributes,
+        requestId: options.requestId,
+        user,
+      }),
     }),
   );
 
