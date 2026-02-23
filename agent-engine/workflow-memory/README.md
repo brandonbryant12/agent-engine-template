@@ -113,6 +113,14 @@ Each index row contains:
 - open risks
 - carry-over actions
 
+Summary freshness is deterministic:
+
+- `pnpm workflow-memory:add-entry` regenerates the summary for the event month.
+- `pnpm workflow-memory:compact` regenerates summaries for all months present in active events.
+- Each generated summary includes a freshness marker:
+  - `<!-- workflow-memory-summary:month=YYYY-MM;events=<count> -->`
+- `pnpm scripts:lint` fails when summary markers drift from `index.json` month counts.
+
 ## Guardrail Ledger
 
 [`guardrails.md`](./guardrails.md) stores only durable controls that became standards (test, lint, docs rule, skill rule, automation).
@@ -148,6 +156,7 @@ Read in this order:
 4. [`index.json`](./index.json) filtered to relevant workflow/tags
 5. Top 3-5 matching events from [`events/`](./events/)
 
+If the summary marker is missing or stale versus `index.json`, skip the summary and use `index.json` + `events/*.jsonl` directly.
 Do not load full event history unless explicitly requested.
 
 ## Write Protocol
@@ -176,6 +185,7 @@ pnpm workflow-memory:add-entry \
 ```
 
 This appends an event to the current month and updates `index.json`.
+It also regenerates `summaries/YYYY-MM.md` for the event month.
 
 For automation runs, persist the append to git immediately:
 

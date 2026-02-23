@@ -94,6 +94,52 @@ cleanup_cycle() {
   git -C "$RUNNER_REPO_DIR" branch -D "$branch_name" >/dev/null 2>&1 || true
 }
 
+bootstrap_worktree_dependencies() {
+  local worktree_dir="$1"
+
+  log "INFO" "$C_INFO" "Bootstrapping dependencies in isolated worktree"
+  if zsh -lic "cd \"$worktree_dir\" && pnpm install --frozen-lockfile --prefer-offline"; then
+    return 0
+  fi
+
+  log "WARN" "$C_WARN" "Dependency bootstrap fast-path failed; retrying with explicit registries"
+  zsh -lic "cd \"$worktree_dir\" && npm config get registry && pnpm config get registry" || true
+
+  if zsh -lic "cd \"$worktree_dir\" && npm_config_registry=https://registry.npmjs.org pnpm install --frozen-lockfile"; then
+    return 0
+  fi
+
+  if zsh -lic "cd \"$worktree_dir\" && npm_config_registry=https://registry.npmjs.com pnpm install --frozen-lockfile"; then
+    return 0
+  fi
+
+  log "ERROR" "$C_ERR" "Dependency bootstrap failed. Diagnostics:"
+  zsh -lic "cd \"$worktree_dir\" && node -v && pnpm -v && npm -v" || true
+  if command -v nslookup >/dev/null 2>&1; then
+    nslookup registry.npmjs.org || true
+  fi
+  if command -v curl >/dev/null 2>&1; then
+    curl -I https://registry.npmjs.org/ || true
+  fi
+
+  log "ERROR" "$C_ERR" "Unable to install dependencies in worktree. Resolve connectivity/registry issues and retry."
+  return 1
+}
+
+verify_workflow_memory_runtime() {
+  local worktree_dir="$1"
+
+  log "INFO" "$C_INFO" "Running workflow-memory runtime preflight"
+  if zsh -lic "cd \"$worktree_dir\" && pnpm workflow-memory:retrieve --workflow 'Periodic Scans' --limit 1 --min-score 0 >/dev/null"; then
+    return 0
+  fi
+
+  log "ERROR" "$C_ERR" "workflow-memory runtime preflight failed. Diagnostics:"
+  zsh -lic "cd \"$worktree_dir\" && node -v && pnpm -v && npm -v && [ -d node_modules ] && echo 'node_modules=present' || echo 'node_modules=missing'" || true
+  log "ERROR" "$C_ERR" "Required workflow-memory commands are not runnable in this fresh worktree."
+  return 1
+}
+
 run_cycle() {
   local run_ts branch_name worktree_dir run_log
   local rc=0
@@ -110,6 +156,14 @@ run_cycle() {
   git -C "$RUNNER_REPO_DIR" worktree add -B "$branch_name" "$worktree_dir" origin/main >/dev/null
 
   trap 'cleanup_cycle "$worktree_dir" "$branch_name"' RETURN
+
+  if ! bootstrap_worktree_dependencies "$worktree_dir"; then
+    return 1
+  fi
+
+  if ! verify_workflow_memory_runtime "$worktree_dir"; then
+    return 1
+  fi
 
   log "INFO" "$C_INFO" "Starting Codex lane run (model=$MODEL_NAME)"
   set +e
@@ -138,6 +192,7 @@ run_cycle() {
 require_command git
 require_command gh
 require_command codex
+require_command zsh
 
 mkdir -p "$STATE_DIR" "$RUNNER_WORKTREES_DIR" "$RUNNER_LOGS_DIR"
 acquire_lock

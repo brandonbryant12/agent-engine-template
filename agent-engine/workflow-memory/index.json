@@ -16,9 +16,7 @@
       "memory-function:working",
       "memory-dynamics:write"
     ],
-    "eventFile": "events/2026-02.jsonl",
-    "source": "bootstrap",
-    "isInitialization": true
+    "eventFile": "events/2026-02.jsonl"
   },
   {
     "id": "2026-02-23-docs-knowledge-drift-bootstrap-initialization-2026-02-1",
@@ -37,9 +35,7 @@
       "memory-function:working",
       "memory-dynamics:write"
     ],
-    "eventFile": "events/2026-02.jsonl",
-    "source": "bootstrap",
-    "isInitialization": true
+    "eventFile": "events/2026-02.jsonl"
   },
   {
     "id": "2026-02-23-feature-delivery-added-issue-evaluator-automation-lane-and-5-minute-loop",
@@ -77,9 +73,7 @@
       "memory-function:working",
       "memory-dynamics:write"
     ],
-    "eventFile": "events/2026-02.jsonl",
-    "source": "bootstrap",
-    "isInitialization": true
+    "eventFile": "events/2026-02.jsonl"
   },
   {
     "id": "2026-02-23-periodic-scans-best-practice-researcher-baseline-macro-scan-repo-tooling-and-pi",
@@ -132,9 +126,7 @@
       "memory-function:working",
       "memory-dynamics:write"
     ],
-    "eventFile": "events/2026-02.jsonl",
-    "source": "bootstrap",
-    "isInitialization": true
+    "eventFile": "events/2026-02.jsonl"
   },
   {
     "id": "2026-02-23-self-improvement-ready-for-dev-executor-run-summary-issues-2-and-3",
