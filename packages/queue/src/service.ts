@@ -7,27 +7,30 @@ import type {
 import type {
   GetJobsByUserOptions,
   Job,
+  JobPayload,
   JobType,
   JobStatus,
+  StaleJobSweepResult,
+  TypedJob,
 } from './types';
 import type { JobId } from '@repo/db/schema';
 import type { Effect } from 'effect';
 
 export interface QueueService {
-  readonly enqueue: (
-    type: JobType,
-    payload: unknown,
+  readonly enqueue: <TType extends JobType>(
+    type: TType,
+    payload: JobPayload<TType>,
     userId: string,
-  ) => Effect.Effect<Job, QueueError>;
+  ) => Effect.Effect<TypedJob<TType>, QueueError>;
 
   readonly getJob: (
     jobId: JobId,
   ) => Effect.Effect<Job, QueueError | JobNotFoundError>;
 
-  readonly getJobsByUser: (
+  readonly getJobsByUser: <TType extends JobType = JobType>(
     userId: string,
-    options?: GetJobsByUserOptions,
-  ) => Effect.Effect<Job[], QueueError>;
+    options?: GetJobsByUserOptions<TType>,
+  ) => Effect.Effect<TypedJob<TType>[], QueueError>;
 
   readonly updateJobStatus: (
     jobId: JobId,
@@ -36,11 +39,13 @@ export interface QueueService {
     error?: string,
   ) => Effect.Effect<Job, QueueError | JobNotFoundError>;
 
-  readonly processNextJob: <R = never>(
-    type: JobType,
-    handler: (job: Job) => Effect.Effect<unknown, JobProcessingError, R>,
+  readonly processNextJob: <TType extends JobType, R = never>(
+    type: TType,
+    handler: (
+      job: TypedJob<TType>,
+    ) => Effect.Effect<unknown, JobProcessingError, R>,
   ) => Effect.Effect<
-    Job | null,
+    TypedJob<TType> | null,
     QueueError | JobProcessingError | JobNotFoundError,
     R
   >;
@@ -54,9 +59,9 @@ export interface QueueService {
     R
   >;
 
-  readonly claimNextJob: (
-    type: JobType,
-  ) => Effect.Effect<Job | null, QueueError>;
+  readonly claimNextJob: <TType extends JobType>(
+    type: TType,
+  ) => Effect.Effect<TypedJob<TType> | null, QueueError>;
 
   readonly deleteJob: (
     jobId: JobId,
@@ -64,7 +69,7 @@ export interface QueueService {
 
   readonly failStaleJobs: (
     maxAgeMs: number,
-  ) => Effect.Effect<Job[], QueueError>;
+  ) => Effect.Effect<StaleJobSweepResult, QueueError>;
 }
 
 export class Queue extends Context.Tag('@repo/queue/Queue')<

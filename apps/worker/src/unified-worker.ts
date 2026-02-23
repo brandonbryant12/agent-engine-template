@@ -3,6 +3,7 @@ import { type RunResult, RunResultSchema } from '@repo/api/contracts';
 import { JobStatus, JobType } from '@repo/db/schema';
 import {
   JobProcessingError,
+  Queue,
   formatError,
   type Job,
   type JobType as QueueJobType,
@@ -13,6 +14,10 @@ import {
   type BaseWorkerConfig,
   type Worker,
 } from './base-worker';
+import {
+  STALE_CHECK_EVERY_N_POLLS,
+  STALE_JOB_MAX_AGE_MS,
+} from './constants';
 import {
   emitRunCompleted,
   emitRunFailed,
@@ -38,6 +43,8 @@ export const INVALID_COMPLETED_RUN_RESULT_ERROR =
   'Run completed with invalid result payload';
 const RUN_RESULT_DECODE_SOURCE_PATH =
   'apps/worker/src/unified-worker.ts:onJobComplete';
+const STALE_REAPER_SOURCE_PATH =
+  'apps/worker/src/unified-worker.ts:onPollCycle';
 
 const toParseErrorSummary = (error: unknown): string => {
   const message = formatError(error);
@@ -153,6 +160,57 @@ export const handleCompletedRun = (
   emitRunFailed(publishEvent, userId, job.id, INVALID_COMPLETED_RUN_RESULT_ERROR);
 };
 
+const shouldRunStaleCheck = (pollCount: number, checkEveryNPolls: number) =>
+  pollCount > 0 && pollCount % checkEveryNPolls === 0;
+
+export const createStaleJobReaper = (
+  maxAgeMs = STALE_JOB_MAX_AGE_MS,
+  checkEveryNPolls = STALE_CHECK_EVERY_N_POLLS,
+) =>
+  (pollCount: number) =>
+    shouldRunStaleCheck(pollCount, checkEveryNPolls)
+      ? Effect.gen(function* () {
+          const queue = yield* Queue;
+          const sweep = yield* queue.failStaleJobs(maxAgeMs).pipe(
+            Effect.catchAll((error) =>
+              Effect.logError('worker.stale_job_reaper.failed').pipe(
+                Effect.annotateLogs('source.path', STALE_REAPER_SOURCE_PATH),
+                Effect.annotateLogs('worker.poll.count', pollCount),
+                Effect.annotateLogs('queue.stale_jobs.max_age_ms', maxAgeMs),
+                Effect.annotateLogs(
+                  'queue.stale_jobs.check_every_n_polls',
+                  checkEveryNPolls,
+                ),
+                Effect.annotateLogs('error.message', formatError(error)),
+                Effect.as(null),
+              ),
+            ),
+          );
+
+          if (!sweep) {
+            return;
+          }
+
+          yield* Effect.logInfo('worker.stale_job_reaper.completed').pipe(
+            Effect.annotateLogs('source.path', STALE_REAPER_SOURCE_PATH),
+            Effect.annotateLogs('worker.poll.count', pollCount),
+            Effect.annotateLogs('queue.stale_jobs.max_age_ms', maxAgeMs),
+            Effect.annotateLogs(
+              'queue.stale_jobs.check_every_n_polls',
+              checkEveryNPolls,
+            ),
+            Effect.annotateLogs(
+              'queue.stale_jobs.checked_count',
+              sweep.checkedCount,
+            ),
+            Effect.annotateLogs(
+              'queue.stale_jobs.affected_count',
+              sweep.affectedCount,
+            ),
+          );
+        })
+      : Effect.void;
+
 const processAiRunJob = (
   job: Job<RunJobPayload>,
   publishEvent: PublishEvent | undefined,
@@ -255,6 +313,7 @@ export function createUnifiedWorker(config: UnifiedWorkerConfig): Worker {
     config,
     processJob,
     onStart,
+    onPollCycle: createStaleJobReaper(),
     onJobComplete,
   });
 }

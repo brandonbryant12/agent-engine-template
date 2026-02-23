@@ -1,4 +1,9 @@
-import { Queue, QueueJobType, formatError, type Job } from '@repo/queue';
+import {
+  Queue,
+  QueueJobType,
+  formatError,
+  type TypedJob,
+} from '@repo/queue';
 import { Effect, Schema } from 'effect';
 import type { User } from '@repo/auth/policy';
 import {
@@ -9,10 +14,7 @@ import {
 } from '../../contracts/runs';
 import { ssePublisher } from '../publisher';
 
-type RunPayload = {
-  prompt?: unknown;
-  threadId?: unknown;
-};
+type RunJob = TypedJob<typeof QueueJobType.PROCESS_AI_RUN>;
 
 type ListRunsInput = {
   readonly limit?: number;
@@ -85,11 +87,11 @@ const logRunResultDecodeFailure = (
   );
 
 const toRunOutput = (
-  job: Job<RunPayload>,
+  job: RunJob,
   sourcePath: string,
 ): Effect.Effect<RunOutput, never> =>
   Effect.gen(function* () {
-    const decoded = decodeRunResultOutcome(job.result);
+    const decoded = decodeRunResultOutcome(job.result as unknown);
     const isCompletedRunWithInvalidResult =
       job.status === 'completed' && decoded.result === null;
     const hasMalformedResult =
@@ -139,7 +141,7 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
     );
 
     const run = yield* toRunOutput(
-      created as Job<RunPayload>,
+      created,
       CREATE_RUN_SOURCE_PATH,
     );
 
@@ -166,6 +168,6 @@ export const listRunsUseCase = ({ user, input }: ListRunsUseCaseInput) =>
     });
 
     return yield* Effect.forEach(jobs, (job) =>
-      toRunOutput(job as Job<RunPayload>, LIST_RUNS_SOURCE_PATH),
+      toRunOutput(job, LIST_RUNS_SOURCE_PATH),
     );
   });

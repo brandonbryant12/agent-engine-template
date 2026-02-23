@@ -2,8 +2,10 @@ import {
   Queue,
   QueueError,
   QueueJobType,
-  type Job,
+  type JobPayload,
+  type JobResult,
   type QueueService,
+  type TypedJob,
 } from '@repo/queue';
 import { Effect, Layer } from 'effect';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -17,6 +19,10 @@ const TEST_USER: User = {
   name: 'Test User',
   role: 'user',
 };
+
+type RunJob = TypedJob<typeof QueueJobType.PROCESS_AI_RUN>;
+type RunPayload = JobPayload<typeof QueueJobType.PROCESS_AI_RUN>;
+type RunResult = JobResult<typeof QueueJobType.PROCESS_AI_RUN>;
 
 const createMockQueueService = (
   overrides: Partial<QueueService> = {},
@@ -33,12 +39,16 @@ const createMockQueueService = (
   ...overrides,
 });
 
-const createJob = (overrides: Partial<Job> = {}): Job => ({
-  id: 'job_test' as Job['id'],
+const createJob = (overrides: Partial<RunJob> = {}): RunJob => ({
+  id: 'job_test' as RunJob['id'],
   type: QueueJobType.PROCESS_AI_RUN,
   status: 'pending',
-  payload: {},
-  result: null,
+  payload: {
+    prompt: 'default prompt',
+    userId: TEST_USER.id,
+    threadId: null,
+  },
+  result: null as RunResult | null,
   error: null,
   createdBy: TEST_USER.id,
   createdAt: new Date('2026-02-23T00:00:00.000Z'),
@@ -61,12 +71,14 @@ describe('runs use-cases', () => {
     let enqueueUserId: string | undefined;
 
     const queue = createMockQueueService({
-      enqueue: (type, payload, userId) => {
+      enqueue: ((type, payload, userId) => {
         enqueueType = type;
         enqueuePayload = payload;
         enqueueUserId = userId;
-        return Effect.succeed(createJob({ payload }));
-      },
+        return Effect.succeed(
+          createJob({ payload: payload as RunPayload }),
+        ) as ReturnType<QueueService['enqueue']>;
+      }) as QueueService['enqueue'],
     });
 
     const publishSpy = vi
@@ -121,19 +133,23 @@ describe('runs use-cases', () => {
     let listOptions: Parameters<QueueService['getJobsByUser']>[1] | undefined;
 
     const queue = createMockQueueService({
-      getJobsByUser: (userId, options) => {
+      getJobsByUser: ((userId, options) => {
         listUserId = userId;
         listOptions = options;
 
         return Effect.succeed([
           createJob({
-            id: 'job_new' as Job['id'],
-            payload: { prompt: 'newer' },
+            id: 'job_new' as RunJob['id'],
+            payload: {
+              prompt: 'newer',
+              userId: TEST_USER.id,
+              threadId: null,
+            },
             createdAt: new Date('2026-02-22T00:00:00.000Z'),
             updatedAt: new Date('2026-02-22T00:00:00.000Z'),
           }),
-        ]);
-      },
+        ]) as ReturnType<QueueService['getJobsByUser']>;
+      }) as QueueService['getJobsByUser'],
     });
 
     const runs = await Effect.runPromise(
@@ -155,17 +171,17 @@ describe('runs use-cases', () => {
 
   it('surfaces deterministic error for completed runs with invalid result payload', async () => {
     const queue = createMockQueueService({
-      getJobsByUser: () =>
+      getJobsByUser: (() =>
         Effect.succeed([
           createJob({
-            id: 'job_invalid_result' as Job['id'],
+            id: 'job_invalid_result' as RunJob['id'],
             status: 'completed',
             result: {
               not: 'a-run-result',
-            },
+            } as unknown as RunResult,
             error: null,
           }),
-        ]),
+        ])) as QueueService['getJobsByUser'],
     });
 
     const runs = await Effect.runPromise(

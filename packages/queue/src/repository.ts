@@ -2,18 +2,36 @@ import { eq, and, asc, desc, sql } from '@repo/db';
 import { Db, withDb } from '@repo/db/effect';
 import { job, JobStatus } from '@repo/db/schema';
 import { Effect, Layer } from 'effect';
-import type { GetJobsByUserOptions, Job, JobType } from './types';
+import type {
+  GetJobsByUserOptions,
+  Job,
+  JobPayload,
+  JobResult,
+  JobType,
+  StaleJobSweepResult,
+  TypedJob,
+} from './types';
 import type { DatabaseInstance } from '@repo/db/client';
 import { QueueError, JobNotFoundError, JobProcessingError } from './errors';
 import { Queue, type QueueService } from './service';
 
 type JobRow = typeof job.$inferSelect;
+type CountRow = { count: number | string };
 
-const mapRowToJob = (row: JobRow): Job => ({
+const mapRowToJob = <TType extends JobType = JobType>(
+  row: JobRow,
+): TypedJob<TType> => ({
   ...row,
-  type: row.type as JobType,
-  payload: row.payload ?? {},
+  type: row.type as TType,
+  payload: (row.payload ?? {}) as unknown as JobPayload<TType>,
+  result: (row.result ?? null) as JobResult<TType> | null,
 });
+
+const intervalSecondsFromMs = (maxAgeMs: number): number =>
+  Math.max(1, Math.floor(maxAgeMs / 1000));
+
+export const toStaleJobTimeoutError = (maxAgeMs: number): string =>
+  `Job timed out: worker did not complete within ${intervalSecondsFromMs(maxAgeMs)}s`;
 
 const makeQueueService = Effect.gen(function* () {
   const { db } = yield* Db;
@@ -37,14 +55,21 @@ const makeQueueService = Effect.gen(function* () {
       }),
     );
 
+  const castTypedJob = <TType extends JobType>(updated: Job): TypedJob<TType> =>
+    updated as TypedJob<TType>;
+
   /** Run handler then mark completed or failed. Assumes job is already PROCESSING. */
-  const runHandler = <R>(
-    claimed: Job,
-    handler: (job: Job) => Effect.Effect<unknown, JobProcessingError, R>,
+  const runHandler = <TType extends JobType, R>(
+    claimed: TypedJob<TType>,
+    handler: (
+      job: TypedJob<TType>,
+    ) => Effect.Effect<unknown, JobProcessingError, R>,
   ) =>
     handler(claimed).pipe(
       Effect.flatMap((result) =>
-        updateJobStatus(claimed.id, JobStatus.COMPLETED, result),
+        updateJobStatus(claimed.id, JobStatus.COMPLETED, result).pipe(
+          Effect.map(castTypedJob<TType>),
+        ),
       ),
       Effect.catchAll((err) =>
         updateJobStatus(
@@ -52,7 +77,7 @@ const makeQueueService = Effect.gen(function* () {
           JobStatus.FAILED,
           undefined,
           err instanceof JobProcessingError ? err.message : String(err),
-        ),
+        ).pipe(Effect.map(castTypedJob<TType>)),
       ),
       Effect.catchAllDefect((defect) =>
         updateJobStatus(
@@ -60,11 +85,15 @@ const makeQueueService = Effect.gen(function* () {
           JobStatus.FAILED,
           undefined,
           `Unexpected defect: ${defect instanceof Error ? defect.message : String(defect)}`,
-        ),
+        ).pipe(Effect.map(castTypedJob<TType>)),
       ),
     );
 
-  const enqueue: QueueService['enqueue'] = (type, payload, userId) =>
+  const enqueue = <TType extends JobType>(
+    type: TType,
+    payload: JobPayload<TType>,
+    userId: string,
+  ): Effect.Effect<TypedJob<TType>, QueueError> =>
     runQuery(
       'enqueue',
       async (db) => {
@@ -72,14 +101,14 @@ const makeQueueService = Effect.gen(function* () {
           .insert(job)
           .values({
             type,
-            payload: payload as Record<string, unknown>,
+            payload: payload as unknown as Record<string, unknown>,
             createdBy: userId,
           })
           .returning();
 
         if (!row) throw new Error('Failed to insert job');
 
-        return mapRowToJob(row);
+        return mapRowToJob<TType>(row);
       },
       'Failed to enqueue job',
     ).pipe(
@@ -113,15 +142,18 @@ const makeQueueService = Effect.gen(function* () {
       ),
     );
 
-  const getJobsByUser: QueueService['getJobsByUser'] = (userId, options) =>
+  const getJobsByUser = <TType extends JobType = JobType>(
+    userId: string,
+    options?: GetJobsByUserOptions<TType>,
+  ): Effect.Effect<TypedJob<TType>[], QueueError> =>
     runQuery(
       'getJobsByUser',
       async (db) => {
         const {
           type,
           limit,
-          sortByCreatedAt = 'asc',
-        }: GetJobsByUserOptions = options ?? {};
+          sortByCreatedAt = 'asc' as const,
+        } = options ?? {};
         const conditions = [eq(job.createdBy, userId)];
         if (type) conditions.push(eq(job.type, type));
 
@@ -138,7 +170,7 @@ const makeQueueService = Effect.gen(function* () {
             ? await orderedQuery.limit(limit)
             : await orderedQuery;
 
-        return rows.map(mapRowToJob);
+        return rows.map((row) => mapRowToJob<TType>(row));
       },
       'Failed to get jobs',
     ).pipe(
@@ -195,7 +227,9 @@ const makeQueueService = Effect.gen(function* () {
       ),
     );
 
-  const claimNextJob = (type: JobType): Effect.Effect<Job | null, QueueError> =>
+  const claimNextJob = <TType extends JobType>(
+    type: TType,
+  ): Effect.Effect<TypedJob<TType> | null, QueueError> =>
     runQuery(
       'claimNextJob',
       async (db) => {
@@ -216,14 +250,23 @@ const makeQueueService = Effect.gen(function* () {
         `);
 
         const row = result.rows[0];
-        return row ? mapRowToJob(row as JobRow) : null;
+        return row ? mapRowToJob<TType>(row as JobRow) : null;
       },
       'Failed to claim next job',
     ).pipe(
       Effect.tap(() => Effect.annotateCurrentSpan('queue.job.type', type)),
     );
 
-  const processNextJob: QueueService['processNextJob'] = (type, handler) =>
+  const processNextJob = <TType extends JobType, R = never>(
+    type: TType,
+    handler: (
+      job: TypedJob<TType>,
+    ) => Effect.Effect<unknown, JobProcessingError, R>,
+  ): Effect.Effect<
+    TypedJob<TType> | null,
+    QueueError | JobProcessingError | JobNotFoundError,
+    R
+  > =>
     claimNextJob(type).pipe(
       Effect.flatMap((claimed) =>
         claimed ? runHandler(claimed, handler) : Effect.succeed(null),
@@ -236,33 +279,65 @@ const makeQueueService = Effect.gen(function* () {
         if (jobData.status !== JobStatus.PENDING)
           return Effect.succeed(jobData);
         return updateJobStatus(jobData.id, JobStatus.PROCESSING).pipe(
-          Effect.flatMap((updatedJob) => runHandler(updatedJob, handler)),
+          Effect.flatMap((updatedJob) =>
+            runHandler(
+              updatedJob as TypedJob<JobType>,
+              handler as (
+                job: TypedJob<JobType>,
+              ) => Effect.Effect<unknown, JobProcessingError>,
+            ),
+          ),
+          Effect.map((updatedJob) => updatedJob as Job),
         );
       }),
     );
 
-  const failStaleJobs: QueueService['failStaleJobs'] = (maxAgeMs) =>
+  const failStaleJobs = (
+    maxAgeMs: number,
+  ): Effect.Effect<StaleJobSweepResult, QueueError> =>
     runQuery(
       'failStaleJobs',
       async (db) => {
-        const intervalSeconds = Math.floor(maxAgeMs / 1000);
+        const intervalSeconds = intervalSecondsFromMs(maxAgeMs);
+        const timeoutError = toStaleJobTimeoutError(maxAgeMs);
+        const staleCondition = sql`${job.status} = ${JobStatus.PROCESSING}
+          AND ${job.startedAt} < NOW() - INTERVAL '${sql.raw(String(intervalSeconds))} seconds'`;
+
+        const countResult = await db.execute(sql`
+          SELECT COUNT(*)::int AS count
+          FROM ${job}
+          WHERE ${staleCondition}
+        `);
+
+        const checkedCount = Number(
+          (countResult.rows[0] as CountRow | undefined)?.count ?? 0,
+        );
+
         const result = await db.execute(sql`
           UPDATE ${job}
           SET "status" = ${JobStatus.FAILED},
-              "error" = ${'Job timed out: worker did not complete within ' + intervalSeconds + 's'},
+              "error" = ${timeoutError},
               "completedAt" = NOW(),
               "updatedAt" = NOW()
-          WHERE ${job.status} = ${JobStatus.PROCESSING}
-            AND ${job.startedAt} < NOW() - INTERVAL '${sql.raw(String(intervalSeconds))} seconds'
+          WHERE ${staleCondition}
           RETURNING *
         `);
 
-        return (result.rows as JobRow[]).map(mapRowToJob);
+        const jobs = (result.rows as JobRow[]).map((row) => mapRowToJob(row));
+
+        return {
+          checkedCount,
+          affectedCount: jobs.length,
+          jobs,
+        } satisfies StaleJobSweepResult;
       },
       'Failed to fail stale jobs',
     ).pipe(
-      Effect.tap((jobs) =>
-        Effect.annotateCurrentSpan('queue.stale_jobs.count', jobs.length),
+      Effect.tap((sweep) =>
+        Effect.annotateCurrentSpan({
+          'queue.stale_jobs.checked_count': sweep.checkedCount,
+          'queue.stale_jobs.affected_count': sweep.affectedCount,
+        }),
       ),
     );
 
