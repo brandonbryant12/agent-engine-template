@@ -32,5 +32,25 @@
     "recency": 1,
     "confidence": 0.88,
     "eventFile": "events/2026-02.jsonl"
+  },
+  {
+    "id": "2026-02-23-self-improvement-ready-for-dev-executor-canonical-ci-gate-workflow-for-issue-1",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Self-Improvement",
+    "title": "ready-for-dev-executor: canonical CI gate workflow for issue #1",
+    "severity": "high",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev-executor",
+      "self-improvement",
+      "ci",
+      "guardrail"
+    ],
+    "importance": 0.9,
+    "recency": 1,
+    "confidence": 0.94,
+    "eventFile": "events/2026-02.jsonl"
   }
 ]
