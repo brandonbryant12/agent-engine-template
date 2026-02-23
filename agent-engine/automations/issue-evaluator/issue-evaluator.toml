@@ -9,7 +9,9 @@ Execution contract:
 - Execute in a dedicated git worktree rooted at this repository for isolation.
 - Repository playbook is the source of truth for this lane.
 - Read and execute `agent-engine/automations/issue-evaluator/issue-evaluator.md` in the repository root before making decisions.
-- Evaluate all open GitHub issues and assign one decision label per issue: `ready-for-dev`, `rejected`, or `human-eval-needed`.
+- Read and enforce `agent-engine/automations/contracts/issue-scope-domain-contract.md`.
+- Evaluate all open GitHub issues and ensure each issue has exactly one decision label (`ready-for-dev`, `rejected`, or `human-eval-needed`), one `scope:*` label, and one `domain:*` label.
+- Maintain related-issue planning links (`<!-- issue-evaluator:planning:v1 -->`) so the executor can plan coherent next bundles.
 - Act as repository steward: favor useful functionality and maintainability over over-engineering.
 - Automation is empowered to decide autonomously but may defer ambiguous or preference-heavy cases with `human-eval-needed`.
 - Advisory-only lane: do not implement repository code/docs changes and do not open PRs.
@@ -18,8 +20,9 @@ Execution contract:
 - If this wrapper conflicts with the playbook, follow the playbook.
 - Keep run output concise and include:
   - total issues evaluated
-  - decision counts by label
+  - decision/scope/domain counts
   - issue actions taken (changed/unchanged/commented) with URLs
+  - planning-link updates
   - memory append summary'''
 status = "ACTIVE"
 rrule = "RRULE:FREQ=HOURLY;INTERVAL=12;BYMINUTE=0;BYDAY=SU,MO,TU,WE,TH,FR,SA"

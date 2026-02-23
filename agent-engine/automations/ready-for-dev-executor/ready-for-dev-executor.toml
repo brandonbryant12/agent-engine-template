@@ -9,8 +9,11 @@ Execution contract:
 - Execute code-writing work in a dedicated git worktree created from latest `origin/main`.
 - Repository playbook is the source of truth for this lane.
 - Read and execute `agent-engine/automations/ready-for-dev-executor/ready-for-dev-executor.md` in the repository root before making decisions.
+- Read and enforce `agent-engine/automations/contracts/issue-scope-domain-contract.md`.
 - Use this as the single implementation lane for issues labeled `ready-for-dev`, including approvals from `issue-evaluator` and explicit human approvals.
 - Select and implement 1..N `ready-for-dev` issues using bounded aggregation.
+- Compute per-issue `scope_score` from `scope:*` labels when available and must bundle 2-3 compatible issues when per-issue scope is small (`scope_score <= 2.0`) and coherence/risk constraints still hold.
+- Use `domain:*` labels plus evaluator planning links to prioritize coherent same-domain bundles.
 - Route each selected issue to the correct workflow/skills per the playbook.
 - For every run path (success/failure/no-op), append workflow memory and run `pnpm workflow-memory:sync` to commit/push memory artifacts.
 - When a run adds code, complete commit -> PR -> merge -> branch/worktree cleanup in the same run.

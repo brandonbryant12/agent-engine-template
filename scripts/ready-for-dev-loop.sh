@@ -160,7 +160,10 @@ Use gpt-5.3-codex with reasoning effort xhigh.
 Execution contract:
 - Execute one full `ready-for-dev-executor` run.
 - Read and execute `agent-engine/automations/ready-for-dev-executor/ready-for-dev-executor.md` before making decisions.
+- Read and enforce `agent-engine/automations/contracts/issue-scope-domain-contract.md`.
 - Treat the playbook as source of truth for selection, implementation, validation, merge, and cleanup.
+- Apply the playbook scope/domain scoring and bundle multiple actionable issues when per-issue scope is small (`scope_score <= 2.0`) and bundle coherence is preserved.
+- Prefer same-domain candidates and evaluator-linked related issues when selecting bundle members.
 - If no actionable `ready-for-dev` issues remain after playbook triage, finish as a no-op run and exit cleanly.
 EOF
 printf '%s\n' "- Additional hard constraint: only implement issues where issue author login is '$ISSUE_AUTHOR'. Skip all others as non-actionable." >>"$PROMPT_FILE"

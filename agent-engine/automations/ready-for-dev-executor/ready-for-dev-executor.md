@@ -10,6 +10,7 @@ Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for th
 Scope and approval:
 - GitHub interaction policy: use `gh` CLI for all GitHub interactions in this run (issue/PR queries, comments, labels, reactions, merges, metadata). Do not use browser/manual edits or non-`gh` GitHub clients.
 - Ensure the label `ready-for-dev` exists in this repository using `gh label create ready-for-dev --color 0E8A16 --description "Approved and ready for implementation automation" --force`.
+- Read and enforce [`agent-engine/automations/contracts/issue-scope-domain-contract.md`](../contracts/issue-scope-domain-contract.md) before selecting issues.
 - Triage open GitHub issues labeled `ready-for-dev` in this repository.
 - This lane is the single implementation executor for issues marked `ready-for-dev`, including issues approved by `issue-evaluator` and any explicit human approvals.
 - Use GitHub REST-style commands for triage (`gh issue list`, `gh issue view --json`, `gh api repos/...`) and do not depend on `gh api graphql` for issue selection.
@@ -20,9 +21,18 @@ Selection and bounded aggregation (`1..N` issues per run):
 - Build candidate set from actionable open issues labeled `ready-for-dev`, ordered by issue number ascending.
 - Select at least 1 issue when actionable candidates exist.
 - N is dynamic and must stay bounded by coherent scope: default target is 1-3 issues; allow up to 5 only when issues are small, tightly related, and safely deliverable together in one PR.
+- Compute a per-issue `scope_score` (`1.0` to `5.0`) before final selection:
+  - primary source: `scope:*` label from shared contract (`scope:1 -> 1.0` ... `scope:5 -> 5.0`)
+  - if scope label is missing, infer from effort metadata + acceptance criteria breadth + expected touch surface and record that fallback in run output
+  - clamp to `[1.0, 5.0]`
+- Read a primary `domain:*` label for each candidate from shared contract.
+- Read evaluator planning-link comments (`<!-- issue-evaluator:planning:v1 -->`) and treat `Related ready-for-dev issues` as strong bundle-priority signals.
+- Small-scope bundling is required, not optional: when 2+ compatible actionable candidates have `scope_score <= 2.0`, select a multi-issue bundle (target 2-3 issues) in the same run.
+- Use a bounded bundle budget: prefer the highest-coherence set with cumulative `scope_score <= 5.0`; only fall back to single-issue selection when no additional compatible candidate can be added safely.
 - Bundling rules:
   - bias conservative: if uncertain, reduce scope and implement fewer issues
-  - maintain one coherent implementation narrative (same subsystem/root-cause class)
+  - maintain one coherent implementation narrative (same domain/root-cause class)
+  - prefer issues explicitly linked by evaluator planning comments before unrelated same-size candidates
   - do not bundle if scope/risk becomes hard to reason about in one context
   - keep to one PR per run
 - Skip issues already linked to an open PR or recently processed in memory without new approval signal.
@@ -36,6 +46,7 @@ Selection and bounded aggregation (`1..N` issues per run):
   - close issue as completed when criteria are satisfied
   - record this as `selection_outcome: skipped_already_implemented` in memory and continue candidate screening in the same run
 - If no actionable issue remains after screening, end run with a concise no-op summary and memory entry (no branch/PR).
+- In run output, include a compact selection table with issue number, `scope_score`, `domain`, and bundle include/exclude reason (including whether inclusion came from evaluator planning links).
 
 Workflow routing contract (must use correct workflow per selected issue):
 - For each selected issue, assign a primary workflow and companion skills before coding using [`agent-engine/workflows/README.md`](../../workflows/README.md):

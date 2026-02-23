@@ -69,12 +69,13 @@ This creates stability plus adaptation:
 5. `issue-evaluator`
 - Repository stewardship triage lane for all open issues.
 - Replaces manual issue approval by applying exactly one decision label per issue: `ready-for-dev`, `rejected`, or `human-eval-needed`.
+- Assigns one `scope:*` and one `domain:*` label per issue and maintains related-issue planning links for executor bundling.
 - Uses explicit value-vs-complexity and maintainability criteria, while deferring preference-heavy ambiguity to humans.
 
 6. `ready-for-dev-executor`
 - Label-gated coding lane.
 - Implements `ready-for-dev` issues with bounded per-run aggregation.
-- Can conservatively bundle multiple small, tightly related `ready-for-dev` issues into one coherent PR when manageable in a single context.
+- Consumes `scope:*` + `domain:*` + related-issue planning links to conservatively bundle multiple small, tightly related `ready-for-dev` issues into one coherent PR when manageable in a single context.
 - Branches from latest `origin/main`, runs core validation gates, and auto-merges on success.
 
 7. `sanity-check`
@@ -180,8 +181,9 @@ External research is encouraged, but only through filters:
 3. `product-vision-researcher` finds strategic product-direction and roadmap opportunities.
 4. `product-owner-reviewer` finds tactical UX/journey and story-cohesion opportunities.
 5. `issue-evaluator` reviews all open issues and applies one decision label per issue (`ready-for-dev`, `rejected`, `human-eval-needed`).
+  - It also applies scope/domain planning metadata using [`agent-engine/automations/contracts/issue-scope-domain-contract.md`](./contracts/issue-scope-domain-contract.md).
 6. `sanity-check` performs hourly memory-driven scans and directly ships bounded high-confidence fixes.
-7. `ready-for-dev-executor` implements and merges `ready-for-dev` issues after gates, selecting 1..N with conservative bundling in one PR.
+7. `ready-for-dev-executor` implements and merges `ready-for-dev` issues after gates, selecting 1..N with conservative scope/domain-aware bundling in one PR.
 
 ## Research Logging
 
