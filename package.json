@@ -15,6 +15,8 @@
     "docker:down:minimal": "sh ./scripts/docker-down-minimal.sh",
     "docker:up:full": "sh ./scripts/docker-up-full.sh",
     "docker:down:full": "sh ./scripts/docker-down-full.sh",
+    "ready-for-dev:loop": "bash ./scripts/ready-for-dev-loop.sh",
+    "automation:ready-for-dev:loop": "bash ./scripts/ready-for-dev-loop.sh",
     "dev": "turbo watch dev --continue",
     "env:copy-example": "turbo run env:copy-example",
     "env:remove": "turbo run env:remove",

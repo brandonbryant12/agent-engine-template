@@ -94,10 +94,30 @@ pnpm spec:generate
 pnpm skills:check:strict
 ```
 
+## Ready-for-Dev Loop Runner
+
+Continuously poll open issues labeled `ready-for-dev`, run one Codex
+`ready-for-dev-executor` cycle when available, and sleep 5 minutes when idle.
+
+```bash
+pnpm ready-for-dev:loop
+```
+
+Behavior:
+- Runs Codex in an external state directory (`~/.cache/...`) using throwaway git worktrees.
+- Keeps the primary checkout clean by avoiding implementation work in the main repo directory.
+- Writes per-run logs under `~/.cache/agent-engine-template/ready-for-dev-loop/logs`.
+
+Optional environment overrides:
+- `READY_FOR_DEV_POLL_SECONDS` (default `300`)
+- `READY_FOR_DEV_STATE_DIR`
+- `READY_FOR_DEV_LABEL` (default `ready-for-dev`)
+- `READY_FOR_DEV_MODEL` (default `gpt-5.3-codex`)
+- `READY_FOR_DEV_REMOTE_URL` (defaults to `origin` URL from the current repo)
+
 ## Using It As a Template
 
 1. Create a new repo from this template.
 2. Rename package/repo identifiers for your project.
 3. Replace `docs/master-spec.md` with product-specific behavior.
 4. Add or customize workflows/automations/skills under `agent-engine/`.
-
