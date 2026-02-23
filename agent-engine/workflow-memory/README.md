@@ -266,6 +266,31 @@ pnpm workflow-memory:coverage:strict
 
 If coverage reports a workflow as missing and that workflow was run, add the missing event immediately with [`agent-engine/scripts/workflow-memory/add-entry.ts`](../scripts/workflow-memory/add-entry.ts).
 
+## Strict-Coverage Bootstrap (Fresh Repos)
+
+For fresh repositories or new months with sparse history, initialize minimum
+coverage before enforcing strict mode:
+
+```bash
+pnpm workflow-memory:bootstrap
+```
+
+Optional flags:
+
+- `--month YYYY-MM` seeds a specific month
+- `--min N` seeds up to `N` entries per core workflow
+- `--owner @handle` sets event ownership
+- `--dry-run` previews planned seeded entries without writing files
+
+Bootstrap entries are explicitly marked as initialization records:
+
+- `source: "bootstrap"`
+- `isInitialization: true`
+- tags include `initialization` and `seeded`
+
+This keeps seeded coverage distinguishable from observed workflow execution in
+future analytics and reviews.
+
 ## Replayable Scenarios
 
 Scenarios are structured test cases that capture exact code input + expected agent findings. They are stored as companion fixtures alongside existing JSONL events. The current tooling validates scenario integrity (structure, fixture existence, secret scanning). LLM-based evaluation is a future follow-up.

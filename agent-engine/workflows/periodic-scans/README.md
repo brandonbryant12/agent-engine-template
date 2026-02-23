@@ -24,7 +24,7 @@ Runs recurring per-PR, daily, weekly, and monthly quality scans to detect system
 
 1. Run cadence-specific checks (per-PR, daily, weekly, monthly/release).
 2. Classify findings by severity, impact, effort, and confidence.
-3. Add workflow-memory coverage checks and flag missing monthly workflow entries.
+3. Add workflow-memory coverage checks and flag missing monthly workflow entries; for fresh-month baselines use `pnpm workflow-memory:bootstrap` before strict enforcement.
 4. Route fixes to execution workflows and track closure status.
 
 ## Outputs

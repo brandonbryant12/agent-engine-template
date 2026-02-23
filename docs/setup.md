@@ -26,6 +26,19 @@ pnpm test
 pnpm build
 ```
 
+## Build-Script Policy Updates
+
+When dependency changes introduce new install-time build scripts, refresh the
+approved/ignored policy and commit the result:
+
+```bash
+pnpm install --no-frozen-lockfile
+pnpm approve-builds
+```
+
+Commit updates to `pnpm-workspace.yaml` and `pnpm-lock.yaml` so clean checkouts
+install deterministically without interactive build-script selection.
+
 ## Optional: Test Database
 
 ```bash
