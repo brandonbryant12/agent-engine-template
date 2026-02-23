@@ -1,6 +1,21 @@
 import { Effect, Layer } from 'effect';
 import { describe, it, expect } from 'vitest';
+import type { JobProcessingError } from '../errors';
 import { Queue, type QueueService } from '../service';
+
+type ProcessNextJobError = Effect.Effect.Error<
+  ReturnType<QueueService['processNextJob']>
+>;
+
+const assertNoProcessingErrorLeak = <
+  T extends Extract<ProcessNextJobError, JobProcessingError> extends never
+    ? true
+    : false,
+>(
+  value: T,
+) => value;
+
+assertNoProcessingErrorLeak(true);
 
 describe('Queue service', () => {
   it('has the correct tag identifier', () => {

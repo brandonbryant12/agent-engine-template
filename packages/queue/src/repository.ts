@@ -264,7 +264,7 @@ const makeQueueService = Effect.gen(function* () {
     ) => Effect.Effect<unknown, JobProcessingError, R>,
   ): Effect.Effect<
     TypedJob<TType> | null,
-    QueueError | JobProcessingError | JobNotFoundError,
+    QueueError | JobNotFoundError,
     R
   > =>
     claimNextJob(type).pipe(

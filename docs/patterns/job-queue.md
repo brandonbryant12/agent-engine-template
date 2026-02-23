@@ -12,5 +12,7 @@
 
 - Claim atomically with `FOR UPDATE SKIP LOCKED`.
 - Write terminal status on any failure path.
+- `processNextJob` persists handler failures as `FAILED` jobs and returns the
+  updated job row instead of surfacing handler failures in its error channel.
 - Reap stale `processing` jobs on poll cadence and log checked/affected counts.
 - Record timestamps for start/completion.

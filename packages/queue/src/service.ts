@@ -39,6 +39,10 @@ export interface QueueService {
     error?: string,
   ) => Effect.Effect<Job, QueueError | JobNotFoundError>;
 
+  /**
+   * Claims one pending job and runs the handler.
+   * Handler failures are persisted as FAILED job status and returned as updated rows.
+   */
   readonly processNextJob: <TType extends JobType, R = never>(
     type: TType,
     handler: (
@@ -46,7 +50,7 @@ export interface QueueService {
     ) => Effect.Effect<unknown, JobProcessingError, R>,
   ) => Effect.Effect<
     TypedJob<TType> | null,
-    QueueError | JobProcessingError | JobNotFoundError,
+    QueueError | JobNotFoundError,
     R
   >;
 
