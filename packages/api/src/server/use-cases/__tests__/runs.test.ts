@@ -153,6 +153,33 @@ describe('runs use-cases', () => {
     expect(runs[0]?.id).toBe('job_new');
   });
 
+  it('surfaces deterministic error for completed runs with invalid result payload', async () => {
+    const queue = createMockQueueService({
+      getJobsByUser: () =>
+        Effect.succeed([
+          createJob({
+            id: 'job_invalid_result' as Job['id'],
+            status: 'completed',
+            result: {
+              not: 'a-run-result',
+            },
+            error: null,
+          }),
+        ]),
+    });
+
+    const runs = await Effect.runPromise(
+      listRunsUseCase({
+        user: TEST_USER,
+        input: {},
+      }).pipe(withQueue(queue)),
+    );
+
+    expect(runs).toHaveLength(1);
+    expect(runs[0]?.result).toBeNull();
+    expect(runs[0]?.error).toBe('Run completed with invalid result payload');
+  });
+
   it('preserves typed queue errors for list run failures', async () => {
     const queueError = new QueueError({ message: 'query failed' });
     const queue = createMockQueueService({
