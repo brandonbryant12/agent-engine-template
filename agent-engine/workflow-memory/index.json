@@ -63,6 +63,38 @@
     "isInitialization": true
   },
   {
+    "id": "2026-02-23-feature-delivery-ready-for-dev-executor-run-summary-issues-6-7-8",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor run summary: issues #6 #7 #8",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "api-router",
+      "invariants",
+      "bundle-issues-6-7-8",
+      "memory-form:external",
+      "memory-form:parametric",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:tool-misuse"
+    ],
+    "importance": 0.9,
+    "recency": 1,
+    "confidence": 0.95,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-periodic-scans-best-practice-researcher-baseline-macro-scan-repo-tooling-and-pi",
     "date": "2026-02-23",
     "month": "2026-02",
