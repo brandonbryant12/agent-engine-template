@@ -1,9 +1,9 @@
 ---
 name: self-improvement
-description: Self-improvement loop for AI-driven development in Template App. Use when turning regressions, scan results, and merge feedback into stronger docs, skills, tests, and automation.
+description: Self-improvement loop for AI-driven development in Agent Engine Template. Use when turning regressions, scan results, and merge feedback into stronger docs, skills, tests, and automation.
 ---
 
-# Template App Self-Improvement
+# Agent Engine Template Self-Improvement
 
 Use this skill to continuously strengthen the AI development system, not just the code.
 

@@ -1,9 +1,9 @@
 ---
 name: periodic-scans
-description: Continuous and periodic quality scan workflow for Template App. Use when running daily/weekly/release audits for correctness, performance, security, testing, and docs drift.
+description: Continuous and periodic quality scan workflow for Agent Engine Template. Use when running daily/weekly/release audits for correctness, performance, security, testing, and docs drift.
 ---
 
-# Template App Periodic Scans
+# Agent Engine Template Periodic Scans
 
 Use this skill to run recurring repo scans and produce a prioritized backlog.
 

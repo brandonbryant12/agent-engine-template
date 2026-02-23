@@ -3,7 +3,7 @@ name: release-incident-response
 description: Release readiness, canary/rollback, and incident response workflow with post-incident guardrail hardening.
 ---
 
-# Template App Release + Incident Response
+# Agent Engine Template Release + Incident Response
 
 Use this skill for release trains, hotfixes, and production incidents.
 

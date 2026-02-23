@@ -1,4 +1,4 @@
-# Template App - Claude Code Instructions
+# Agent Engine Template - Claude Code Instructions
 
 ## Read Docs First
 

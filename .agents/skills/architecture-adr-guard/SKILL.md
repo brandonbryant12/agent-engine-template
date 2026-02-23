@@ -3,7 +3,7 @@ name: architecture-adr-guard
 description: Architecture boundary and ADR guard workflow for validating design changes against documented system constraints.
 ---
 
-# Template App Architecture + ADR Guard
+# Agent Engine Template Architecture + ADR Guard
 
 Use this skill when a change may cross package boundaries, layer rules, or core runtime patterns.
 

@@ -1,9 +1,9 @@
 ---
 name: frontend-design
-description: Intentional UI design workflow for Template App `apps/web`. Use when designing or refreshing page/component visuals, layout, styling, or interaction polish, especially when requests call for a distinct visual direction instead of generic UI.
+description: Intentional UI design workflow for Agent Engine Template `apps/web`. Use when designing or refreshing page/component visuals, layout, styling, or interaction polish, especially when requests call for a distinct visual direction instead of generic UI.
 ---
 
-# Template App Frontend Design
+# Agent Engine Template Frontend Design
 
 Apply this skill when shipping design-heavy frontend changes in `apps/web`.
 

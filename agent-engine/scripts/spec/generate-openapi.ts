@@ -142,7 +142,7 @@ const buildOpenApiDocument = (
   return {
     openapi: '3.1.0',
     info: {
-      title: 'Template App API (Spec Snapshot)',
+      title: 'Agent Engine Template API (Spec Snapshot)',
       version: '1.0.0',
       description:
         'Generated from oRPC contract metadata. Request/response schemas are intentionally omitted in this initial snapshot.',

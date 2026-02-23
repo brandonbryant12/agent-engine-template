@@ -3,7 +3,7 @@ name: security-dependency-hygiene
 description: Security and dependency hygiene workflow for auth/data safety, secret exposure prevention, and dependency risk control.
 ---
 
-# Template App Security + Dependency Hygiene
+# Agent Engine Template Security + Dependency Hygiene
 
 Use this skill in weekly scans, before releases, and after dependency updates.
 

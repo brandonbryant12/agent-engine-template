@@ -38,7 +38,7 @@ process.on('uncaughtException', (error) => {
 async function startWorker(): Promise<void> {
   initTelemetry({
     enabled: env.TELEMETRY_ENABLED,
-    serviceName: env.OTEL_SERVICE_NAME ?? 'template-app-worker',
+    serviceName: env.OTEL_SERVICE_NAME ?? 'agent-engine-template-worker',
     serviceVersion: env.OTEL_SERVICE_VERSION,
     environment: env.OTEL_ENV,
     otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,

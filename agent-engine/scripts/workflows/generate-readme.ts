@@ -58,7 +58,7 @@ async function main() {
   lines.push("");
   lines.push("# Workflow Catalog");
   lines.push("");
-  lines.push("Canonical workflow catalog for Template App.");
+  lines.push("Canonical workflow catalog for Agent Engine Template.");
   lines.push("");
   lines.push("Source of truth: [`agent-engine/workflows/registry.json`](./registry.json)");
   lines.push("");

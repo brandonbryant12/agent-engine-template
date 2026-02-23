@@ -25,7 +25,7 @@ import { authClient } from '@/clients/auth-client';
 import { env } from '@/env';
 import { queryClient } from '@/query-client';
 
-const STORAGE_NAMESPACE = 'template-app.chat.threads';
+const STORAGE_NAMESPACE = 'agent-engine-template.chat.threads';
 
 type AuthMode = 'signin' | 'signup';
 
@@ -146,7 +146,7 @@ function AuthGate() {
     <section className="mx-auto flex min-h-[70vh] w-full max-w-md items-center">
       <div className="w-full space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
         <Badge variant="info">AI Chat MVP</Badge>
-        <h1 className="text-2xl font-semibold">Template App Chat</h1>
+        <h1 className="text-2xl font-semibold">Agent Engine Template Chat</h1>
         <p className="text-sm text-muted-foreground">
           {mode === 'signin'
             ? 'Sign in to continue your chat threads.'

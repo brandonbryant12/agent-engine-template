@@ -1,9 +1,9 @@
 ---
 name: debug-fix
-description: Test-driven procedure for reproducing, narrowing, fixing, and validating regressions in Template App.
+description: Test-driven procedure for reproducing, narrowing, fixing, and validating regressions in Agent Engine Template.
 ---
 
-# Template App Debug + Fix
+# Agent Engine Template Debug + Fix
 
 Use this when tests fail, behavior regresses, or root cause is unclear.
 

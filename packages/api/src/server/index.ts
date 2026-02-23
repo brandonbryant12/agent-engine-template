@@ -63,11 +63,11 @@ export const createApi = ({
     plugins: [
       new StrictGetMethodPlugin(),
       new OpenAPIReferencePlugin({
-        docsTitle: 'Template App | API Reference',
+        docsTitle: 'Agent Engine Template | API Reference',
         docsProvider: 'scalar',
         specGenerateOptions: {
           info: {
-            title: 'Template App API',
+            title: 'Agent Engine Template API',
             version: '1.0.0',
           },
           servers: [{ url: urlJoin(serverUrl, apiPath) }],

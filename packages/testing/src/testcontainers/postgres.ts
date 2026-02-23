@@ -32,7 +32,7 @@ export async function startPostgresContainer(): Promise<{
   console.log('[Testcontainers] Starting PostgreSQL container...');
 
   const container = await new PostgreSqlContainer('postgres:16-alpine')
-    .withDatabase('template_app_test')
+    .withDatabase('agent_engine_template_test')
     .withUsername('test')
     .withPassword('test')
     .withExposedPorts(5432)

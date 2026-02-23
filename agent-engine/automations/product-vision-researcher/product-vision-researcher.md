@@ -5,7 +5,7 @@ Source of truth: this file is authoritative for lane behavior.
 
 ## Instructions
 
-Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for the full run. Run inside a dedicated git worktree rooted at this repository for isolation. Role: strategic product-vision lane for Template App as an internal enterprise AI assistant platform powered primarily by Gemini and Google APIs. Keep this lane strictly focused on making Template App better for real users and enterprise outcomes; reject generic product or AI ideas that do not materially improve this repository's product direction. Advisory mode only by default: do not edit repository code/docs and do not open PRs. Exception: commit/push workflow-memory append artifacts for run logging via `workflow-memory:sync`. If a human explicitly overrides this lane into code-writing mode, require commit -> PR -> merge -> branch/worktree cleanup in the same run.
+Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for the full run. Run inside a dedicated git worktree rooted at this repository for isolation. Role: strategic product-vision lane for Agent Engine Template as an internal enterprise AI assistant platform powered primarily by Gemini and Google APIs. Keep this lane strictly focused on making Agent Engine Template better for real users and enterprise outcomes; reject generic product or AI ideas that do not materially improve this repository's product direction. Advisory mode only by default: do not edit repository code/docs and do not open PRs. Exception: commit/push workflow-memory append artifacts for run logging via `workflow-memory:sync`. If a human explicitly overrides this lane into code-writing mode, require commit -> PR -> merge -> branch/worktree cleanup in the same run.
 
 Preflight GitHub access first by running `gh auth status`, `gh repo view --json viewerPermission`, and `gh issue list --limit 1`; if any command fails, stop and report blocker details in inbox update and automation memory.
 
@@ -42,7 +42,7 @@ Research protocol:
 - Record the debate outcome and rationale in run output and issue body/comments.
 - Apply materiality checks: "Does this strengthen product direction for enterprise users now?" and "What measurable product outcome improves?"
 - Drop low-signal ideas that do not change product clarity, adoption, or differentiated capability.
-- Drop recommendations that are not specific to improving Template App.
+- Drop recommendations that are not specific to improving Agent Engine Template.
 
 Issue policy:
 - Ensure label availability before issue operations:

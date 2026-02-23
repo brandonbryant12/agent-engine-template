@@ -3,7 +3,7 @@ name: codebase-nav
 description: Repository-specific navigation map for quickly locating chat surfaces, contracts, routes, tests, and integration points.
 ---
 
-# Template App Codebase Navigation
+# Agent Engine Template Codebase Navigation
 
 Use this when you need fast repo orientation before implementing, reviewing, or debugging.
 

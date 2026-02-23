@@ -1,6 +1,6 @@
 # Repository Operating Framework
 
-This is the navigation layer for how repository governance works in Template App.
+This is the navigation layer for how repository governance works in Agent Engine Template.
 It explains how standards docs, specs, skills, lint/invariants/tests, workflow memory,
 and automation lanes fit into one operating system.
 

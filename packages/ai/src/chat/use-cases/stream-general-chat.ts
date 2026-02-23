@@ -7,7 +7,7 @@ import {
 import { Effect } from 'effect';
 import { LLM } from '../../llm/service';
 
-const GENERAL_CHAT_SYSTEM_PROMPT = `You are the default AI assistant for Template App.
+const GENERAL_CHAT_SYSTEM_PROMPT = `You are the default AI assistant for Agent Engine Template.
 
 Guidelines:
 - Be concise, clear, and practical.

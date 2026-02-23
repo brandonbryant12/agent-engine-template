@@ -6,11 +6,11 @@ services:
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-      POSTGRES_DB: template_app_test
+      POSTGRES_DB: agent_engine_template_test
     tmpfs:
       - /var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test -d template_app_test"]
+      test: ["CMD-SHELL", "pg_isready -U test -d agent_engine_template_test"]
       interval: 5s
       timeout: 5s
       retries: 5

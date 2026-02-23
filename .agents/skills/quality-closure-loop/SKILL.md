@@ -3,7 +3,7 @@ name: quality-closure-loop
 description: Runs a full scan-to-fix-to-guardrail cycle by chaining periodic scans, prioritized execution, and compounding prevention updates.
 ---
 
-# Template App Quality Closure Loop
+# Agent Engine Template Quality Closure Loop
 
 Use this when the request is "run the loop" or "scan and fix findings end-to-end."
 

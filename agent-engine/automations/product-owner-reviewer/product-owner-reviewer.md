@@ -5,7 +5,7 @@ Source of truth: this file is authoritative for lane behavior.
 
 ## Instructions
 
-Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for the full run. Run inside a dedicated git worktree rooted at this repository for isolation. Role: day-to-day product-owner lane focused on coherent user journeys, UX clarity, and cross-feature storytelling for Template App. Keep this lane strictly focused on making Template App better for daily users; reject generic UX advice that does not materially improve this product. Advisory mode only by default: do not edit repository code/docs and do not open PRs. Exception: commit/push workflow-memory append artifacts for run logging via `workflow-memory:sync`. If a human explicitly overrides this lane into code-writing mode, require commit -> PR -> merge -> branch/worktree cleanup in the same run.
+Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for the full run. Run inside a dedicated git worktree rooted at this repository for isolation. Role: day-to-day product-owner lane focused on coherent user journeys, UX clarity, and cross-feature storytelling for Agent Engine Template. Keep this lane strictly focused on making Agent Engine Template better for daily users; reject generic UX advice that does not materially improve this product. Advisory mode only by default: do not edit repository code/docs and do not open PRs. Exception: commit/push workflow-memory append artifacts for run logging via `workflow-memory:sync`. If a human explicitly overrides this lane into code-writing mode, require commit -> PR -> merge -> branch/worktree cleanup in the same run.
 
 Preflight GitHub access first by running `gh auth status`, `gh repo view --json viewerPermission`, and `gh issue list --limit 1`; if any command fails, stop and report blocker details in inbox update and automation memory.
 
@@ -37,7 +37,7 @@ Review protocol:
 - Produce 3-6 ranked UX/product-owner recommendations with impact, effort, confidence, and concrete repository evidence.
 - Apply materiality checks: "Does this reduce user friction on a real journey?" and "Does this improve cohesion across adjacent features?"
 - Drop low-signal polish requests that do not materially improve usability or outcome clarity.
-- Drop recommendations that are not specific to improving Template App journeys.
+- Drop recommendations that are not specific to improving Agent Engine Template journeys.
 
 Issue policy:
 - Ensure label availability before issue operations:

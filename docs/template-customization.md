@@ -5,9 +5,9 @@ Use this checklist right after creating a repository from this template.
 ## 1. Rename Project Identifiers
 
 Replace placeholders:
-- `template-app` (slug)
+- `agent-engine-template` (slug)
 - `template_app` (database names)
-- `Template App` (display name)
+- `Agent Engine Template` (display name)
 
 ## 2. Keep or Remove Optional Surfaces
 

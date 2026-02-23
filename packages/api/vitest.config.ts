@@ -12,7 +12,7 @@ export default mergeConfig(
       // Tests use transaction rollback for isolation
       env: {
         TEST_POSTGRES_URL:
-          'postgresql://test:test@localhost:5433/template_app_test',
+          'postgresql://test:test@localhost:5433/agent_engine_template_test',
       },
       // Increase timeout for database operations
       testTimeout: 30000,

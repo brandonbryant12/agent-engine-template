@@ -1,4 +1,4 @@
-# Template App — full-stack Docker Compose
+# Agent Engine Template — full-stack Docker Compose
 #
 # Usage:
 #   HOST_IP=<your-lan-ip> docker compose up --build
@@ -62,7 +62,7 @@ services:
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
       # S3 / MinIO storage
       STORAGE_PROVIDER: s3
-      S3_BUCKET: template-app
+      S3_BUCKET: agent-engine-template
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: minioadmin
       S3_SECRET_ACCESS_KEY: minioadmin
@@ -104,7 +104,7 @@ services:
       GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
       # S3 / MinIO storage
       STORAGE_PROVIDER: s3
-      S3_BUCKET: template-app
+      S3_BUCKET: agent-engine-template
       S3_REGION: us-east-1
       S3_ACCESS_KEY_ID: minioadmin
       S3_SECRET_ACCESS_KEY: minioadmin
@@ -202,9 +202,9 @@ services:
       - -c
       - |
         mc alias set myminio http://minio:9001 minioadmin minioadmin
-        mc mb --ignore-existing myminio/template-app
-        mc anonymous set public myminio/template-app
-        echo "MinIO bucket 'template-app' ready with public access"
+        mc mb --ignore-existing myminio/agent-engine-template
+        mc anonymous set public myminio/agent-engine-template
+        echo "MinIO bucket 'agent-engine-template' ready with public access"
 
 volumes:
   postgres_data:

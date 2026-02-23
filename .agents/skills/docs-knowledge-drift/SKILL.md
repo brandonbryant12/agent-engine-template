@@ -3,7 +3,7 @@ name: docs-knowledge-drift
 description: Docs/code drift workflow to keep architecture, patterns, testing, and workflow guidance aligned with repository reality.
 ---
 
-# Template App Docs + Knowledge Drift
+# Agent Engine Template Docs + Knowledge Drift
 
 Use this skill after behavior changes, during weekly scans, and before releases.
 

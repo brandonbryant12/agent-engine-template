@@ -9,12 +9,12 @@ import { configureProxy } from './lib/proxy';
 configureProxy();
 
 const cli = Command.make('cli', {}).pipe(
-  Command.withDescription('Template App developer CLI'),
+  Command.withDescription('Agent Engine Template developer CLI'),
   Command.withSubcommands([admin, test, seed]),
 );
 
 const app = Command.run(cli, {
-  name: 'Template App CLI',
+  name: 'Agent Engine Template CLI',
   version: '0.0.1',
 });
 

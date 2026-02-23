@@ -20,7 +20,7 @@ export interface TestDatabaseConfig {
 export const DEFAULT_TEST_CONNECTION =
   // eslint-disable-next-line no-restricted-properties -- test infrastructure, not production code
   process.env.TEST_POSTGRES_URL ??
-  'postgres://test:test@localhost:5433/template_app_test';
+  'postgres://test:test@localhost:5433/agent_engine_template_test';
 
 export function createTestDatabase(config: TestDatabaseConfig = {}) {
   const connectionString = config.connectionString ?? DEFAULT_TEST_CONNECTION;

@@ -3,7 +3,7 @@ name: pr-risk-review
 description: Pre-merge risk review focused on regression prevention, auth/data safety, and test coverage gaps.
 ---
 
-# Template App PR Risk Review
+# Agent Engine Template PR Risk Review
 
 Use this skill before merge for agent-authored or high-risk human-authored changes.
 

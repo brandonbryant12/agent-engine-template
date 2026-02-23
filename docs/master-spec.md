@@ -1,4 +1,4 @@
-# Template App Master Specification
+# Agent Engine Template Master Specification
 
 This document is the behavior source of truth for repositories created from this template.
 
@@ -66,9 +66,9 @@ pnpm spec:generate
 <!-- BEGIN GENERATED:snapshot-metadata -->
 # Snapshot Metadata (Generated)
 
-- Generated at: 2026-02-23T18:10:45.958Z
-- Git branch: unknown
-- Git commit: unknown
+- Generated at: 2026-02-23T18:29:21.999Z
+- Git branch: main
+- Git commit: fc63c4c
 
 ## Inventory
 

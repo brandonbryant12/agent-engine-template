@@ -1,4 +1,4 @@
-# Web App (Template App)
+# Web App (Agent Engine Template)
 
 This app is the MVP surface for a signed-in AI chat workflow:
 

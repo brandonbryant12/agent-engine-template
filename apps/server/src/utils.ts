@@ -3,7 +3,7 @@ export const generateRootHtml = (webUrl: string, serverUrl: string) => `
   <html lang="en">
     <head>
       <meta charset="UTF-8" />
-      <title>Template App API</title>
+      <title>Agent Engine Template API</title>
       <style>
         :root { color-scheme: light dark; }
         body {
@@ -49,7 +49,7 @@ export const generateRootHtml = (webUrl: string, serverUrl: string) => `
       </style>
     </head>
     <body>
-      <h1>Template App API</h1>
+      <h1>Agent Engine Template API</h1>
       <hr />
       <h2>Resources</h2>
       <ul>

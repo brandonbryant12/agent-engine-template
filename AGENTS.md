@@ -1,4 +1,4 @@
-# Template App - Agent Instructions
+# Agent Engine Template - Agent Instructions
 
 ## Before Making Changes
 

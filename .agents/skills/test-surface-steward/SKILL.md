@@ -3,7 +3,7 @@ name: test-surface-steward
 description: Test strategy stewardship workflow for balancing use-case, integration, workflow, invariant, frontend, and e2e coverage.
 ---
 
-# Template App Test Surface Steward
+# Agent Engine Template Test Surface Steward
 
 Use this skill when adding/refactoring behavior or when test health drifts.
 

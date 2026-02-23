@@ -3,7 +3,7 @@ name: intake-triage
 description: Intake and scoping workflow for turning requests into clear slices, acceptance criteria, and risk flags before implementation.
 ---
 
-# Template App Intake + Triage
+# Agent Engine Template Intake + Triage
 
 Use this skill at the start of every feature, refactor, bugfix, or operational change.
 

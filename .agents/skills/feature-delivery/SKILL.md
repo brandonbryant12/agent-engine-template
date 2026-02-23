@@ -1,9 +1,9 @@
 ---
 name: feature-delivery
-description: End-to-end feature delivery workflow for Template App. Use when implementing or refactoring a feature from request to merge, including planning, coding, tests, docs updates, and compounding learnings.
+description: End-to-end feature delivery workflow for Agent Engine Template. Use when implementing or refactoring a feature from request to merge, including planning, coding, tests, docs updates, and compounding learnings.
 ---
 
-# Template App Feature Delivery
+# Agent Engine Template Feature Delivery
 
 Use this skill for the happy path of shipping features with the repo's docs-first standards.
 

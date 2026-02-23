@@ -3,7 +3,7 @@
 
 # Workflow Catalog
 
-Canonical workflow catalog for Template App.
+Canonical workflow catalog for Agent Engine Template.
 
 Source of truth: [`agent-engine/workflows/registry.json`](./registry.json)
 

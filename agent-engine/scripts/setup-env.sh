@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Template App — Environment Setup
+# Agent Engine Template — Environment Setup
 # Generates .env files for server, web, and worker apps.
 #
 # Supports two modes:
@@ -68,7 +68,7 @@ prompt_yn() {
 # ─── Banner ───────────────────────────────────────────────────────────
 echo -e "${BOLD}${CYAN}"
 echo "  ┌─────────────────────────────────────┐"
-echo "  │     Template App — Env Setup       │"
+echo "  │     Agent Engine Template — Env Setup       │"
 echo "  └─────────────────────────────────────┘"
 echo -e "${RESET}"
 
@@ -185,7 +185,7 @@ elif [[ "$STORAGE_PROVIDER" == "s3" ]]; then
   # MinIO defaults from docker compose
   MINIO_PORT="9001"
   MINIO_CONSOLE_PORT="9090"
-  prompt S3_BUCKET "S3 bucket" "template-app"
+  prompt S3_BUCKET "S3 bucket" "agent-engine-template"
   prompt S3_REGION "S3 region" "us-east-1"
   prompt S3_ACCESS_KEY_ID "S3 access key ID" "minioadmin"
   prompt_secret S3_SECRET_ACCESS_KEY "S3 secret access key" "minioadmin"
@@ -228,7 +228,7 @@ cat >> "$ROOT_DIR/apps/server/.env" <<EOF
 TELEMETRY_ENABLED=${DEFAULT_TELEMETRY_ENABLED}
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
 # OTEL_EXPORTER_OTLP_HEADERS=DD-API-KEY=your-datadog-api-key
-OTEL_SERVICE_NAME=template-app-server
+OTEL_SERVICE_NAME=agent-engine-template-server
 OTEL_ENV=${DEFAULT_OTEL_ENV}
 EOF
 
@@ -282,7 +282,7 @@ cat >> "$ROOT_DIR/apps/worker/.env" <<EOF
 TELEMETRY_ENABLED=${DEFAULT_TELEMETRY_ENABLED}
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
 # OTEL_EXPORTER_OTLP_HEADERS=DD-API-KEY=your-datadog-api-key
-OTEL_SERVICE_NAME=template-app-worker
+OTEL_SERVICE_NAME=agent-engine-template-worker
 OTEL_ENV=${DEFAULT_OTEL_ENV}
 EOF
 

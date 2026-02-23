@@ -10,8 +10,8 @@
 
 ```bash
 # Clone and enter the project
-git clone <repo-url> template-app
-cd template-app
+git clone <repo-url> agent-engine-template
+cd agent-engine-template
 
 # Get your LAN IP
 HOST_IP=$(hostname -I | awk '{print $1}')
@@ -92,9 +92,9 @@ USE_MOCK_AI=true
 MinIO provides S3-compatible object storage. The compose setup:
 
 - Runs the S3 API on port **9001** and console on **9090**
-- Auto-creates a `template-app` bucket with public anonymous access
+- Auto-creates a `agent-engine-template` bucket with public anonymous access
 - The API server uploads to MinIO internally via `http://minio:9001`
-- URLs returned to the browser use `http://<HOST_IP>:9001/template-app/<key>`
+- URLs returned to the browser use `http://<HOST_IP>:9001/agent-engine-template/<key>`
 
 Default credentials (MinIO Console at `http://<HOST_IP>:9090`):
 

@@ -33,7 +33,7 @@ process.on('uncaughtException', (error) => {
 const startServer = async () => {
   initTelemetry({
     enabled: env.TELEMETRY_ENABLED,
-    serviceName: env.OTEL_SERVICE_NAME ?? 'template-app-server',
+    serviceName: env.OTEL_SERVICE_NAME ?? 'agent-engine-template-server',
     serviceVersion: env.OTEL_SERVICE_VERSION,
     environment: env.OTEL_ENV,
     otlpEndpoint: env.OTEL_EXPORTER_OTLP_ENDPOINT,

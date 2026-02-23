@@ -3,7 +3,7 @@ name: performance-cost-guard
 description: Performance and cost regression workflow for frontend bundles, backend hot paths, CI runtime, and AI/provider spend.
 ---
 
-# Template App Performance + Cost Guard
+# Agent Engine Template Performance + Cost Guard
 
 Use this skill for performance-sensitive changes, weekly quality scans, and release readiness checks.
 

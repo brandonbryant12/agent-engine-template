@@ -3,7 +3,7 @@ name: tanstack-vite
 description: TanStack Query/Router/Form + Vite guardrails for apps/web. Use when implementing or reviewing frontend data loading, routing, forms, caching, or build/performance behavior.
 ---
 
-# Template App TanStack + Vite
+# Agent Engine Template TanStack + Vite
 
 Apply this whenever `apps/web` changes touch data loading, route behavior, forms, or build output.
 

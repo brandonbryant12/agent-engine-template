@@ -1,6 +1,6 @@
 # Agent Engine
 
-This folder is a high-level map of the controls used to keep Template App changes predictable and safe.
+This folder is a high-level map of the controls used to keep Agent Engine Template changes predictable and safe.
 It sits above detailed standards docs and explains how specs, skills, gates, and learning loops work together.
 
 ## Terminology

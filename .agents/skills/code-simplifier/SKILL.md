@@ -1,6 +1,6 @@
 ---
 name: code-simplifier
-description: Simplifies recently modified code for clarity and maintainability while preserving exact behavior and enforcing Template App docs/pattern guardrails.
+description: Simplifies recently modified code for clarity and maintainability while preserving exact behavior and enforcing Agent Engine Template docs/pattern guardrails.
 ---
 
 # Code Simplifier
