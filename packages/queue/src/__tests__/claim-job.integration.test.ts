@@ -6,7 +6,7 @@ import { user } from '@repo/db/schema';
 import { Effect, Layer } from 'effect';
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
 import { JobProcessingError } from '../errors';
-import { QueueLive } from '../repository';
+import { QueueLive, toStaleJobTimeoutError } from '../repository';
 import { Queue } from '../service';
 
 /**
@@ -233,5 +233,44 @@ describe.skipIf(!POSTGRES_URL)('Queue atomic job claim (integration)', () => {
     expect(claimed).toHaveLength(1);
     expect(missed).toHaveLength(1);
     expect(claimed[0]!.status).toBe(JobStatus.COMPLETED);
+  });
+
+  it('fails stale processing jobs with deterministic timeout errors', async () => {
+    const enqueued = await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.enqueue(JobType.PROCESS_AI_RUN, { stale: true }, testUserId),
+      ),
+    );
+
+    const startedAt = new Date(Date.now() - 90_000);
+    await db
+      .update(job)
+      .set({
+        status: JobStatus.PROCESSING,
+        startedAt,
+        updatedAt: startedAt,
+      })
+      .where(eq(job.id, enqueued.id));
+
+    const maxAgeMs = 60_000;
+    const sweep = await runEffect(
+      Effect.flatMap(Queue, (q) => q.failStaleJobs(maxAgeMs)),
+    );
+
+    expect(sweep.checkedCount).toBe(1);
+    expect(sweep.affectedCount).toBe(1);
+    expect(sweep.jobs).toHaveLength(1);
+    expect(sweep.jobs[0]?.id).toBe(enqueued.id);
+    expect(sweep.jobs[0]?.status).toBe(JobStatus.FAILED);
+    expect(sweep.jobs[0]?.error).toBe(toStaleJobTimeoutError(maxAgeMs));
+
+    const [updated] = await db
+      .select()
+      .from(job)
+      .where(eq(job.id, enqueued.id))
+      .limit(1);
+
+    expect(updated?.status).toBe(JobStatus.FAILED);
+    expect(updated?.error).toBe(toStaleJobTimeoutError(maxAgeMs));
   });
 });
