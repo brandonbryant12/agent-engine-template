@@ -4,11 +4,11 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { readWorkflowRegistry } from "../workflows/registry";
 import { runScript } from "../lib/effect-script";
+import { refreshMonthlySummary } from "./summary-refresh";
 
 const MEMORY_DIR = path.join("agent-engine", "workflow-memory");
 const INDEX_PATH = path.join(MEMORY_DIR, "index.json");
 const EVENTS_DIR = path.join(MEMORY_DIR, "events");
-const SUMMARIES_DIR = path.join(MEMORY_DIR, "summaries");
 
 const REQUIRED_ARGS = [
   "workflow",
@@ -156,37 +156,6 @@ async function readJsonlIds(filePath) {
   } catch (error) {
     if (error && error.code === "ENOENT") {
       return new Set();
-    }
-    throw error;
-  }
-}
-
-async function ensureMonthlySummary(month) {
-  const summaryPath = path.join(SUMMARIES_DIR, `${month}.md`);
-  try {
-    await fs.access(summaryPath);
-  } catch (error) {
-    if (error && error.code === "ENOENT") {
-      const template = `# ${month} Workflow Memory Summary
-
-## Top Repeated Patterns
-
-- _No entries yet._
-
-## Guardrails Added
-
-- _No entries yet._
-
-## Open Risks
-
-- _No entries yet._
-
-## Carry-Over Actions
-
-- _No entries yet._
-`;
-      await fs.writeFile(summaryPath, template, "utf8");
-      return;
     }
     throw error;
   }
@@ -479,7 +448,6 @@ async function main() {
   const eventFile = path.join(EVENTS_DIR, `${month}.jsonl`);
 
   await fs.mkdir(EVENTS_DIR, { recursive: true });
-  await fs.mkdir(SUMMARIES_DIR, { recursive: true });
 
   const existingIds = await readJsonlIds(eventFile);
   if (existingIds.has(event.id)) {
@@ -514,11 +482,12 @@ async function main() {
   deduped.sort((a, b) => (a.date === b.date ? a.id.localeCompare(b.id) : b.date.localeCompare(a.date)));
 
   await fs.writeFile(INDEX_PATH, `${JSON.stringify(deduped, null, 2)}\n`, "utf8");
-  await ensureMonthlySummary(month);
+  await refreshMonthlySummary(month);
 
   console.log(`Added workflow memory event: ${event.id}`);
   console.log(`Event file: ${eventFile}`);
   console.log(`Index updated: ${INDEX_PATH}`);
+  console.log(`Summary refreshed: agent-engine/workflow-memory/summaries/${month}.md`);
   printCoverageSummary(deduped, month, knownWorkflows);
 }
 

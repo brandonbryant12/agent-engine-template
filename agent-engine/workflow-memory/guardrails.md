@@ -22,8 +22,8 @@ Use this format:
 - Source workflow: Self-Improvement
 - Problem signature: Single markdown memory file causes retrieval/context bloat.
 - Control type: automation + docs rule
-- Change landed: `agent-engine/scripts/workflow-memory/add-entry.mjs`, [`agent-engine/workflow-memory/README.md`](./README.md), workflow protocol updates.
-- Evidence: [`agent-engine/workflow-memory/README.md`](./README.md), `agent-engine/scripts/workflow-memory/add-entry.mjs`, [`agent-engine/workflows/README.md`](../workflows/README.md)
+- Change landed: `agent-engine/scripts/workflow-memory/add-entry.ts`, [`agent-engine/workflow-memory/README.md`](./README.md), workflow protocol updates.
+- Evidence: [`agent-engine/workflow-memory/README.md`](./README.md), `agent-engine/scripts/workflow-memory/add-entry.ts`, [`agent-engine/workflows/README.md`](../workflows/README.md)
 - Owner: automation
 - Status: active
 
@@ -32,8 +32,8 @@ Use this format:
 - Source workflow: Self-Improvement
 - Problem signature: Workflow memory entries were structurally correct but sparse across active workflows.
 - Control type: automation + docs rule + skill update
-- Change landed: `agent-engine/scripts/workflow-memory/check-coverage.mjs`, `package.json` workflow-memory scripts, skill/doc requirements for event id evidence and weekly coverage checks.
-- Evidence: `agent-engine/scripts/workflow-memory/check-coverage.mjs`, [`agent-engine/workflow-memory/README.md`](./README.md), [`agent-engine/workflows/README.md`](../workflows/README.md), [`.agents/skills/periodic-scans/SKILL.md`](../../.agents/skills/periodic-scans/SKILL.md)
+- Change landed: `agent-engine/scripts/workflow-memory/check-coverage.ts`, `package.json` workflow-memory scripts, skill/doc requirements for event id evidence and weekly coverage checks.
+- Evidence: `agent-engine/scripts/workflow-memory/check-coverage.ts`, [`agent-engine/workflow-memory/README.md`](./README.md), [`agent-engine/workflows/README.md`](../workflows/README.md), [`.agents/skills/periodic-scans/SKILL.md`](../../.agents/skills/periodic-scans/SKILL.md)
 - Owner: automation
 - Status: active
 
@@ -42,8 +42,8 @@ Use this format:
 - Source workflow: Self-Improvement
 - Problem signature: Skill content drift and stale path examples reduce reliability of skill-guided edits.
 - Control type: automation + docs rule
-- Change landed: `agent-engine/scripts/skills/check-quality.mjs`, `skills:check:strict` command, workflow/docs updates requiring quality checks after skill edits.
-- Evidence: `agent-engine/scripts/skills/check-quality.mjs`, `package.json`, [`agent-engine/workflows/README.md`](../workflows/README.md), [`AGENTS.md`](../../AGENTS.md), [`CLAUDE.md`](../../CLAUDE.md)
+- Change landed: `agent-engine/scripts/skills/check-quality.ts`, `skills:check:strict` command, workflow/docs updates requiring quality checks after skill edits.
+- Evidence: `agent-engine/scripts/skills/check-quality.ts`, `package.json`, [`agent-engine/workflows/README.md`](../workflows/README.md), [`AGENTS.md`](../../AGENTS.md), [`CLAUDE.md`](../../CLAUDE.md)
 - Owner: automation
 - Status: active
 
@@ -63,6 +63,6 @@ Use this format:
 - Problem signature: Memory and agent-failure events used inconsistent tags, reducing aggregation and retrieval quality.
 - Control type: automation + docs rule + skill update
 - Change landed: Added canonical taxonomy ([`agent-engine/workflow-memory/taxonomy.md`](./taxonomy.md)), required taxonomy checklist in workflow docs, and add-entry validation/options for memory and capability/failure tags.
-- Evidence: [`agent-engine/workflow-memory/taxonomy.md`](./taxonomy.md), `agent-engine/scripts/workflow-memory/add-entry.mjs`, [`agent-engine/workflows/README.md`](../workflows/README.md), [`.agents/skills/periodic-scans/SKILL.md`](../../.agents/skills/periodic-scans/SKILL.md), [`.agents/skills/self-improvement/SKILL.md`](../../.agents/skills/self-improvement/SKILL.md)
+- Evidence: [`agent-engine/workflow-memory/taxonomy.md`](./taxonomy.md), `agent-engine/scripts/workflow-memory/add-entry.ts`, [`agent-engine/workflows/README.md`](../workflows/README.md), [`.agents/skills/periodic-scans/SKILL.md`](../../.agents/skills/periodic-scans/SKILL.md), [`.agents/skills/self-improvement/SKILL.md`](../../.agents/skills/self-improvement/SKILL.md)
 - Owner: automation
 - Status: active

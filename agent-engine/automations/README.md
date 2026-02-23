@@ -138,6 +138,18 @@ workflow memory in git:
     - `agent-engine/workflow-memory/summaries/*.md`
   - only block when non-memory conflicts appear
 
+## Runtime Bootstrap For Memory-Writing Research Lanes
+
+Research lanes that run in fresh isolated worktrees and invoke
+`pnpm workflow-memory:*` commands must bootstrap runtime dependencies before lane
+logic starts:
+
+1. `zsh -lic 'cd <worktree> && pnpm install --frozen-lockfile --prefer-offline'`
+2. If install fails, retry with explicit npm registries and emit actionable diagnostics.
+3. Run a fast runtime preflight before research execution:
+   - `zsh -lic 'cd <worktree> && pnpm workflow-memory:retrieve --workflow "Periodic Scans" --limit 1 --min-score 0'`
+4. Stop the cycle early when bootstrap/preflight fails instead of running partial research logic.
+
 ## Controlled Chaos Rules
 
 External research is encouraged, but only through filters:

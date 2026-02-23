@@ -3,6 +3,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { runScript } from "../lib/effect-script";
+import { refreshMonthlySummaries } from "./summary-refresh";
 
 const MEMORY_DIR = path.join("agent-engine", "workflow-memory");
 const EVENTS_DIR = path.join(MEMORY_DIR, "events");
@@ -179,10 +180,11 @@ async function main() {
 
   if (!dryRun) {
     await fs.writeFile(INDEX_PATH, `${JSON.stringify(indexRows, null, 2)}\n`, "utf8");
+    await refreshMonthlySummaries([...byMonth.keys()]);
   }
 
   console.log(
-    `${dryRun ? "Dry run" : "Compaction"} complete. Read=${totalRead}, active=${activeEvents.length}, deduped=${duplicatesRemoved}, archived=${archivedCount}.`,
+    `${dryRun ? "Dry run" : "Compaction"} complete. Read=${totalRead}, active=${activeEvents.length}, deduped=${duplicatesRemoved}, archived=${archivedCount}, summaries=${byMonth.size}.`,
   );
 }
 

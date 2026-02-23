@@ -9,6 +9,12 @@ Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for th
 
 Preflight GitHub access first by running `gh auth status`, `gh repo view --json viewerPermission`, and `gh issue list --limit 1`; if any command fails, stop and report blocker details in inbox update and automation memory.
 
+Runtime bootstrap in each fresh isolated worktree before research logic:
+- Run dependency install: `zsh -lic 'cd "$PWD" && pnpm install --frozen-lockfile --prefer-offline'`.
+- If install fails due network/registry errors, retry with explicit npm registries and stop with actionable diagnostics if still failing.
+- Run workflow-memory runtime preflight: `zsh -lic 'cd "$PWD" && pnpm workflow-memory:retrieve --workflow "Periodic Scans" --limit 1 --min-score 0'`.
+- If preflight fails, stop before research logic and report diagnostics in run output/memory.
+
 GitHub interaction policy: use `gh` CLI for all GitHub interactions in this run (issue/PR search/read/write, comments, labels, reactions, and metadata). Do not use browser/manual edits or non-`gh` GitHub clients.
 
 Random-walk protocol:
