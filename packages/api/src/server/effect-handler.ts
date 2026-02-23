@@ -58,7 +58,7 @@ type ProtocolErrorClass<E extends TaggedError> = {
   getData?: (error: E) => Record<string, unknown>;
 };
 
-const STATUS_TO_ERROR_CODES: Readonly<Record<number, readonly string[]>> = {
+export const STATUS_TO_ERROR_CODES: Readonly<Record<number, readonly string[]>> = {
   400: ['BAD_REQUEST'],
   401: ['UNAUTHORIZED'],
   403: ['FORBIDDEN'],

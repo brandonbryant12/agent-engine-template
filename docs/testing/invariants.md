@@ -53,9 +53,18 @@ Required for all agent-authored backend changes.
 
 | Status Code | Required Mapping |
 |---|---|
+| `400` | `BAD_REQUEST` |
+| `401` | `UNAUTHORIZED` |
+| `403` | `FORBIDDEN` |
+| `404` | `NOT_FOUND` |
 | `409` | `CONFLICT` |
-| `502` | `SERVICE_UNAVAILABLE` |
+| `413` | `PAYLOAD_TOO_LARGE` |
+| `415` | `UNSUPPORTED_MEDIA_TYPE` |
 | `422` | `UNPROCESSABLE_CONTENT` |
+| `429` | `RATE_LIMITED` |
+| `502` | `SERVICE_UNAVAILABLE` |
+| `503` | `SERVICE_UNAVAILABLE` |
+| `504` | `SERVICE_UNAVAILABLE` |
 
 ### Invariant Docs Sync
 <!-- enforced-by: invariant-test -->
