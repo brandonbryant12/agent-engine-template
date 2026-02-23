@@ -63,6 +63,27 @@
     "isInitialization": true
   },
   {
+    "id": "2026-02-23-feature-delivery-ready-for-dev-executor-run-summary-issues-12-and-13",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor run summary: issues #12 and #13",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "inbox-summary",
+      "issues-12-13",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-periodic-scans-best-practice-researcher-baseline-macro-scan-repo-tooling-and-pi",
     "date": "2026-02-23",
     "month": "2026-02",
