@@ -1,5 +1,6 @@
 import { Effect, Schema } from 'effect';
 import { describe, expect, it } from 'vitest';
+import type { JobId } from '../schemas/brands';
 import {
   JobStatus,
   JobStatusSchema,
@@ -8,7 +9,6 @@ import {
   serializeJob,
   serializeJobEffect,
 } from '../schemas/jobs';
-import type { JobId } from '../schemas/brands';
 
 describe('jobs schema', () => {
   it('exposes expected JobStatus constants', () => {

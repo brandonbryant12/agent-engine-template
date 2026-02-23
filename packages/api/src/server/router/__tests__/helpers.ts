@@ -1,8 +1,8 @@
 import { ORPCError } from '@orpc/client';
 import { ManagedRuntime, type Layer } from 'effect';
-import type { User } from '@repo/auth/policy';
 import type { AuthenticatedORPCContext, ORPCContext } from '../../orpc';
 import type { ServerRuntime } from '../../runtime';
+import type { User } from '@repo/auth/policy';
 
 interface TestSession {
   session: {

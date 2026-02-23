@@ -90,9 +90,25 @@ pnpm lint
 pnpm test
 pnpm test:invariants
 pnpm build
+pnpm scripts:lint
 pnpm spec:generate
 pnpm skills:check:strict
 ```
+
+## CI Contract
+
+The canonical repository CI contract lives at
+`.github/workflows/ci.yml`.
+
+For every PR to `main`, CI pins Node (`22.10.0`), installs with
+`pnpm install --frozen-lockfile`, and runs:
+
+- `pnpm typecheck`
+- `pnpm lint`
+- `pnpm test`
+- `pnpm test:invariants`
+- `pnpm build`
+- `pnpm scripts:lint`
 
 ## Ready-for-Dev Loop Runner
 
