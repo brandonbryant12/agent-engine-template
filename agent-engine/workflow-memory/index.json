@@ -116,6 +116,35 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-23-periodic-scans-issue-evaluator-triage-run-full-open-issue-coverage",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "Issue-evaluator triage run: full open-issue coverage",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "issue-evaluator",
+      "memory",
+      "workflow-memory",
+      "tool:gh",
+      "tool:workflow-memory:add-entry",
+      "tool:workflow-memory:sync",
+      "issue-triage",
+      "label-hygiene",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:retrieve",
+      "memory-dynamics:write"
+    ],
+    "importance": 0.86,
+    "confidence": 0.93,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-self-improvement-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
