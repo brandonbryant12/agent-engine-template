@@ -10,7 +10,10 @@ import {
 import { Effect, Layer } from 'effect';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { User } from '@repo/auth/policy';
-import { ssePublisher } from '../../publisher';
+import {
+  SSEPublisher,
+  type SSEPublisherService,
+} from '../../sse-publisher-service';
 import { createRunUseCase, listRunsUseCase } from '../runs';
 
 const TEST_USER: User = {
@@ -39,6 +42,13 @@ const createMockQueueService = (
   ...overrides,
 });
 
+const createMockPublisherService = (
+  overrides: Partial<SSEPublisherService> = {},
+): SSEPublisherService => ({
+  publish: () => Effect.succeed(undefined),
+  ...overrides,
+});
+
 const createJob = (overrides: Partial<RunJob> = {}): RunJob => ({
   id: 'job_test' as RunJob['id'],
   type: QueueJobType.PROCESS_AI_RUN,
@@ -58,7 +68,16 @@ const createJob = (overrides: Partial<RunJob> = {}): RunJob => ({
   ...overrides,
 });
 
-const withQueue = (queue: QueueService) => Effect.provide(Layer.succeed(Queue, queue));
+const withQueueAndPublisher = (
+  queue: QueueService,
+  publisher: SSEPublisherService = createMockPublisherService(),
+) =>
+  Effect.provide(
+    Layer.mergeAll(
+      Layer.succeed(Queue, queue),
+      Layer.succeed(SSEPublisher, publisher),
+    ),
+  );
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -81,9 +100,10 @@ describe('runs use-cases', () => {
       }) as QueueService['enqueue'],
     });
 
-    const publishSpy = vi
-      .spyOn(ssePublisher, 'publish')
-      .mockImplementation(() => undefined);
+    const publish = vi.fn<SSEPublisherService['publish']>(() =>
+      Effect.succeed(undefined),
+    );
+    const publisher = createMockPublisherService({ publish });
 
     const result = await Effect.runPromise(
       createRunUseCase({
@@ -92,7 +112,7 @@ describe('runs use-cases', () => {
           prompt: 'Plan quarterly roadmap',
           threadId: 'thread_123',
         },
-      }).pipe(withQueue(queue)),
+      }).pipe(withQueueAndPublisher(queue, publisher)),
     );
 
     expect(enqueueType).toBe(QueueJobType.PROCESS_AI_RUN);
@@ -102,7 +122,16 @@ describe('runs use-cases', () => {
       threadId: 'thread_123',
       userId: TEST_USER.id,
     });
-    expect(publishSpy).toHaveBeenCalledTimes(1);
+    expect(publish).toHaveBeenCalledTimes(1);
+    expect(publish).toHaveBeenCalledWith(
+      TEST_USER.id,
+      expect.objectContaining({
+        type: 'run_queued',
+        runId: 'job_test',
+        prompt: 'Plan quarterly roadmap',
+        threadId: 'thread_123',
+      }),
+    );
     expect(result.prompt).toBe('Plan quarterly roadmap');
     expect(result.threadId).toBe('thread_123');
   });
@@ -120,7 +149,7 @@ describe('runs use-cases', () => {
           input: {
             prompt: 'Plan quarterly roadmap',
           },
-        }).pipe(withQueue(queue)),
+        }).pipe(withQueueAndPublisher(queue)),
       ),
     );
 
@@ -156,7 +185,7 @@ describe('runs use-cases', () => {
       listRunsUseCase({
         user: TEST_USER,
         input: { limit: 1 },
-      }).pipe(withQueue(queue)),
+      }).pipe(withQueueAndPublisher(queue)),
     );
 
     expect(listUserId).toBe(TEST_USER.id);
@@ -188,7 +217,7 @@ describe('runs use-cases', () => {
       listRunsUseCase({
         user: TEST_USER,
         input: {},
-      }).pipe(withQueue(queue)),
+      }).pipe(withQueueAndPublisher(queue)),
     );
 
     expect(runs).toHaveLength(1);
@@ -207,7 +236,7 @@ describe('runs use-cases', () => {
         listRunsUseCase({
           user: TEST_USER,
           input: {},
-        }).pipe(withQueue(queue)),
+        }).pipe(withQueueAndPublisher(queue)),
       ),
     );
 
