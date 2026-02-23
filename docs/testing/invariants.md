@@ -74,6 +74,7 @@ Required for all agent-authored backend changes.
 | Rule | What It Prevents |
 |---|---|
 | All `pnpm test:invariants` files must appear in this doc | Invariant-doc drift and missing documentation |
+| `AGENTS.md` and `CLAUDE.md` must both include required safety commands (`pnpm scripts:lint`, skill sync, and strict skill checks) | Instruction-surface drift where one agent path can bypass script/skill guardrails |
 
 ## When to Update Invariants
 <!-- enforced-by: manual-review -->
