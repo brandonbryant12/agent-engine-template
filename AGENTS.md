@@ -75,5 +75,6 @@ pnpm scripts:lint
 - `Layer.succeed` for pure object literals only.
 - `Layer.sync` for class/factory instantiation.
 - `Layer.effect` when construction depends on other Effect services.
+- Enforced by `packages/testing/src/__tests__/effect-layer-constructor.invariants.test.ts` via `pnpm test:invariants`.
 
 See [`docs/patterns/effect-runtime.md`](./docs/patterns/effect-runtime.md).
