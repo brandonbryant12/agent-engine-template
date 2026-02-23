@@ -129,6 +129,27 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-23-self-improvement-ready-for-dev-executor-run-summary-issue-18",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Self-Improvement",
+    "title": "ready-for-dev-executor run summary: issue #18",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev-executor",
+      "workflow-memory",
+      "inbox-summary",
+      "issues-18",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-self-improvement-ready-for-dev-executor-run-summary-issues-2-and-3",
     "date": "2026-02-23",
     "month": "2026-02",
