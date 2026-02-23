@@ -24,6 +24,16 @@ Required for all agent-authored backend changes.
 | Chat routes avoid direct `runtime.runPromise` | Bypassing shared handler pipeline |
 | Chat handlers define `api.chat.*` spans | Missing or inconsistent tracing |
 
+### API Chat Contract Invariants
+<!-- enforced-by: invariant-test -->
+
+**File:** `packages/api/src/contracts/__tests__/chat-contract.invariants.test.ts`
+
+| Rule | What It Prevents |
+|---|---|
+| `chat.general` input must remain Standard Schema-backed with bounded message validation | Regressing to trust-only inputs or unbounded payload shapes |
+| Generated OpenAPI for `/chat/general` must include a request body schema | API docs drift that hides required chat input payloads |
+
 ### API Router Handler Invariants
 <!-- enforced-by: invariant-test -->
 
