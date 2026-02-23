@@ -44,6 +44,14 @@ pnpm lint
 pnpm test
 pnpm test:invariants
 pnpm build
+pnpm scripts:lint
+```
+
+## After Skill Changes
+
+```bash
+agent-engine/scripts/sync-skills.sh
+pnpm skills:check:strict
 ```
 
 ## Non-Negotiables

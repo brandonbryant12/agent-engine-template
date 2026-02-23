@@ -8,6 +8,14 @@ const repoRoot = path.resolve(currentDir, '..', '..', '..', '..');
 
 const packageJsonPath = path.join(repoRoot, 'package.json');
 const docsPath = path.join(repoRoot, 'docs/testing/invariants.md');
+const agentsInstructionsPath = path.join(repoRoot, 'AGENTS.md');
+const claudeInstructionsPath = path.join(repoRoot, 'CLAUDE.md');
+
+const REQUIRED_SAFETY_COMMANDS = [
+  'pnpm scripts:lint',
+  'agent-engine/scripts/sync-skills.sh',
+  'pnpm skills:check:strict',
+] as const;
 
 const extractInvariantFiles = (script: string): string[] => {
   const tokens = script.split(/\s+/).filter(Boolean);
@@ -40,6 +48,27 @@ describe('invariant docs sync', () => {
     expect(
       missing,
       'Invariant docs must list every test:invariants file path.',
+    ).toEqual([]);
+  });
+
+  it('keeps AGENTS and CLAUDE safety-command contracts aligned', () => {
+    const agents = fs.readFileSync(agentsInstructionsPath, 'utf-8');
+    const claude = fs.readFileSync(claudeInstructionsPath, 'utf-8');
+
+    const missingInAgents = REQUIRED_SAFETY_COMMANDS.filter(
+      (command) => !agents.includes(command),
+    );
+    const missingInClaude = REQUIRED_SAFETY_COMMANDS.filter(
+      (command) => !claude.includes(command),
+    );
+
+    expect(
+      missingInAgents,
+      'AGENTS.md must include all required safety commands.',
+    ).toEqual([]);
+    expect(
+      missingInClaude,
+      'CLAUDE.md must include all required safety commands.',
     ).toEqual([]);
   });
 });
