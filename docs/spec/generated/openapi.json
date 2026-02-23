@@ -1,0 +1,83 @@
+{
+  "info": {
+    "description": "Generated from oRPC contract metadata. Request/response schemas are intentionally omitted in this initial snapshot.",
+    "title": "Template App API (Spec Snapshot)",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/chat/general": {
+      "post": {
+        "operationId": "chat.general",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/events/": {
+      "get": {
+        "operationId": "events.subscribe",
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/runs/": {
+      "get": {
+        "description": "List background AI runs for the current user.",
+        "operationId": "runs.list",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "summary": "List runs",
+        "tags": [
+          "runs"
+        ]
+      },
+      "post": {
+        "description": "Queue a background AI run and track progress via SSE.",
+        "operationId": "runs.create",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        },
+        "summary": "Create run",
+        "tags": [
+          "runs"
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ]
+}

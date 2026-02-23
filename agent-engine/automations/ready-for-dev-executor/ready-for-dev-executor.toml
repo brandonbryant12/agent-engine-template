@@ -1,0 +1,23 @@
+version = 1
+id = "ready-for-dev-executor"
+name = "Ready-for-Dev Executor"
+prompt = '''Use gpt-5.3-codex with reasoning effort xhigh.
+
+Execution contract:
+- Execute one full `ready-for-dev-executor` run.
+- Keep reasoning effort at xhigh throughout the run; do not downgrade reasoning depth.
+- Execute code-writing work in a dedicated git worktree created from latest `origin/main`.
+- Repository playbook is the source of truth for this lane.
+- Read and execute `agent-engine/automations/ready-for-dev-executor/ready-for-dev-executor.md` in the repository root before making decisions.
+- Use this as the single implementation lane for approved issues from both `best-practice-researcher` and `agent-engine-researcher`.
+- Select and implement 1..N `ready-for-dev` issues using bounded aggregation.
+- Route each selected issue to the correct workflow/skills per the playbook.
+- For every run path (success/failure/no-op), append workflow memory and run `pnpm workflow-memory:sync` to commit/push memory artifacts.
+- When a run adds code, complete commit -> PR -> merge -> branch/worktree cleanup in the same run.
+- If this wrapper conflicts with the playbook, follow the playbook.
+- Keep run output concise and include issue selection rationale, workflow routing, validation evidence, delivery outcome, and memory append summary.'''
+status = "ACTIVE"
+rrule = "RRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=11;BYDAY=SU,MO,TU,WE,TH,FR,SA"
+cwds = ["$REPO_ROOT"]
+created_at = 1771680075906
+updated_at = 1771798046000

@@ -1,0 +1,14 @@
+.cache/
+.turbo/
+.DS_Store
+
+.env*
+!.env.example
+
+dist/
+node_modules/
+
+# E2E test artifacts
+e2e/.auth/
+e2e-results/
+playwright-report/

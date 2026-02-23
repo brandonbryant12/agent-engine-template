@@ -1,0 +1,14 @@
+@import '../../../tools/tailwind/style.css';
+
+/* Ensure Tailwind scans shared UI components. */
+@source '../../../packages/ui';
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  code {
+    @apply rounded bg-muted px-1.5 py-0.5 text-xs;
+  }
+}

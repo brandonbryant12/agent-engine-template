@@ -1,0 +1,57 @@
+import js from '@eslint/js';
+import eslintConfigPrettier from 'eslint-config-prettier';
+import tseslint from 'typescript-eslint';
+import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginReact from 'eslint-plugin-react';
+import globals from 'globals';
+import { defineConfig } from 'eslint/config';
+import baseConfig from './base.js';
+
+export default defineConfig([
+  ...baseConfig,
+  js.configs.recommended,
+  eslintConfigPrettier,
+  ...tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
+  {
+    languageOptions: {
+      ...pluginReact.configs.flat.recommended.languageOptions,
+      globals: {
+        ...globals.serviceworker,
+        ...globals.browser,
+      },
+    },
+  },
+  {
+    plugins: {
+      'react-hooks': pluginReactHooks,
+    },
+    settings: { react: { version: 'detect' } },
+    rules: {
+      ...pluginReactHooks.configs.recommended.rules,
+      // React scope no longer necessary with new JSX transform.
+      'react/react-in-jsx-scope': 'off',
+      'react/prop-types': 'off',
+      'react/no-children-prop': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    files: ['**/*.tsx', '**/*.jsx'],
+    ignores: ['**/*.test.tsx', '**/*.test.jsx'],
+    rules: {
+      // Guardrail against monolithic React components.
+      'max-lines-per-function': [
+        'warn',
+        {
+          max: 275,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      complexity: ['warn', 30],
+      'max-depth': ['warn', 4],
+      'react/jsx-max-depth': ['warn', { max: 10 }],
+    },
+  },
+]);

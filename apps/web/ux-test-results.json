@@ -1,0 +1,90 @@
+{
+  "journey": "brand-creation",
+  "testStatus": "partially-completed",
+  "blockedBy": "Authentication - provided credentials (b@b.com) did not exist in database",
+  "frictionPoints": [
+    {
+      "step": "Login",
+      "issue": "Generic error message 'An unexpected error occurred' shown for invalid credentials - should say 'Invalid email or password'",
+      "severity": "high",
+      "recommendation": "Provide specific, user-friendly error messages for authentication failures"
+    },
+    {
+      "step": "Login",
+      "issue": "After login failure, user is redirected to landing page instead of staying on login form",
+      "severity": "high",
+      "recommendation": "Keep user on login page after failed attempt so they can retry"
+    },
+    {
+      "step": "Navigation",
+      "issue": "Accessing /brands while unauthenticated redirects to landing page without explanation",
+      "severity": "medium",
+      "recommendation": "Show login prompt or redirect to login with return URL to /brands"
+    },
+    {
+      "step": "Navigation",
+      "issue": "Brands link not visible in public navigation - requires authentication to discover",
+      "severity": "medium",
+      "recommendation": "Consider showing Brands in nav with login prompt, or clearer feature discovery on landing page"
+    }
+  ],
+  "delights": [
+    "Fast initial page load (1028ms)",
+    "Clear Sign In button visible on landing page",
+    "Clean login form with proper labels",
+    "Proper heading structure for screen readers (H1, H3s)",
+    "Professional visual design with consistent branding"
+  ],
+  "suggestions": [
+    "Improve error messaging for login failures - be specific about what went wrong",
+    "Keep users on the login form after failed attempts",
+    "Add redirect handling for protected routes - show why login is required",
+    "Consider adding feature preview for unauthenticated users",
+    "Provide test/demo credentials or a 'Try it free' flow for easier evaluation"
+  ],
+  "overallScore": 6,
+  "scoreExplanation": "Score reflects UX quality of tested flows only. Login form is well-designed but error handling needs improvement. Could not test brand creation due to auth blocker.",
+  "screenshots": {
+    "landing": "ux-screenshots/01-landing.png",
+    "loginPage": "ux-screenshots/02-login-page.png",
+    "loginFilled": "ux-screenshots/03-login-filled.png",
+    "afterLoginFailure": "ux-screenshots/05-brands-page.png"
+  },
+  "testedFlows": [
+    {
+      "flow": "Landing page load",
+      "result": "PASS",
+      "notes": "Fast load, clear CTAs"
+    },
+    {
+      "flow": "Navigate to Sign In",
+      "result": "PASS",
+      "notes": "Button clearly visible"
+    },
+    {
+      "flow": "Login form usability",
+      "result": "PASS",
+      "notes": "Clear labels, proper input types"
+    },
+    {
+      "flow": "Login error handling",
+      "result": "FAIL",
+      "notes": "Generic error, redirect instead of staying on page"
+    },
+    {
+      "flow": "Brand creation",
+      "result": "BLOCKED",
+      "notes": "Could not test - requires valid authentication"
+    }
+  ],
+  "testMetadata": {
+    "url": "http://localhost:8085",
+    "credentials": {
+      "email": "b@b.com",
+      "note": "User did not exist in database"
+    },
+    "browser": "Chromium (Playwright)",
+    "viewport": "1920x1080",
+    "timestamp": "2026-01-31T21:55:33.768Z"
+  }
+}

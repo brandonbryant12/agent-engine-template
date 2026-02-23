@@ -1,0 +1,133 @@
+# Template App - Minimal Docker Compose
+#
+# Starts:
+# - web
+# - server
+# - worker
+# - postgres
+# - redis
+# - schema migration job
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    ports:
+      - '8086:8080'
+    environment:
+      PUBLIC_SERVER_URL: 'http://localhost:3036'
+      PUBLIC_SERVER_API_PATH: '/api'
+    depends_on:
+      server:
+        condition: service_healthy
+
+  server:
+    build:
+      context: .
+      dockerfile: ./apps/server/Dockerfile
+    ports:
+      - '3036:3036'
+    environment:
+      NODE_ENV: production
+      SERVER_AUTH_SECRET: '${SERVER_AUTH_SECRET:-please_change_this_in_production}'
+      SERVER_POSTGRES_URL: 'postgres://postgres:postgres@db:5432/template_app'
+      SERVER_REDIS_URL: 'redis://redis:6379'
+      SERVER_HOST: '0.0.0.0'
+      SERVER_PORT: '3036'
+      PUBLIC_SERVER_URL: 'http://localhost:3036'
+      PUBLIC_SERVER_API_PATH: '/api'
+      PUBLIC_WEB_URL: 'http://localhost:8086'
+      CORS_ORIGINS: '*'
+      USE_MOCK_AI: '${USE_MOCK_AI:-true}'
+      GEMINI_API_KEY: '${GEMINI_API_KEY:-}'
+      STORAGE_PROVIDER: filesystem
+      STORAGE_PATH: /data/storage
+      STORAGE_BASE_URL: 'http://localhost:3036/storage'
+    volumes:
+      - server_storage:/data/storage
+    healthcheck:
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      test:
+        [
+          'CMD-SHELL',
+          'wget --quiet --spider http://0.0.0.0:3036/healthcheck || exit 1',
+        ]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./apps/worker/Dockerfile
+    environment:
+      NODE_ENV: production
+      SERVER_POSTGRES_URL: 'postgres://postgres:postgres@db:5432/template_app'
+      SERVER_REDIS_URL: 'redis://redis:6379'
+      PUBLIC_SERVER_URL: 'http://localhost:3036'
+      USE_MOCK_AI: '${USE_MOCK_AI:-true}'
+      GEMINI_API_KEY: '${GEMINI_API_KEY:-}'
+      STORAGE_PROVIDER: filesystem
+      STORAGE_PATH: /data/storage
+      STORAGE_BASE_URL: 'http://localhost:3036/storage'
+    volumes:
+      - server_storage:/data/storage
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  db:
+    image: docker.io/postgres:16
+    ports:
+      - '5432:5432'
+    command: ['postgres', '-c', 'wal_level=logical']
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: template_app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d template_app']
+
+  redis:
+    image: redis:7-alpine
+    command: ['redis-server', '--appendonly', 'yes']
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    restart: 'no'
+    build:
+      context: .
+      dockerfile: ./packages/db/Dockerfile
+    environment:
+      DB_POSTGRES_URL: 'postgres://postgres:postgres@db:5432/template_app'
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  server_storage:

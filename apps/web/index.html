@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+    </script>
+    <title>Template App</title>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <!-- Runtime env injection — populated by entrypoint in production -->
+    <script src="/env.js"></script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

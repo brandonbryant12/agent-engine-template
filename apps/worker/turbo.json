@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "env": [
+        "SERVER_*",
+        "PUBLIC_SERVER_URL",
+        "USE_MOCK_AI",
+        "GEMINI_API_KEY",
+        "STORAGE_*",
+        "S3_*"
+      ],
+      "inputs": ["$TURBO_DEFAULT$", ".env"],
+      "persistent": true
+    },
+    "build": {
+      "env": [
+        "SERVER_*",
+        "PUBLIC_SERVER_URL",
+        "USE_MOCK_AI",
+        "GEMINI_API_KEY",
+        "STORAGE_*",
+        "S3_*"
+      ],
+      "inputs": ["$TURBO_DEFAULT$", ".env"]
+    },
+    "start": {
+      "env": [
+        "SERVER_*",
+        "PUBLIC_SERVER_URL",
+        "USE_MOCK_AI",
+        "GEMINI_API_KEY",
+        "STORAGE_*",
+        "S3_*"
+      ],
+      "persistent": true
+    }
+  }
+}

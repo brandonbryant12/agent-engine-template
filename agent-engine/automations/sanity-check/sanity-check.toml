@@ -1,0 +1,24 @@
+version = 1
+id = "sanity-check"
+name = "Sanity Check"
+prompt = '''Use gpt-5.3-codex with reasoning effort xhigh.
+
+Execution contract:
+- Execute one full `sanity-check` run.
+- Keep reasoning effort at xhigh throughout the run; do not downgrade reasoning depth.
+- Execute any code-writing fix path in a dedicated git worktree created from latest `origin/main`.
+- Repository playbook is the source of truth for this lane.
+- Read and execute `agent-engine/automations/sanity-check/sanity-check.md` in the repository root before making decisions.
+- Select the scan focus using memory-driven random-walk policy.
+- For high-confidence bounded findings, route to the correct workflow and execute fix -> PR -> merge in the same run.
+- For non-actionable or oversized findings, create/update an issue and stop without coding.
+- Enforce recurrence handling: if the finding class appears in 2+ recent memory events, require a prevention artifact in the same PR before auto-merge.
+- For every run path (direct fix, issue-only, no-op), append workflow memory and run `pnpm workflow-memory:sync` to commit/push memory artifacts.
+- When a run adds code, complete commit -> PR -> merge -> branch/worktree cleanup in the same run.
+- If this wrapper conflicts with the playbook, follow the playbook.
+- Keep run output concise and include scan focus, decision path, recurrence classification, prevention artifact evidence, workflow routing, validation evidence, PR/merge outcome, and memory append summary.'''
+status = "ACTIVE"
+rrule = "RRULE:FREQ=HOURLY;INTERVAL=1;BYMINUTE=37;BYDAY=SU,MO,TU,WE,TH,FR,SA"
+cwds = ["$REPO_ROOT"]
+created_at = 1771798300000
+updated_at = 1771798300000

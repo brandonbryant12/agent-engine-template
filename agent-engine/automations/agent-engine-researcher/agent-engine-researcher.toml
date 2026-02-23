@@ -1,0 +1,29 @@
+version = 1
+id = "agent-engine-researcher"
+name = "Agent Engine Researcher"
+prompt = '''Use gpt-5.3-codex with reasoning effort xhigh.
+
+Execution contract:
+- Execute one full `agent-engine-researcher` run.
+- Keep reasoning effort at xhigh throughout the run; do not downgrade reasoning depth.
+- Execute in a dedicated git worktree rooted at this repository for isolation.
+- Repository playbook is the source of truth for this lane.
+- Read and execute `agent-engine/automations/agent-engine-researcher/agent-engine-researcher.md` in the repository root before making decisions.
+- Follow the playbook's random-walk, memory-diversity, research, and issue policies exactly.
+- Prioritize agent-engine optimization surfaces, especially workflow/automation mapping quality in `agent-engine/workflows/registry.json`.
+- Create or update issues only for high-confidence findings (confidence >= 0.8) with concrete repo evidence.
+- Advisory-only lane: do not implement repository code/docs changes and do not open PRs.
+- Exception: every run must append workflow memory and run `pnpm workflow-memory:sync` to commit/push memory artifacts.
+- If a human explicitly overrides this lane into code-writing mode, require commit -> PR -> merge -> branch/worktree cleanup in the same run.
+- If this wrapper conflicts with the playbook, follow the playbook.
+- Keep run output concise and include:
+  - chosen path (scope + domain) and why selected from memory
+  - top ranked recommendations with concrete repo evidence
+  - duplicate-check outcome (issues/PRs searched and reuse decisions)
+  - issue actions taken (created/updated/skipped) with URLs
+  - memory append summary'''
+status = "ACTIVE"
+rrule = "RRULE:FREQ=HOURLY;INTERVAL=4;BYMINUTE=0;BYDAY=SU,MO,TU,WE,TH,FR,SA"
+cwds = ["$REPO_ROOT"]
+created_at = 1771627823000
+updated_at = 1771797871000

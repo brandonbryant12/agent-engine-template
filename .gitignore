@@ -1,0 +1,27 @@
+node_modules/
+dist/
+out/
+
+.cache/
+.turbo/
+.vscode/
+
+.DS_Store
+
+.env*
+!.env.example
+
+.vercel
+
+.coverage
+
+# E2E test outputs
+apps/web/e2e-results/
+apps/web/playwright-report/
+apps/web/test-results/
+
+# CLI tool outputs
+tools/cli/.output/
+
+# Standards debate workspace
+agentic-harness-framework/scripts/standards-debate/workspace/

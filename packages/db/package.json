@@ -1,0 +1,87 @@
+{
+  "name": "@repo/db",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./dist/src/client.d.ts",
+      "default": "./src/client.ts"
+    },
+    "./schema": {
+      "types": "./dist/src/schema.d.ts",
+      "default": "./src/schema.ts"
+    },
+    "./effect": {
+      "types": "./dist/src/effect.d.ts",
+      "default": "./src/effect.ts"
+    },
+    "./errors": {
+      "types": "./dist/src/errors.d.ts",
+      "default": "./src/errors.ts"
+    },
+    "./runtime": {
+      "types": "./dist/src/runtime.d.ts",
+      "default": "./src/runtime.ts"
+    },
+    "./logging": {
+      "types": "./dist/src/logging.d.ts",
+      "default": "./src/logging.ts"
+    },
+    "./telemetry": {
+      "types": "./dist/src/telemetry.d.ts",
+      "default": "./src/telemetry.ts"
+    },
+    "./error-protocol": {
+      "types": "./dist/src/error-protocol.d.ts",
+      "default": "./src/error-protocol.ts"
+    },
+    "./migrate": {
+      "types": "./dist/src/migrate.d.ts",
+      "default": "./src/migrate.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc --build tsconfig.package.json",
+    "env:copy-example": "shx -- cp -n .env.example .env",
+    "env:remove": "shx -- rm -f .env",
+    "env:run": "dotenv --",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint --max-warnings=0",
+    "push": "pnpm env:run drizzle-kit push",
+    "migrate": "pnpm env:run drizzle-kit migrate",
+    "generate": "pnpm env:run drizzle-kit generate",
+    "studio": "pnpm env:run drizzle-kit studio",
+    "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@repo/prettier-config",
+  "dependencies": {
+    "@opentelemetry/api": "catalog:",
+    "@opentelemetry/exporter-trace-otlp-http": "catalog:",
+    "@opentelemetry/resources": "catalog:",
+    "@opentelemetry/sdk-trace-base": "catalog:",
+    "@opentelemetry/sdk-trace-node": "catalog:",
+    "@opentelemetry/semantic-conventions": "catalog:",
+    "drizzle-orm": "catalog:",
+    "effect": "^3.16.0",
+    "pg": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "dotenv-cli": "catalog:",
+    "drizzle-kit": "catalog:",
+    "eslint": "catalog:",
+    "shx": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:"
+  }
+}

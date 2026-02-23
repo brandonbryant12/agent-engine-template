@@ -1,0 +1,46 @@
+{
+  "compilerOptions": {
+    /** Effect Integration */
+    "plugins": [{ "name": "@effect/language-service" }],
+
+    /** Module System */
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+
+    /**
+     * From Tanstack Docs: enabling verbatimModuleSyntax can result in server
+     * bundles leaking into client bundles. It is recommended to keep this
+     * option disabled. More details:
+     * - https://github.com/TanStack/router/issues/3401
+     */
+    "verbatimModuleSyntax": false,
+
+    /** Strictness (Effect recommended) */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    /** JavaScript */
+    "allowJs": true,
+    "checkJs": true,
+
+    /** Build Performance */
+    "skipLibCheck": true,
+    "incremental": true,
+    "disableSourceOfProjectReferenceRedirect": true,
+    "tsBuildInfoFile": "${configDir}/.cache/tsbuildinfo.json",
+
+    /** Development & Debugging */
+    "sourceMap": true,
+
+    /** Transpile using Bundler (not tsc) */
+    "noEmit": true
+  },
+  "exclude": ["node_modules", "build", "dist"]
+}

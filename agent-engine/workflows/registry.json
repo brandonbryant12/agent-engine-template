@@ -1,0 +1,265 @@
+{
+  "version": 1,
+  "coreWorkflows": [
+    {
+      "id": "feature-delivery",
+      "name": "Feature Delivery",
+      "memoryKey": "Feature Delivery",
+      "summary": "Executes plan -> implement -> validate -> compound for vertical delivery slices.",
+      "primarySkills": [
+        "feature-delivery"
+      ],
+      "automationLanes": [
+        "ready-for-dev-executor",
+        "sanity-check"
+      ],
+      "docsPath": "agent-engine/workflows/feature-delivery/README.md"
+    },
+    {
+      "id": "architecture-adr-guard",
+      "name": "Architecture + ADR Guard",
+      "memoryKey": "Architecture + ADR Guard",
+      "summary": "Checks boundary/layer/runtime correctness and documents approved deviations.",
+      "primarySkills": [
+        "architecture-adr-guard"
+      ],
+      "automationLanes": [
+        "best-practice-researcher",
+        "ready-for-dev-executor",
+        "sanity-check"
+      ],
+      "docsPath": "agent-engine/workflows/architecture-adr-guard/README.md"
+    },
+    {
+      "id": "docs-knowledge-drift",
+      "name": "Docs + Knowledge Drift",
+      "memoryKey": "Docs + Knowledge Drift",
+      "summary": "Keeps workflow/standards docs aligned with actual repository behavior.",
+      "primarySkills": [
+        "docs-knowledge-drift"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/docs-knowledge-drift/README.md"
+    },
+    {
+      "id": "periodic-scans",
+      "name": "Periodic Scans",
+      "memoryKey": "Periodic Scans",
+      "summary": "Runs recurring quality scans and routes findings into closure workflows.",
+      "primarySkills": [
+        "periodic-scans"
+      ],
+      "automationLanes": [
+        "best-practice-researcher",
+        "agent-engine-researcher",
+        "product-vision-researcher",
+        "product-owner-reviewer",
+        "sanity-check"
+      ],
+      "docsPath": "agent-engine/workflows/periodic-scans/README.md"
+    },
+    {
+      "id": "self-improvement",
+      "name": "Self-Improvement",
+      "memoryKey": "Self-Improvement",
+      "summary": "Converts repeated failures into stronger guardrails, tests, docs, and automation rules.",
+      "primarySkills": [
+        "self-improvement"
+      ],
+      "automationLanes": [
+        "agent-engine-researcher",
+        "ready-for-dev-executor",
+        "sanity-check"
+      ],
+      "docsPath": "agent-engine/workflows/self-improvement/README.md"
+    }
+  ],
+  "utilitySkills": [
+    {
+      "id": "intake-triage",
+      "name": "Intake + Triage",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Scopes requests into slices, acceptance criteria, and risk flags before implementation.",
+      "skills": [
+        "intake-triage"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "architecture-adr-guard",
+        "self-improvement"
+      ],
+      "automationLanes": [
+        "ready-for-dev-executor",
+        "sanity-check"
+      ],
+      "docsPath": "agent-engine/workflows/intake-triage/README.md"
+    },
+    {
+      "id": "tanstack-vite",
+      "name": "TanStack + Vite Guardrails",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Applies frontend data/routing/forms/build guardrails for apps/web.",
+      "skills": [
+        "tanstack-vite"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "architecture-adr-guard",
+        "self-improvement"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/tanstack-vite/README.md"
+    },
+    {
+      "id": "pr-risk-review",
+      "name": "PR Risk Review",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Runs findings-first pre-merge risk review for regressions, safety, and contract drift.",
+      "skills": [
+        "pr-risk-review"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "architecture-adr-guard",
+        "self-improvement"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/pr-risk-review/README.md"
+    },
+    {
+      "id": "test-surface-steward",
+      "name": "Test Surface Steward",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Balances required test depth and reliability across backend, API, worker, and web.",
+      "skills": [
+        "test-surface-steward"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "periodic-scans",
+        "self-improvement"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/test-surface-steward/README.md"
+    },
+    {
+      "id": "security-dependency-hygiene",
+      "name": "Security + Dependency Hygiene",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Audits auth/data safety, secret handling, and dependency risk.",
+      "skills": [
+        "security-dependency-hygiene"
+      ],
+      "usedWithWorkflows": [
+        "periodic-scans",
+        "feature-delivery",
+        "self-improvement"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/security-dependency-hygiene/README.md"
+    },
+    {
+      "id": "performance-cost-guard",
+      "name": "Performance + Cost Guard",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Detects and prioritizes performance and cost regressions.",
+      "skills": [
+        "performance-cost-guard"
+      ],
+      "usedWithWorkflows": [
+        "periodic-scans",
+        "feature-delivery",
+        "self-improvement"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/performance-cost-guard/README.md"
+    },
+    {
+      "id": "release-incident-response",
+      "name": "Release + Incident Response",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Defines release go/no-go, canary/rollback thresholds, and incident handling loops.",
+      "skills": [
+        "release-incident-response"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "periodic-scans",
+        "self-improvement"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/release-incident-response/README.md"
+    },
+    {
+      "id": "quality-closure-loop",
+      "name": "Quality Closure Loop",
+      "memoryKey": "Uses workflow keys executed in-loop",
+      "summary": "Orchestrates scan -> triage -> fixes -> recurrence prevention -> closure.",
+      "skills": [
+        "quality-closure-loop"
+      ],
+      "usedWithWorkflows": [
+        "periodic-scans",
+        "feature-delivery",
+        "docs-knowledge-drift",
+        "self-improvement",
+        "architecture-adr-guard"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/quality-closure-loop/README.md"
+    },
+    {
+      "id": "code-simplifier",
+      "name": "Code Simplifier",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Improves readability while preserving behavior and guardrail compliance.",
+      "skills": [
+        "code-simplifier"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "docs-knowledge-drift",
+        "self-improvement",
+        "architecture-adr-guard"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/code-simplifier/README.md"
+    },
+    {
+      "id": "codebase-nav",
+      "name": "Codebase Navigation",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Locates canonical files and test targets quickly before implementation/review.",
+      "skills": [
+        "codebase-nav"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "architecture-adr-guard",
+        "docs-knowledge-drift"
+      ],
+      "automationLanes": [],
+      "docsPath": "agent-engine/workflows/codebase-nav/README.md"
+    },
+    {
+      "id": "debug-fix",
+      "name": "Debug + Fix",
+      "memoryKey": "Use parent workflow key",
+      "summary": "Runs a test-driven reproduce -> isolate -> fix -> validate loop.",
+      "skills": [
+        "debug-fix"
+      ],
+      "usedWithWorkflows": [
+        "feature-delivery",
+        "periodic-scans",
+        "self-improvement",
+        "architecture-adr-guard"
+      ],
+      "automationLanes": [
+        "ready-for-dev-executor",
+        "sanity-check"
+      ],
+      "docsPath": "agent-engine/workflows/debug-fix/README.md"
+    }
+  ]
+}

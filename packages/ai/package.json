@@ -1,0 +1,67 @@
+{
+  "name": "@repo/ai",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./errors": {
+      "types": "./dist/src/errors.d.ts",
+      "default": "./src/errors.ts"
+    },
+    "./llm": {
+      "types": "./dist/src/llm/index.d.ts",
+      "default": "./src/llm/index.ts"
+    },
+    "./tts": {
+      "types": "./dist/src/tts/index.d.ts",
+      "default": "./src/tts/index.ts"
+    },
+    "./chat": {
+      "types": "./dist/src/chat/index.d.ts",
+      "default": "./src/chat/index.ts"
+    },
+    "./testing": {
+      "types": "./dist/src/testing/index.d.ts",
+      "default": "./src/testing/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc --build tsconfig.package.json",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint --max-warnings=0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "vitest run --testPathPattern=live",
+    "test:live:llm": "vitest run src/__tests__/live/llm.live.test.ts",
+    "test:live:llm:smoke": "vitest run src/__tests__/live/llm.smoke.live.test.ts",
+    "test:live:tts": "vitest run src/__tests__/live/tts.live.test.ts",
+    "typecheck": "tsc --build --noEmit --emitDeclarationOnly false"
+  },
+  "prettier": "@repo/prettier-config",
+  "dependencies": {
+    "@ai-sdk/google": "catalog:",
+    "@ai-sdk/openai": "^1.0.0",
+    "@google/genai": "^1.40.0",
+    "@repo/db": "workspace:*",
+    "@repo/storage": "workspace:*",
+    "ai": "catalog:",
+    "effect": "catalog:"
+  },
+  "devDependencies": {
+    "@effect/vitest": "catalog:",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/testing": "workspace:*",
+    "@repo/prettier-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
