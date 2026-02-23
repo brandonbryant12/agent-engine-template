@@ -3,4 +3,6 @@
 
 export interface FileRoutesByFullPath {
   '/': unknown;
+  '/chat': unknown;
+  '/jobs': unknown;
 }

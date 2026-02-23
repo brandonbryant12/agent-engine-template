@@ -2,10 +2,11 @@
 
 ## Current Surface
 
-- auth gate (sign in / sign up)
-- thread list + thread selection
-- chat composer + message stream
-- run status panel
+- **App shell** — sidebar navigation (Dashboard, Chat, Jobs) + mobile drawer
+- **Auth gate** — sign-in / sign-up form
+- **Dashboard** — stat cards, quick action links, recent runs list
+- **Chat** — thread sidebar + message stream + composer
+- **Jobs** — run stats, create-run form, full run list with SSE updates
 
 ## Rules
 
