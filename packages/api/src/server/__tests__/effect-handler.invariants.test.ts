@@ -1,10 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import { handleTaggedError, type ErrorFactory } from '../effect-handler';
+import {
+  handleTaggedError,
+  STATUS_TO_ERROR_CODES,
+  type ErrorFactory,
+} from '../effect-handler';
 
 const createFactory = (code: string) => (options: unknown) => ({
   code,
   options,
 });
+
+const EXPECTED_FALLBACK_PRIORITY_BY_STATUS = {
+  400: 'BAD_REQUEST',
+  401: 'UNAUTHORIZED',
+  403: 'FORBIDDEN',
+  404: 'NOT_FOUND',
+  409: 'CONFLICT',
+  413: 'PAYLOAD_TOO_LARGE',
+  415: 'UNSUPPORTED_MEDIA_TYPE',
+  422: 'UNPROCESSABLE_CONTENT',
+  429: 'RATE_LIMITED',
+  502: 'SERVICE_UNAVAILABLE',
+  503: 'SERVICE_UNAVAILABLE',
+  504: 'SERVICE_UNAVAILABLE',
+} as const satisfies Readonly<Record<number, string>>;
 
 const captureThrown = (error: { _tag: string }, factories: ErrorFactory) => {
   try {
@@ -15,57 +34,58 @@ const captureThrown = (error: { _tag: string }, factories: ErrorFactory) => {
   }
 };
 
-class Fallback409Error extends Error {
-  readonly _tag = 'Fallback409Error';
-  static readonly httpStatus = 409;
-  static readonly httpCode = 'MISSING_DOMAIN_CODE';
-  static readonly httpMessage = 'Conflict fallback';
-  static readonly logLevel = 'silent' as const;
-}
+const createFallbackError = (status: number) =>
+  class FallbackError extends Error {
+    readonly _tag = `Fallback${status}Error`;
+    static readonly httpStatus = status;
+    static readonly httpCode = 'MISSING_DOMAIN_CODE';
+    static readonly httpMessage = `Fallback for ${status}`;
+    static readonly logLevel = 'silent' as const;
+  };
 
-class Fallback502Error extends Error {
-  readonly _tag = 'Fallback502Error';
-  static readonly httpStatus = 502;
-  static readonly httpCode = 'MISSING_DOMAIN_CODE';
-  static readonly httpMessage = 'Upstream unavailable';
-  static readonly logLevel = 'silent' as const;
-}
+const sortedStatusKeys = (record: Readonly<Record<number, unknown>>) =>
+  Object.keys(record)
+    .map(Number)
+    .sort((a, b) => a - b);
 
-class Fallback422Error extends Error {
-  readonly _tag = 'Fallback422Error';
-  static readonly httpStatus = 422;
-  static readonly httpCode = 'MISSING_DOMAIN_CODE';
-  static readonly httpMessage = 'Validation issue';
-  static readonly logLevel = 'silent' as const;
-}
+const createFactoriesForStatus = (status: number): ErrorFactory => {
+  const fallbackCodes = STATUS_TO_ERROR_CODES[status] ?? [];
+  return Object.fromEntries([
+    ...fallbackCodes.map((code) => [code, createFactory(code)] as const),
+    ['INTERNAL_ERROR', createFactory('INTERNAL_ERROR')] as const,
+  ]);
+};
+
+const fallbackCases = Object.entries(EXPECTED_FALLBACK_PRIORITY_BY_STATUS).map(
+  ([status, expectedCode]) => ({
+    status: Number(status),
+    expectedCode,
+  }),
+);
 
 describe('effect-handler fallback invariants', () => {
-  it('maps 409 fallback to CONFLICT', () => {
-    const thrown = captureThrown(new Fallback409Error(), {
-      CONFLICT: createFactory('CONFLICT'),
-      INTERNAL_ERROR: createFactory('INTERNAL_ERROR'),
-    });
-
-    expect(thrown).toMatchObject({ code: 'CONFLICT' });
+  it('requires explicit fallback expectations for every status mapping key', () => {
+    expect(
+      sortedStatusKeys(EXPECTED_FALLBACK_PRIORITY_BY_STATUS),
+    ).toStrictEqual(sortedStatusKeys(STATUS_TO_ERROR_CODES));
   });
 
-  it('prefers SERVICE_UNAVAILABLE over BAD_GATEWAY for 502 fallback', () => {
-    const thrown = captureThrown(new Fallback502Error(), {
-      SERVICE_UNAVAILABLE: createFactory('SERVICE_UNAVAILABLE'),
-      BAD_GATEWAY: createFactory('BAD_GATEWAY'),
-      INTERNAL_ERROR: createFactory('INTERNAL_ERROR'),
-    });
-
-    expect(thrown).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+  it('keeps first-priority fallback expectations aligned with status map ordering', () => {
+    for (const { status, expectedCode } of fallbackCases) {
+      expect(STATUS_TO_ERROR_CODES[status]?.[0]).toBe(expectedCode);
+    }
   });
 
-  it('prefers UNPROCESSABLE_CONTENT over INPUT_VALIDATION_FAILED for 422 fallback', () => {
-    const thrown = captureThrown(new Fallback422Error(), {
-      UNPROCESSABLE_CONTENT: createFactory('UNPROCESSABLE_CONTENT'),
-      INPUT_VALIDATION_FAILED: createFactory('INPUT_VALIDATION_FAILED'),
-      INTERNAL_ERROR: createFactory('INTERNAL_ERROR'),
-    });
+  it.each(fallbackCases)(
+    'maps $status fallback to $expectedCode',
+    ({ status, expectedCode }) => {
+      const FallbackError = createFallbackError(status);
+      const thrown = captureThrown(
+        new FallbackError(),
+        createFactoriesForStatus(status),
+      );
 
-    expect(thrown).toMatchObject({ code: 'UNPROCESSABLE_CONTENT' });
-  });
+      expect(thrown).toMatchObject({ code: expectedCode });
+    },
+  );
 });
