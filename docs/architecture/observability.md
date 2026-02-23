@@ -9,8 +9,8 @@
 ## Required Attributes
 
 - `request.id` for API spans
+- `enduser.id` for authenticated API spans
 - `queue.job.id` for queue transitions
-- user identifier when available
 
 ## Error Logging
 
