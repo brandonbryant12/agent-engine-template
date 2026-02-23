@@ -175,174 +175,174 @@
 
 @layer base {
   :root {
-    /* Midnight Studio - Light Theme */
-    /* Clean, contemporary with cool neutrals and electric accents */
-    --selected: 220 14% 92%;
-    --nav: 220 14% 97%;
-    --elevated: 220 10% 95%;
+    /* Agent Engine "Swarm" — Light Theme */
+    /* Warm amber + charcoal — bumblebee precision */
+    --selected: 40 14% 92%;
+    --nav: 40 12% 97%;
+    --elevated: 38 10% 95%;
 
-    /* Cool gray backgrounds */
-    --background: 220 14% 96%;
-    --foreground: 224 30% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 30% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 30% 10%;
+    /* Warm-tinted neutral backgrounds */
+    --background: 40 15% 96%;
+    --foreground: 30 20% 10%;
+    --card: 40 20% 99%;
+    --card-foreground: 30 20% 10%;
+    --popover: 40 20% 99%;
+    --popover-foreground: 30 20% 10%;
 
-    /* Primary: Electric indigo */
-    --primary: 238 70% 58%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Hive amber */
+    --primary: 45 96% 50%;
+    --primary-foreground: 30 30% 8%;
 
-    /* Secondary: Cool slate */
-    --secondary: 220 13% 91%;
-    --secondary-foreground: 224 20% 25%;
+    /* Secondary: Warm stone */
+    --secondary: 36 10% 90%;
+    --secondary-foreground: 30 12% 28%;
 
-    /* Muted: Soft cool gray */
-    --muted: 220 14% 93%;
-    --muted-foreground: 220 9% 46%;
+    /* Muted: Warm gray */
+    --muted: 36 10% 93%;
+    --muted-foreground: 30 6% 46%;
 
-    /* Accent: Soft violet wash */
-    --accent: 250 30% 93%;
-    --accent-foreground: 250 30% 30%;
+    /* Accent: Soft amber wash */
+    --accent: 42 25% 93%;
+    --accent-foreground: 36 20% 30%;
 
     /* Status colors */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --success: 160 60% 40%;
-    --success-foreground: 160 30% 98%;
-    --info: 210 70% 50%;
-    --info-foreground: 210 30% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 38 90% 10%;
+    --success: 152 60% 40%;
+    --success-foreground: 152 30% 98%;
+    --info: 200 70% 50%;
+    --info-foreground: 200 30% 98%;
+    --warning: 30 90% 48%;
+    --warning-foreground: 30 90% 10%;
 
-    /* Cool borders */
-    --border: 220 13% 87%;
-    --input: 220 13% 87%;
-    --ring: 238 70% 58%;
+    /* Borders */
+    --border: 36 12% 86%;
+    --input: 36 12% 86%;
+    --ring: 45 96% 50%;
 
-    --chart-1: 238 70% 58%;
-    --chart-2: 160 60% 45%;
+    --chart-1: 45 96% 50%;
+    --chart-2: 200 70% 50%;
     --chart-3: 330 65% 55%;
-    --chart-4: 38 92% 50%;
+    --chart-4: 152 60% 40%;
     --chart-5: 0 72% 55%;
 
-    --thumb-chat-1: 260 25% 95%;
-    --thumb-chat-2: 260 20% 92%;
-    --thumb-chat-line: 260 70% 50%;
+    --thumb-chat-1: 42 22% 95%;
+    --thumb-chat-2: 42 16% 92%;
+    --thumb-chat-line: 45 80% 50%;
 
-    --thumb-narration-1: 160 20% 95%;
-    --thumb-narration-2: 160 15% 92%;
-    --thumb-narration-line: 160 60% 45%;
+    --thumb-narration-1: 200 18% 95%;
+    --thumb-narration-2: 200 14% 92%;
+    --thumb-narration-line: 200 60% 45%;
 
-    --thumb-document-1: 210 20% 96%;
-    --thumb-document-2: 210 15% 93%;
-    --thumb-document-line: 210 50% 50%;
+    --thumb-document-1: 36 18% 96%;
+    --thumb-document-2: 36 14% 93%;
+    --thumb-document-line: 36 50% 45%;
 
-    --thumb-visual-1: 38 25% 96%;
-    --thumb-visual-2: 38 20% 93%;
-    --thumb-visual-line: 38 70% 50%;
+    --thumb-visual-1: 330 18% 96%;
+    --thumb-visual-2: 330 14% 93%;
+    --thumb-visual-line: 330 60% 50%;
 
-    --manuscript-shadow: 28 20% 92% / 0.4;
+    --manuscript-shadow: 36 18% 90% / 0.4;
     --radius: 0.625rem;
 
     --toast-error: 0 60% 95%;
-    --toast-info: 210 55% 95%;
-    --toast-loading: 220 14% 94%;
-    --toast-success: 160 45% 93%;
-    --toast-warning: 38 70% 93%;
+    --toast-info: 200 55% 95%;
+    --toast-loading: 38 12% 94%;
+    --toast-success: 152 45% 93%;
+    --toast-warning: 40 70% 93%;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 224 20% 25%;
-    --sidebar-primary: 238 70% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 94%;
-    --sidebar-accent-foreground: 224 20% 18%;
-    --sidebar-border: 220 13% 90%;
-    --sidebar-ring: 238 70% 58%;
+    --sidebar-background: 40 20% 99%;
+    --sidebar-foreground: 30 12% 28%;
+    --sidebar-primary: 45 96% 50%;
+    --sidebar-primary-foreground: 30 30% 8%;
+    --sidebar-accent: 40 14% 94%;
+    --sidebar-accent-foreground: 30 12% 18%;
+    --sidebar-border: 36 12% 89%;
+    --sidebar-ring: 45 96% 50%;
   }
 
   .dark {
-    /* Midnight Studio - Dark Theme */
-    /* Deep slate with electric indigo glow */
-    --selected: 224 20% 16%;
-    --nav: 224 25% 7%;
-    --elevated: 224 18% 12%;
+    /* Agent Engine "Swarm" — Dark Theme */
+    /* Deep warm charcoal with electric amber glow */
+    --selected: 30 10% 14%;
+    --nav: 28 12% 5%;
+    --elevated: 30 8% 11%;
 
-    --background: 224 25% 6%;
-    --foreground: 220 15% 93%;
-    --card: 224 20% 9%;
-    --card-foreground: 220 15% 93%;
-    --popover: 224 20% 9%;
-    --popover-foreground: 220 15% 93%;
+    --background: 28 14% 6%;
+    --foreground: 38 12% 92%;
+    --card: 30 10% 9%;
+    --card-foreground: 38 12% 92%;
+    --popover: 30 10% 9%;
+    --popover-foreground: 38 12% 92%;
 
-    /* Primary: Electric indigo - glows on dark */
-    --primary: 238 85% 70%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Vivid hive amber — glows on dark */
+    --primary: 48 96% 53%;
+    --primary-foreground: 30 30% 6%;
 
-    /* Secondary: Deep slate */
-    --secondary: 224 15% 14%;
-    --secondary-foreground: 220 12% 80%;
+    /* Secondary: Deep warm charcoal */
+    --secondary: 30 8% 13%;
+    --secondary-foreground: 36 8% 78%;
 
-    /* Muted: Dark slate */
-    --muted: 224 12% 14%;
-    --muted-foreground: 220 8% 52%;
+    /* Muted: Warm dark gray */
+    --muted: 28 6% 13%;
+    --muted-foreground: 30 5% 48%;
 
-    /* Accent: Deep violet tint */
-    --accent: 250 20% 16%;
-    --accent-foreground: 250 25% 75%;
+    /* Accent: Deep amber tint */
+    --accent: 38 12% 14%;
+    --accent-foreground: 42 18% 70%;
 
-    /* Status colors - vibrant against dark */
+    /* Status colors — vibrant against dark */
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --success: 160 60% 45%;
-    --success-foreground: 160 30% 98%;
-    --info: 210 80% 56%;
-    --info-foreground: 210 30% 98%;
-    --warning: 38 92% 55%;
-    --warning-foreground: 38 95% 10%;
+    --success: 152 60% 45%;
+    --success-foreground: 152 30% 98%;
+    --info: 200 80% 56%;
+    --info-foreground: 200 30% 98%;
+    --warning: 30 90% 52%;
+    --warning-foreground: 30 95% 8%;
 
-    --border: 224 15% 16%;
-    --input: 224 15% 16%;
-    --ring: 238 80% 66%;
+    --border: 30 8% 15%;
+    --input: 30 8% 15%;
+    --ring: 48 92% 50%;
 
-    --chart-1: 238 80% 66%;
-    --chart-2: 160 60% 50%;
+    --chart-1: 48 96% 53%;
+    --chart-2: 200 70% 50%;
     --chart-3: 330 70% 60%;
-    --chart-4: 38 92% 55%;
+    --chart-4: 152 60% 45%;
     --chart-5: 0 72% 60%;
 
-    --thumb-chat-1: 260 20% 12%;
-    --thumb-chat-2: 260 15% 9%;
-    --thumb-chat-line: 260 70% 50%;
+    --thumb-chat-1: 40 12% 11%;
+    --thumb-chat-2: 40 8% 8%;
+    --thumb-chat-line: 45 80% 50%;
 
-    --thumb-narration-1: 160 15% 12%;
-    --thumb-narration-2: 160 10% 9%;
-    --thumb-narration-line: 160 60% 45%;
+    --thumb-narration-1: 200 12% 11%;
+    --thumb-narration-2: 200 8% 8%;
+    --thumb-narration-line: 200 60% 45%;
 
-    --thumb-document-1: 210 15% 12%;
-    --thumb-document-2: 210 10% 9%;
-    --thumb-document-line: 210 50% 50%;
+    --thumb-document-1: 36 12% 11%;
+    --thumb-document-2: 36 8% 8%;
+    --thumb-document-line: 36 50% 45%;
 
-    --thumb-visual-1: 38 15% 12%;
-    --thumb-visual-2: 38 10% 9%;
-    --thumb-visual-line: 38 70% 50%;
+    --thumb-visual-1: 330 12% 11%;
+    --thumb-visual-2: 330 8% 8%;
+    --thumb-visual-line: 330 60% 50%;
 
-    --manuscript-shadow: 28 20% 10% / 0.5;
+    --manuscript-shadow: 36 12% 6% / 0.5;
 
-    --toast-error: 0 55% 10%;
-    --toast-info: 210 55% 10%;
-    --toast-loading: 224 12% 10%;
-    --toast-success: 160 45% 10%;
-    --toast-warning: 38 65% 12%;
+    --toast-error: 0 55% 9%;
+    --toast-info: 200 50% 9%;
+    --toast-loading: 30 6% 9%;
+    --toast-success: 152 40% 9%;
+    --toast-warning: 40 60% 11%;
 
-    --sidebar-background: 224 22% 7%;
-    --sidebar-foreground: 220 14% 88%;
-    --sidebar-primary: 238 80% 66%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 18% 12%;
-    --sidebar-accent-foreground: 220 12% 80%;
-    --sidebar-border: 224 15% 14%;
-    --sidebar-ring: 238 80% 66%;
+    --sidebar-background: 28 12% 6%;
+    --sidebar-foreground: 36 10% 86%;
+    --sidebar-primary: 48 96% 53%;
+    --sidebar-primary-foreground: 30 30% 6%;
+    --sidebar-accent: 30 8% 11%;
+    --sidebar-accent-foreground: 36 8% 78%;
+    --sidebar-border: 30 8% 13%;
+    --sidebar-ring: 48 92% 50%;
   }
 }
 
@@ -376,14 +376,14 @@
     font-feature-settings: 'cv01', 'cv02';
   }
 
-  /* Subtle noise texture overlay — adds depth to flat backgrounds */
+  /* Subtle noise texture overlay — adds grain and warmth */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 9999;
-    opacity: 0.018;
+    opacity: 0.022;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-repeat: repeat;
@@ -391,10 +391,10 @@
   }
 
   .dark body::before {
-    opacity: 0.03;
+    opacity: 0.04;
   }
 
-  /* Ambient radial glow — soft studio light effect */
+  /* Ambient radial glow — warm amber wash from top */
   body::after {
     content: '';
     position: fixed;
@@ -407,7 +407,7 @@
     z-index: 0;
     background: radial-gradient(
       ellipse at center,
-      hsl(var(--primary) / 0.04) 0%,
+      hsl(var(--primary) / 0.035) 0%,
       transparent 70%
     );
   }
@@ -415,8 +415,8 @@
   .dark body::after {
     background: radial-gradient(
       ellipse at center,
-      hsl(var(--primary) / 0.06) 0%,
-      transparent 65%
+      hsl(var(--primary) / 0.07) 0%,
+      transparent 60%
     );
   }
 

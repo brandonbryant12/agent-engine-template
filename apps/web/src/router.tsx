@@ -7,6 +7,7 @@ import { Badge } from '@repo/ui/components/badge';
 import { Button } from '@repo/ui/components/button';
 import { Input } from '@repo/ui/components/input';
 import { Toaster } from '@repo/ui/components/sonner';
+import { Spinner } from '@repo/ui/components/spinner';
 import { Textarea } from '@repo/ui/components/textarea';
 import { QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -56,12 +57,39 @@ const homeRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([homeRoute]);
 
+/* ─── Shared Logo ─── */
+
+function EngineIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path d="M14 4 L6 17 h8 L10 28 L26 15 h-8 L22 4 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+function LogoMark() {
+  return (
+    <div className="logo">
+      <div className="logo-icon">
+        <EngineIcon />
+      </div>
+      <span className="logo-text">Agent Engine</span>
+    </div>
+  );
+}
+
+/* ─── Layout & Pages ─── */
+
 function RootLayout() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto max-w-7xl p-4 md:p-6">
-        <Outlet />
-      </main>
+      <Outlet />
       <Toaster position="bottom-right" />
     </div>
   );
@@ -72,8 +100,11 @@ function HomePage() {
 
   if (isPending) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading session...</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <LogoMark />
+          <Spinner />
+        </div>
       </div>
     );
   }
@@ -90,6 +121,8 @@ function HomePage() {
     />
   );
 }
+
+/* ─── Auth ─── */
 
 function AuthGate() {
   const [mode, setMode] = useState<AuthMode>('signin');
@@ -143,54 +176,99 @@ function AuthGate() {
   }, [email, mode, password]);
 
   return (
-    <section className="mx-auto flex min-h-[70vh] w-full max-w-md items-center">
-      <div className="w-full space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <Badge variant="info">AI Chat MVP</Badge>
-        <h1 className="text-2xl font-semibold">Agent Engine Template Chat</h1>
-        <p className="text-sm text-muted-foreground">
-          {mode === 'signin'
-            ? 'Sign in to continue your chat threads.'
-            : 'Create an account to start chatting.'}
-        </p>
-
-        <div className="space-y-3">
-          <Input
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            aria-label="Email"
-          />
-          <Input
-            type="password"
-            placeholder="Your password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            aria-label="Password"
-          />
-          <Button onClick={() => void onSubmit()} disabled={isSubmitting}>
-            {isSubmitting
-              ? mode === 'signin'
-                ? 'Signing in...'
-                : 'Creating account...'
-              : mode === 'signin'
-                ? 'Sign In'
-                : 'Create Account'}
-          </Button>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="auth-card animate-fade-in-up">
+        <div className="auth-header">
+          <div className="mb-6 flex justify-center">
+            <LogoMark />
+          </div>
+          <h1 className="page-title">
+            {mode === 'signin' ? 'Welcome back' : 'Get started'}
+          </h1>
+          <p className="text-body mt-2">
+            {mode === 'signin'
+              ? 'Sign in to continue to your workspace.'
+              : 'Create an account to start building.'}
+          </p>
         </div>
 
-        <Button
-          variant="ghost"
-          onClick={() => setMode((prev) => (prev === 'signin' ? 'signup' : 'signin'))}
-        >
-          {mode === 'signin'
-            ? 'Need an account? Create one'
-            : 'Already have an account? Sign in'}
-        </Button>
+        <div className="card-padded">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label
+                className="text-sm font-medium text-foreground"
+                htmlFor="auth-email"
+              >
+                Email
+              </label>
+              <Input
+                id="auth-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void onSubmit();
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <label
+                className="text-sm font-medium text-foreground"
+                htmlFor="auth-password"
+              >
+                Password
+              </label>
+              <Input
+                id="auth-password"
+                type="password"
+                placeholder="Your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    void onSubmit();
+                  }
+                }}
+              />
+            </div>
+            <Button
+              className="w-full"
+              onClick={() => void onSubmit()}
+              disabled={isSubmitting}
+            >
+              {isSubmitting
+                ? mode === 'signin'
+                  ? 'Signing in...'
+                  : 'Creating account...'
+                : mode === 'signin'
+                  ? 'Sign In'
+                  : 'Create Account'}
+            </Button>
+          </div>
+        </div>
+
+        <div className="auth-footer">
+          <button
+            type="button"
+            className="text-link"
+            onClick={() => setMode((prev) => (prev === 'signin' ? 'signup' : 'signin'))}
+          >
+            {mode === 'signin'
+              ? 'Need an account? Create one'
+              : 'Already have an account? Sign in'}
+          </button>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
+
+/* ─── Chat Workspace ─── */
 
 // eslint-disable-next-line max-lines-per-function
 function ChatWorkspace({
@@ -404,92 +482,124 @@ function ChatWorkspace({
   }, []);
 
   return (
-    <section className="space-y-4">
-      <header className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card p-4">
-        <div>
-          <Badge variant="success">Authenticated</Badge>
-          <h1 className="mt-1 text-2xl font-semibold">AI Chat MVP</h1>
-          <p className="text-sm text-muted-foreground">{userEmail}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={createThread}>
-            New Thread
-          </Button>
-          <Button variant="ghost" onClick={() => void onSignOut()}>
-            Sign Out
-          </Button>
+    <div className="flex h-screen flex-col">
+      {/* ── Sticky Header ── */}
+      <header className="header shrink-0">
+        <div className="header-content">
+          <LogoMark />
+          <div className="flex items-center gap-3">
+            <span className="text-meta hidden sm:inline">{userEmail}</span>
+            <Button variant="outline" size="sm" onClick={createThread}>
+              New Thread
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => void onSignOut()}>
+              Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)_320px]">
-        <aside className="space-y-2 rounded-2xl border border-border bg-card p-3">
-          <p className="text-sm font-medium">Previous Threads</p>
-
-          {threadsWithActiveMessages.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No threads yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {threadsWithActiveMessages.map((thread) => (
-                <li key={thread.id}>
-                  <button
-                    type="button"
-                    onClick={() => selectThread(thread.id)}
-                    className={
-                      thread.id === activeThreadId
-                        ? 'w-full rounded-lg border border-primary/40 bg-primary/10 p-2 text-left'
-                        : 'w-full rounded-lg border border-border p-2 text-left hover:bg-muted'
-                    }
-                  >
-                    <p className="truncate text-sm font-medium">{thread.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {thread.messages.length === 0
-                        ? 'No messages yet'
-                        : extractMessageText(
-                            thread.messages[thread.messages.length - 1]!,
-                          )}
-                    </p>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </aside>
-
-        <div className="flex min-h-[560px] flex-col rounded-2xl border border-border bg-card">
-          <div className="flex-1 space-y-3 overflow-y-auto p-4">
-            {messages.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
-                Start a new conversation in this thread.
+      {/* ── Workspace ── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Thread Sidebar */}
+        <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card/50 lg:flex">
+          <div className="p-3 pb-0">
+            <p className="page-eyebrow mb-0 px-1">Threads</p>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3">
+            {threadsWithActiveMessages.length === 0 ? (
+              <div className="empty-state rounded-xl py-6">
+                <p className="text-sm text-muted-foreground">No threads yet.</p>
               </div>
             ) : (
-              messages.map((message) => (
-                <article
-                  key={message.id}
-                  className={
-                    message.role === 'user'
-                      ? 'ml-auto max-w-[85%] rounded-xl bg-primary px-4 py-3 text-primary-foreground'
-                      : 'mr-auto max-w-[85%] rounded-xl border border-border bg-muted/40 px-4 py-3'
-                  }
-                >
-                  <p className="mb-1 text-xs uppercase tracking-wide opacity-70">
-                    {message.role}
+              <ul className="space-y-1">
+                {threadsWithActiveMessages.map((thread, index) => (
+                  <li
+                    key={thread.id}
+                    className={`animate-fade-in stagger-${String(Math.min(index + 1, 6))}`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => selectThread(thread.id)}
+                      className={
+                        thread.id === activeThreadId
+                          ? 'w-full rounded-xl border border-primary/30 bg-primary/5 p-3 text-left transition-all duration-200'
+                          : 'w-full rounded-xl border border-transparent p-3 text-left transition-all duration-200 hover:bg-muted/50'
+                      }
+                    >
+                      <p className="truncate text-sm font-medium text-foreground">
+                        {thread.title}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {thread.messages.length === 0
+                          ? 'No messages yet'
+                          : extractMessageText(
+                              thread.messages[thread.messages.length - 1]!,
+                            )}
+                      </p>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </aside>
+
+        {/* Chat Area */}
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+            {messages.length === 0 ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="empty-state-lg w-full max-w-md animate-fade-in-up">
+                  <div className="empty-state-icon">
+                    <EngineIcon size={28} />
+                  </div>
+                  <p className="empty-state-title">Start a conversation</p>
+                  <p className="empty-state-description">
+                    Send a message or queue a background run to get started.
                   </p>
-                  <p className="whitespace-pre-wrap text-sm">
-                    {extractMessageText(message)}
-                  </p>
-                </article>
-              ))
+                </div>
+              </div>
+            ) : (
+              <div className="mx-auto max-w-3xl space-y-4">
+                {messages.map((message) => (
+                  <article
+                    key={message.id}
+                    className={
+                      message.role === 'user'
+                        ? 'ml-auto max-w-[80%] animate-fade-in'
+                        : 'mr-auto max-w-[80%] animate-fade-in'
+                    }
+                  >
+                    <p className="text-meta mb-1.5 px-1">
+                      {message.role === 'user' ? 'You' : 'Assistant'}
+                    </p>
+                    <div
+                      className={
+                        message.role === 'user'
+                          ? 'rounded-2xl rounded-br-md bg-primary px-4 py-3 text-primary-foreground'
+                          : 'card rounded-2xl rounded-bl-md px-4 py-3'
+                      }
+                    >
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {extractMessageText(message)}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
             )}
           </div>
 
-          <div className="border-t border-border p-4">
-            {error ? (
-              <p className="mb-2 text-sm text-destructive">
-                {error.message || 'Streaming failed.'}
-              </p>
-            ) : null}
+          {/* Composer */}
+          <div className="shrink-0 border-t border-border bg-card/80 p-4 backdrop-blur-sm">
+            <div className="mx-auto max-w-3xl">
+              {error ? (
+                <p className="mb-2 text-sm text-destructive">
+                  {error.message || 'Streaming failed.'}
+                </p>
+              ) : null}
 
-            <div className="space-y-2">
               <Textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
@@ -500,26 +610,28 @@ function ChatWorkspace({
                   }
                 }}
                 placeholder="Ask anything..."
-                className="min-h-[96px]"
+                className="min-h-[80px] resize-none"
                 aria-label="Chat message"
               />
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-muted-foreground">
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-meta">
                   {isStreaming
-                    ? 'Streaming response...'
-                    : 'Enter sends chat. Background runs execute asynchronously.'}
+                    ? 'Streaming...'
+                    : 'Enter to send \u00b7 Shift+Enter for newline'}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => void onQueueRun()}
                     disabled={
                       isQueueingRun || isStreaming || draft.trim().length === 0
                     }
                   >
-                    {isQueueingRun ? 'Queueing...' : 'Run in Background'}
+                    {isQueueingRun ? 'Queueing...' : 'Background Run'}
                   </Button>
                   <Button
+                    size="sm"
                     onClick={onSend}
                     disabled={isStreaming || draft.trim().length === 0}
                   >
@@ -531,65 +643,98 @@ function ChatWorkspace({
           </div>
         </div>
 
-        <aside className="space-y-3 rounded-2xl border border-border bg-card p-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Background Runs</p>
-            <Badge variant="info">{activeRuns} active</Badge>
+        {/* Background Runs Sidebar */}
+        <aside className="hidden w-80 shrink-0 flex-col border-l border-border bg-card/50 xl:flex">
+          <div className="flex items-center justify-between p-3 px-4 pb-0">
+            <p className="page-eyebrow mb-0">Runs</p>
+            <Badge variant="info" className="text-[10px]">
+              {activeRuns} active
+            </Badge>
           </div>
-
-          {runsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading runs...</p>
-          ) : runs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Queue a run from the composer to test jobs + SSE.
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {runs.map((run) => (
-                <li
-                  key={run.id}
-                  className="rounded-xl border border-border bg-background/50 p-3"
-                >
-                  <div className="mb-1 flex items-center justify-between gap-2">
-                    <p className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                      {formatRunStatus(run.status)}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {formatTimestamp(run.lastEventAt ?? run.updatedAt)}
-                    </p>
-                  </div>
-
-                  <p className="text-sm break-words">{run.prompt}</p>
-
-                  {run.status === 'processing' && run.progress !== null ? (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      {run.progressMessage ?? 'Processing'} ({run.progress}%)
-                    </p>
-                  ) : null}
-
-                  {run.status === 'completed' && run.result ? (
-                    <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                      <p className="font-medium text-foreground">
-                        {run.result.title}
-                      </p>
-                      <p className="break-words">{run.result.summary}</p>
+          <div className="flex-1 overflow-y-auto p-3">
+            {runsLoading ? (
+              <div className="loading-center">
+                <Spinner size="sm" />
+              </div>
+            ) : runs.length === 0 ? (
+              <div className="empty-state rounded-xl py-6 px-3">
+                <p className="text-xs text-muted-foreground">
+                  Queue a run from the composer.
+                </p>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {runs.map((run, index) => (
+                  <li
+                    key={run.id}
+                    className={`card-interactive p-3 animate-fade-in stagger-${String(Math.min(index + 1, 6))}`}
+                  >
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <Badge
+                        variant={
+                          run.status === 'completed'
+                            ? 'success'
+                            : run.status === 'failed'
+                              ? 'error'
+                              : run.status === 'processing'
+                                ? 'purple'
+                                : 'info'
+                        }
+                        className="text-[10px]"
+                      >
+                        {formatRunStatus(run.status)}
+                      </Badge>
+                      <span className="text-meta">
+                        {formatTimestamp(run.lastEventAt ?? run.updatedAt)}
+                      </span>
                     </div>
-                  ) : null}
 
-                  {run.status === 'failed' ? (
-                    <p className="mt-2 text-xs text-destructive">
-                      {run.error ?? 'Run failed.'}
+                    <p className="text-sm break-words text-foreground/90">
+                      {run.prompt}
                     </p>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
+
+                    {run.status === 'processing' && run.progress !== null ? (
+                      <div className="mt-2">
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all duration-500"
+                            style={{ width: `${String(run.progress)}%` }}
+                          />
+                        </div>
+                        <p className="mt-1 text-meta">
+                          {run.progressMessage ?? 'Processing'} ({run.progress}%)
+                        </p>
+                      </div>
+                    ) : null}
+
+                    {run.status === 'completed' && run.result ? (
+                      <div className="mt-2 space-y-1 rounded-lg bg-success/5 border border-success/10 p-2">
+                        <p className="text-sm font-medium text-foreground">
+                          {run.result.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground break-words">
+                          {run.result.summary}
+                        </p>
+                      </div>
+                    ) : null}
+
+                    {run.status === 'failed' ? (
+                      <p className="mt-2 text-xs text-destructive">
+                        {run.error ?? 'Run failed.'}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </aside>
       </div>
-    </section>
+    </div>
   );
 }
+
+/* ─── Utilities ─── */
 
 const readErrorMessage = (error: unknown, fallback: string): string => {
   if (error && typeof error === 'object' && 'message' in error) {
