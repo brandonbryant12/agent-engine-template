@@ -15,7 +15,9 @@ const USAGE = `Usage:
     --min-score 0.35 \\
     [--month YYYY-MM] \\
     [--has-scenario] \\
-    [--scenario-skill <skill-name>]
+    [--scenario-skill <skill-name>] \\
+    [--scan-scope <scope>] \\
+    [--scan-domain <domain>]
 
 Scoring (0-1):
   score = 0.4 * importance + 0.3 * recency + 0.2 * tagMatch + 0.1 * confidence
@@ -106,6 +108,25 @@ function parseMinScore(raw) {
   throw new Error(`Invalid --min-score value: ${raw}`);
 }
 
+function parseFilterValue(raw, flagName) {
+  if (raw === undefined || raw === null) return "";
+  const normalized = String(raw).trim().toLowerCase();
+  if (!normalized) {
+    throw new Error(`Invalid ${flagName} value: expected a non-empty string.`);
+  }
+  return normalized;
+}
+
+function readScanField(row, key) {
+  if (!row || typeof row !== "object") return null;
+  const scan = row.scan;
+  if (!scan || typeof scan !== "object") return null;
+  const value = scan[key];
+  if (typeof value !== "string") return null;
+  const normalized = value.trim().toLowerCase();
+  return normalized || null;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
@@ -130,6 +151,8 @@ async function main() {
 
   const hasScenario = args.has_scenario === "true";
   const scenarioSkill = args.scenario_skill ? args.scenario_skill.trim() : "";
+  const scanScope = parseFilterValue(args.scan_scope, "--scan-scope");
+  const scanDomain = parseFilterValue(args.scan_domain, "--scan-domain");
 
   const scored = index
     .filter((row) => {
@@ -138,9 +161,18 @@ async function main() {
       if (month && row.month !== month) return false;
       if (hasScenario && !row.hasScenario) return false;
       if (scenarioSkill && row.scenarioSkill !== scenarioSkill) return false;
+      if (scanScope && readScanField(row, "scope") !== scanScope) return false;
+      if (scanDomain && readScanField(row, "domain") !== scanDomain) return false;
       return true;
     })
     .map((row) => {
+      const scan = {
+        walkMode: readScanField(row, "walkMode"),
+        scope: readScanField(row, "scope"),
+        domain: readScanField(row, "domain"),
+        signal: readScanField(row, "signal"),
+      };
+      const hasScanMetadata = scan.walkMode || scan.scope || scan.domain || scan.signal;
       const importance = clamp01(parseOptionalNumber(row.importance) ?? 0);
       const confidence = clamp01(parseOptionalNumber(row.confidence) ?? 0);
       const recency = clamp01(
@@ -163,6 +195,7 @@ async function main() {
           tagMatch,
           confidence,
         },
+        ...(hasScanMetadata ? { scan } : {}),
         eventFile: row.eventFile,
       };
     })
@@ -177,6 +210,8 @@ async function main() {
       month: month || null,
       minScore,
       limit,
+      scanScope: scanScope || null,
+      scanDomain: scanDomain || null,
     },
     results: scored,
   };

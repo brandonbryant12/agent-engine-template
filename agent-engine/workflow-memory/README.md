@@ -84,6 +84,15 @@ standards.
   - `importance` (0-1, higher = more critical or reusable)
   - `recency` (0-1, higher = more recent; override computed recency if needed)
   - `confidence` (0-1, higher = more reliable evidence)
+  - `scan` (optional object for structured random-walk metadata):
+    - `walkMode`
+    - `scope`
+    - `domain`
+    - `signal`
+
+For `workflow: "Periodic Scans"` entries tagged `best-practice-researcher`, `scan`
+metadata is required and must be provided through
+`--scan-walk-mode`, `--scan-scope`, `--scan-domain`, and `--scan-signal`.
 
 ## Index (Fast Retrieval)
 
@@ -102,6 +111,7 @@ Each index row contains:
 - `importance` (optional 0-1)
 - `recency` (optional 0-1)
 - `confidence` (optional 0-1)
+- `scan` (optional object mirroring event `scan` metadata)
 - `eventFile`
 
 ## Summaries (Human Compression)
@@ -187,6 +197,26 @@ pnpm workflow-memory:add-entry \
 This appends an event to the current month and updates `index.json`.
 It also regenerates `summaries/YYYY-MM.md` for the event month.
 
+Periodic scan events can be logged with explicit random-walk metadata:
+
+```bash
+pnpm workflow-memory:add-entry \
+  --workflow "Periodic Scans" \
+  --title "best-practice-researcher: meso scan (api-contracts-orpc-hono)" \
+  --trigger "Scheduled random-walk run" \
+  --finding "Opened issue #123 after protocol contract drift check" \
+  --evidence "https://github.com/<org>/<repo>/issues/123" \
+  --follow-up "Await issue-evaluator label decision" \
+  --owner "@automation" \
+  --status "open" \
+  --severity "medium" \
+  --tags best-practice-researcher,periodic-scans \
+  --scan-walk-mode weighted-random \
+  --scan-scope meso \
+  --scan-domain api-contracts-orpc-hono \
+  --scan-signal 4
+```
+
 For automation runs, persist the append to git immediately:
 
 ```bash
@@ -241,6 +271,12 @@ Sample output (truncated):
         "docs",
         "workflow-memory"
       ],
+      "scan": {
+        "walkMode": "weighted-random",
+        "scope": "meso",
+        "domain": "api-contracts-orpc-hono",
+        "signal": "4"
+      },
       "score": 0.86,
       "breakdown": {
         "importance": 0.8,
@@ -252,6 +288,17 @@ Sample output (truncated):
     }
   ]
 }
+```
+
+Filter retrieval by structured random-walk metadata:
+
+```bash
+pnpm workflow-memory:retrieve \
+  --workflow "Periodic Scans" \
+  --scan-scope meso \
+  --scan-domain api-contracts-orpc-hono \
+  --limit 8 \
+  --min-score 0
 ```
 
 ## Coverage Audit
