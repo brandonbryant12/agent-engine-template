@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "id": "2026-02-23-periodic-scans-best-practice-researcher-baseline-macro-scan-repo-tooling-and-pi",
+    "date": "2026-02-23",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "best-practice-researcher: baseline macro scan (repo-tooling-and-pipeline-config)",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "best-practice-researcher",
+      "repo-tooling-and-pipeline-config",
+      "memory",
+      "workflow-memory",
+      "guardrail",
+      "memory-form:external",
+      "memory-form:parametric",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-function:working",
+      "memory-dynamics:retrieve",
+      "memory-dynamics:write",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.86,
+    "recency": 1,
+    "confidence": 0.88,
+    "eventFile": "events/2026-02.jsonl"
+  }
+]
