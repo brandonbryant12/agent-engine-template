@@ -16,3 +16,15 @@ Per-request context (current user, request id) is added at handler execution tim
 - Do not instantiate new runtimes inside handlers.
 - Keep runtime layer graph deterministic.
 - Inject test layers in integration tests.
+
+## Layer Constructor Policy
+
+- `Layer.succeed` is for pure object literals only.
+- `Layer.sync` is for class/factory instantiation functions.
+- `Layer.effect` is for constructors that depend on other Effect services.
+
+## Guardrail Enforcement
+
+- Invariant guard file:
+  `packages/testing/src/__tests__/effect-layer-constructor.invariants.test.ts`
+- Invocation path: `pnpm test:invariants` (wired in root `package.json`)

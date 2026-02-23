@@ -76,6 +76,17 @@ Required for all agent-authored backend changes.
 | `503` | `SERVICE_UNAVAILABLE` |
 | `504` | `SERVICE_UNAVAILABLE` |
 
+### Effect Layer Constructor Invariants
+<!-- enforced-by: invariant-test -->
+
+**File:** `packages/testing/src/__tests__/effect-layer-constructor.invariants.test.ts`
+
+| Rule | What It Prevents |
+|---|---|
+| `Layer.succeed` in non-test runtime files must receive object literal service values | Side-effectful construction paths hidden behind `Layer.succeed` |
+| `Layer.sync` in non-test runtime files must receive class/factory-style constructor functions | Misusing sync layers for prebuilt values or plain objects |
+| `Layer.effect` in non-test runtime files must use Effect-backed constructor expressions or identifiers bound to `Effect.*` | Losing dependency-aware initialization semantics in runtime layer graphs |
+
 ### Invariant Docs Sync
 <!-- enforced-by: invariant-test -->
 
