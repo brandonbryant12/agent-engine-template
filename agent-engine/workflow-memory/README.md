@@ -63,6 +63,31 @@ In short: `events` capture incidents, `index` makes them queryable,
 `summaries` compress recurring signal, and `guardrails` preserve long-term
 standards.
 
+## LLM Trace Capture
+
+Events can include an optional `trace` field that captures raw LLM interaction
+data for future prompt optimization (GAPA/DSPy). See
+[`traces/README.md`](./traces/README.md) for the full trace schema, AI
+self-evaluation protocol, and optimization roadmap.
+
+Quick example:
+
+```bash
+pnpm workflow-memory:add-entry \
+  --workflow "Periodic Scans" \
+  --title "best-practice-researcher: trace example" \
+  ... \
+  --trace-playbook best-practice-researcher \
+  --trace-playbook-version abc123 \
+  --trace-input '{"context":"...","taskDescription":"..."}' \
+  --trace-output '{"raw":"...","structured":{}}' \
+  --trace-model gpt-5.3-codex \
+  --trace-score 0.78
+```
+
+Index rows for traced events include `hasTrace: true` and `tracePlaybook` for
+fast filtering during optimization data extraction.
+
 ## Event Record (Source Of Truth)
 
 - Store one JSON object per line in files under [`events/`](./events/) (for example, `events/YYYY-MM.jsonl`).
