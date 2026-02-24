@@ -1,5 +1,20 @@
 [
   {
+    "id": "2026-02-24-periodic-scans-rfc-reviewer-security-ack-for-issue-47",
+    "date": "2026-02-24",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "RFC reviewer security ack for issue #47",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "rfc-reviewer",
+      "security",
+      "github-issue"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-architecture-adr-guard-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
