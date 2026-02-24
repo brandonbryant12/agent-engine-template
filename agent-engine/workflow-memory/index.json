@@ -1,5 +1,35 @@
 [
   {
+    "id": "2026-02-24-periodic-scans-rfc-reviewer-issue-47-qa-lead-acknowledgement-matured-acceptance",
+    "date": "2026-02-24",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer issue #47 QA Lead acknowledgement matured acceptance criteria",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "rfc-reviewer",
+      "qa-lead",
+      "issue-47",
+      "memory-form:external",
+      "memory-form:parametric",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.74,
+    "confidence": 0.9,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-architecture-adr-guard-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
