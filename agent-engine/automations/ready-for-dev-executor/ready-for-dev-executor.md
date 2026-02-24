@@ -107,15 +107,17 @@ Run each gate via `zsh -lic 'cd "$WORKTREE_DIR" && <gate-command>'`.
 Delivery behavior:
 - If any gate fails, do not open/merge PR. Post concise failure details and next action on the primary issue, then record memory. For preflight failures (GitHub API, Docker, or npm/network), include the captured diagnostics in issue comments.
 - If all gates pass, commit with a conventional message referencing the primary issue, push, and open one PR to main that:
-  - uses closing/linking keywords for the issues addressed (`Fixes #...` for fully resolved issues, `Refs #...` for partials)
-  - MUST include `Fixes #<primary-issue-number>` for the primary issue when the run intent is full resolution
+  - uses plain-text closing/linking keywords for the issues addressed (Fixes #... for fully resolved issues, Refs #... for partials)
+  - MUST include plain-text `Fixes #<primary-issue-number>` for the primary issue when the run intent is full resolution
+  - do not wrap closing/linking keywords in markdown code spans or code fences
   - includes an `Aggregated Issues` section listing all bundled issues and status
   - includes a `Workflow Routing` section mapping each issue to workflow + skills used
   - includes a `Research Log Update` section when applicable
   Then run a pre-merge linkage gate:
   - fetch PR body via `gh pr view --json body,number,url`
-  - verify primary issue has a closing keyword (`Fixes #<primary-issue-number>` or `Closes #<primary-issue-number>`)
-  - verify each bundled issue line in Aggregated Issues matches intent (`Fixes #...` for fully resolved, `Refs #...` for partial)
+  - verify primary issue has a non-code closing keyword (Fixes #<primary-issue-number> or Closes #<primary-issue-number>)
+  - verify each bundled issue line in Aggregated Issues matches intent with non-code keywords (Fixes #... for fully resolved, Refs #... for partial)
+  - fail the linkage gate if any required keyword appears only inside markdown code formatting (inline code spans or fenced code blocks)
   - if linkage check fails, do not merge; update PR body or post a blocking comment, then record memory
   Then add labels codex and codex-automation when available and auto-merge with squash, deleting the merged branch from remote and local (prefer `gh pr merge --delete-branch`; if local branch still exists, delete it explicitly). After merge, clean up the git worktree with `git worktree remove "$WORKTREE_DIR"` and delete any remaining local branch pointer for `"$WORKTREE_BRANCH"`.
 - After merge, verify closure/linkage for all issues referenced by the PR; if any expected closure did not occur, post corrective issue comment and open a follow-up issue for linkage failure.
