@@ -1,5 +1,28 @@
 [
   {
+    "id": "2026-02-24-periodic-scans-rfc-reviewer-issue-47-crazy-visionary-acknowledgement-matured-ar",
+    "date": "2026-02-24",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer issue #47 Crazy Visionary acknowledgement matured artifact-first prompt resolver",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "rfc-reviewer",
+      "periodic-scans",
+      "issue-47",
+      "crazy-visionary",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.76,
+    "confidence": 0.89,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-periodic-scans-rfc-reviewer-issue-47-qa-lead-acknowledgement-matured-acceptance",
     "date": "2026-02-24",
     "month": "2026-02",
