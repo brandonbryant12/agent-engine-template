@@ -1,5 +1,25 @@
 [
   {
+    "id": "2026-02-24-periodic-scans-rfc-reviewer-run-issue-47-sre-deployment-safety-feedback",
+    "date": "2026-02-24",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer run: issue #47 SRE deployment-safety feedback",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "rfc-reviewer",
+      "rfc",
+      "issue-47",
+      "sre-platform"
+    ],
+    "importance": 0.84,
+    "confidence": 0.93,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-architecture-adr-guard-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
