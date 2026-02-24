@@ -1,5 +1,24 @@
 [
   {
+    "id": "2026-02-24-periodic-scans-rfc-reviewer-security-review-issue-46-tooling-rfc",
+    "date": "2026-02-24",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer: security review issue #46 tooling RFC",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "rfc-reviewer",
+      "security",
+      "github-issues"
+    ],
+    "importance": 0.82,
+    "confidence": 0.92,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-architecture-adr-guard-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
