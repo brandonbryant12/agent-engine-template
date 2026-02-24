@@ -131,3 +131,8 @@ limit: one PR per run.
 - if `workflow-memory:sync` reports non-fast-forward, allow it to auto-rebase
   append-only memory files and retry; only stop when conflicts include
   non-memory paths.
+
+
+## LLM Trace Capture
+
+For LLM trace capture, follow the protocol in [`traces/README.md`](../../workflow-memory/traces/README.md).

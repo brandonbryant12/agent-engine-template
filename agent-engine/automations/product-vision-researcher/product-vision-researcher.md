@@ -88,3 +88,8 @@ Memory logging contract (required every run, including no-op):
 - Commit and push memory append artifacts after each run:
   - `pnpm workflow-memory:sync --message "chore(workflow-memory): product-vision-researcher run memory"`
 - If `workflow-memory:sync` reports non-fast-forward, allow it to auto-rebase append-only memory files and retry; only stop when conflicts include non-memory paths.
+
+
+## LLM Trace Capture
+
+For LLM trace capture, follow the protocol in [`traces/README.md`](../../workflow-memory/traces/README.md).

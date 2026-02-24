@@ -82,6 +82,15 @@ This creates stability plus adaptation:
 - Can move directly from high-confidence bounded findings to implementation, PR, and auto-merge in one run.
 - Uses workflow routing to pick the correct execution contract for each fix.
 
+8. `trace-evaluator`
+- Independent AI judge lane for evaluating automation trace quality.
+- Discovers recent traces that lack AI feedback and evaluates them with fresh context.
+- Scores output on evidence quality/validity, actionability, coherence, relevance, completeness, accuracy, and playbook alignment.
+- Verifies citations, URLs, and file references are real and valid.
+- Persists structured evaluation feedback as new workflow-memory events linked to the original trace.
+- Provides the independent feedback signal required for future GAPA/DSPy prompt optimization.
+- No direct code changes.
+
 ## Lane Contract
 
 For every lane:
@@ -182,6 +191,7 @@ External research is encouraged, but only through filters:
 5. `issue-evaluator` reviews all open issues and applies one decision label per issue (`ready-for-dev`, `rejected`, `human-eval-needed`).
 6. `sanity-check` performs hourly memory-driven scans and directly ships bounded high-confidence fixes.
 7. `ready-for-dev-executor` implements and merges `ready-for-dev` issues after gates, selecting 1..N with conservative bundling in one PR.
+8. `trace-evaluator` independently evaluates automation traces and provides quality feedback for prompt optimization.
 
 ## Research Logging
 
@@ -206,6 +216,7 @@ cp agent-engine/automations/agent-engine-researcher/agent-engine-researcher.toml
 cp agent-engine/automations/product-vision-researcher/product-vision-researcher.toml ~/.codex/automations/product-vision-researcher/automation.toml
 cp agent-engine/automations/product-owner-reviewer/product-owner-reviewer.toml ~/.codex/automations/product-owner-reviewer/automation.toml
 cp agent-engine/automations/sanity-check/sanity-check.toml ~/.codex/automations/sanity-check/automation.toml
+cp agent-engine/automations/trace-evaluator/trace-evaluator.toml ~/.codex/automations/trace-evaluator/automation.toml
 ```
 
 Pull runtime wrappers back into repo mirror (verification only):
@@ -218,4 +229,5 @@ cp ~/.codex/automations/agent-engine-researcher/automation.toml agent-engine/aut
 cp ~/.codex/automations/product-vision-researcher/automation.toml agent-engine/automations/product-vision-researcher/product-vision-researcher.toml
 cp ~/.codex/automations/product-owner-reviewer/automation.toml agent-engine/automations/product-owner-reviewer/product-owner-reviewer.toml
 cp ~/.codex/automations/sanity-check/automation.toml agent-engine/automations/sanity-check/sanity-check.toml
+cp ~/.codex/automations/trace-evaluator/automation.toml agent-engine/automations/trace-evaluator/trace-evaluator.toml
 ```

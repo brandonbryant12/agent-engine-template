@@ -25,3 +25,7 @@ tools/cli/.output/
 
 # Standards debate workspace
 agentic-harness-framework/scripts/standards-debate/workspace/
+
+# Trace data (contains sensitive LLM context/outputs)
+agent-engine/workflow-memory/traces/data/
+agent-engine/workflow-memory/traces/tmp/

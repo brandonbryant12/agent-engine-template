@@ -9,6 +9,7 @@ import { refreshMonthlySummary } from "./summary-refresh";
 const MEMORY_DIR = path.join("agent-engine", "workflow-memory");
 const INDEX_PATH = path.join(MEMORY_DIR, "index.json");
 const EVENTS_DIR = path.join(MEMORY_DIR, "events");
+const TRACES_DATA_DIR = path.join(MEMORY_DIR, "traces", "data");
 
 const REQUIRED_ARGS = [
   "workflow",
@@ -81,12 +82,27 @@ const USAGE = `Usage:
     [--scan-walk-mode <mode>] \\
     [--scan-scope <scope>] \\
     [--scan-domain <domain>] \\
-    [--scan-signal <signal>]
+    [--scan-signal <signal>] \\
+    [--trace-playbook <automation-id>] \\
+    [--trace-playbook-version <git-sha-or-hash>] \\
+    [--trace-input <json-string-or-file-path>] \\
+    [--trace-output <json-string-or-file-path>] \\
+    [--trace-model <model-name>] \\
+    [--trace-tokens <json: {"prompt":N,"completion":N}>] \\
+    [--trace-latency <milliseconds>] \\
+    [--trace-ai-feedback <json-string>] \\
+    [--trace-score <0-1>]
 
 Scenario flags:
   When any --scenario-* flag is provided, --scenario-skill and --scenario-verdict
   are required. Scenarios create replayable test cases linked to fixture files at
   agent-engine/workflow-memory/scenarios/{id}.md.
+
+Trace flags:
+  When any --trace-* flag is provided, --trace-playbook is required.
+  Traces capture LLM interaction data for future prompt optimization (GEPA/DSPy).
+  --trace-input and --trace-output accept either a JSON string or a file path
+  (prefix with @ to read from file, e.g. --trace-input @agent-engine/workflow-memory/traces/tmp/input.json).
 `;
 
 function slug(value) {
@@ -387,7 +403,59 @@ function buildScanMetadata(args) {
   };
 }
 
-function buildEvent(args) {
+async function parseJsonOrFile(raw) {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("@")) {
+    const filePath = trimmed.slice(1);
+    const content = await fs.readFile(filePath, "utf8");
+    return JSON.parse(content);
+  }
+  return JSON.parse(trimmed);
+}
+
+async function buildTrace(args) {
+  const hasTraceFlags = Object.keys(args).some((k) => k.startsWith("trace_"));
+  if (!hasTraceFlags) return undefined;
+
+  if (!args.trace_playbook) {
+    throw new Error("--trace-playbook is required when using any --trace-* flag");
+  }
+
+  const traceInput = args.trace_input ? await parseJsonOrFile(args.trace_input) : undefined;
+  const traceOutput = args.trace_output ? await parseJsonOrFile(args.trace_output) : undefined;
+  const tokens = args.trace_tokens ? JSON.parse(args.trace_tokens) : undefined;
+  const aiFeedback = args.trace_ai_feedback ? JSON.parse(args.trace_ai_feedback) : undefined;
+
+  const score = args.trace_score !== undefined ? Number(args.trace_score) : undefined;
+  if (score !== undefined && (!Number.isFinite(score) || score < 0 || score > 1)) {
+    throw new Error(`Invalid --trace-score: ${args.trace_score}. Expected 0-1.`);
+  }
+
+  const latency = args.trace_latency !== undefined ? Number(args.trace_latency) : undefined;
+  if (latency !== undefined && (!Number.isFinite(latency) || latency < 0)) {
+    throw new Error(`Invalid --trace-latency: ${args.trace_latency}. Expected positive number.`);
+  }
+
+  return {
+    playbook: args.trace_playbook.trim(),
+    ...(args.trace_playbook_version ? { playbookVersion: args.trace_playbook_version.trim() } : {}),
+    ...(traceInput !== undefined ? { input: traceInput } : {}),
+    ...(traceOutput !== undefined ? { output: traceOutput } : {}),
+    evaluation: {
+      ...(aiFeedback ? { aiFeedback } : {}),
+      ...(score !== undefined ? { score } : {}),
+    },
+    metadata: {
+      ...(args.trace_model ? { model: args.trace_model.trim() } : {}),
+      ...(tokens ? { tokens } : {}),
+      ...(latency !== undefined ? { latencyMs: latency } : {}),
+      timestamp: new Date().toISOString(),
+    },
+  };
+}
+
+async function buildEvent(args) {
   const date = args.date ?? new Date().toISOString().slice(0, 10);
   if (!validateDate(date)) {
     throw new Error(`Invalid date: ${date}. Expected YYYY-MM-DD.`);
@@ -487,6 +555,28 @@ function buildEvent(args) {
     source: (args.source ?? "manual").trim(),
     createdAt: new Date().toISOString(),
   };
+
+  const trace = await buildTrace(args);
+  if (trace) {
+    // Store only a lightweight trace reference in the JSONL event.
+    // Full trace payloads (input/output/feedback) go to a separate local file
+    // outside git to avoid committing sensitive LLM context data.
+    event.traceRef = {
+      playbook: trace.playbook,
+      ...(trace.playbookVersion ? { playbookVersion: trace.playbookVersion } : {}),
+      ...(trace.evaluation?.score !== undefined ? { score: trace.evaluation.score } : {}),
+      hasAiFeedback: !!(trace.evaluation?.aiFeedback),
+      traceFilePath: path.join("traces", "data", `${event.id}.trace.json`),
+    };
+
+    // Write full trace payload to local gitignored file
+    await fs.mkdir(TRACES_DATA_DIR, { recursive: true });
+    const traceFilePath = path.join(TRACES_DATA_DIR, `${event.id}.trace.json`);
+    await fs.writeFile(traceFilePath, JSON.stringify(trace, null, 2) + "\n", "utf8");
+    console.log(`Trace data written: ${traceFilePath}`);
+  }
+
+  return event;
 }
 
 async function main() {
@@ -497,7 +587,7 @@ async function main() {
     return;
   }
 
-  const event = buildEvent(args);
+  const event = await buildEvent(args);
   const knownWorkflows = await readKnownWorkflows();
   assertKnownWorkflow(event.workflow, knownWorkflows);
   const month = event.date.slice(0, 7);
@@ -529,6 +619,7 @@ async function main() {
     ...(typeof event.confidence === "number" ? { confidence: event.confidence } : {}),
     ...(event.scenario ? { hasScenario: true, scenarioSkill: event.scenario.skill } : {}),
     ...(event.scan ? { scan: event.scan } : {}),
+    ...(event.traceRef ? { hasTrace: true, tracePlaybook: event.traceRef.playbook } : {}),
     eventFile: path.join("events", `${month}.jsonl`),
   };
 
