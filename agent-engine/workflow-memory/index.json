@@ -1,5 +1,34 @@
 [
   {
+    "id": "2026-02-24-periodic-scans-rfc-reviewer-issue-46-accessibility-advocate-acknowledgement-thr",
+    "date": "2026-02-24",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer: issue #46 accessibility advocate acknowledgement (threshold hold)",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "rfc-reviewer",
+      "memory",
+      "workflow-memory",
+      "persona:accessibility-advocate",
+      "tool:gh",
+      "tool:workflow-memory:add-entry",
+      "tool:workflow-memory:sync",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:retrieve",
+      "memory-dynamics:write"
+    ],
+    "importance": 0.86,
+    "recency": 1,
+    "confidence": 0.91,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-23-architecture-adr-guard-bootstrap-initialization-2026-02-1",
     "date": "2026-02-23",
     "month": "2026-02",
