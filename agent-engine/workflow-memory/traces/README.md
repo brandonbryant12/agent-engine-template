@@ -1,11 +1,11 @@
 # LLM Trace Capture for Prompt Optimization
 
 This directory documents the trace capture infrastructure that enables future
-GAPA/DSPy-style prompt optimization for automation playbooks.
+GEPA/DSPy-style prompt optimization for automation playbooks.
 
 ## Why Traces?
 
-The [GAPA (Generalized Automatic Prompt Adaptation)](https://arxiv.org/abs/2311.09558) methodology
+The [GEPA (Reflective Prompt Evolution)](https://arxiv.org/abs/2507.19457) methodology
 requires three ingredients to automatically optimize prompts:
 
 1. **The current prompt/instructions** — the playbook `.md` file
@@ -16,47 +16,76 @@ Without captured traces, you cannot build the optimization dataset. The
 workflow-memory system already captures *what happened* (findings, follow-ups),
 but not the *raw LLM interaction* that produced those results.
 
-## Trace Schema
+## Trace Storage: Separation of Concerns
 
-Each workflow-memory event can include an optional `trace` field:
+**Trace data is NOT stored in git.** Traces contain full LLM context windows,
+raw model outputs, and potentially sensitive data (API keys in context, PII,
+proprietary code snippets). Committing them to git would be a security risk and
+would bloat the repository.
+
+Instead, traces use a two-layer storage model:
+
+### Layer 1: Lightweight Reference in JSONL (git-tracked)
+
+Workflow-memory events in the JSONL files store only a `traceRef` with metadata:
 
 ```json
 {
-  "trace": {
+  "traceRef": {
     "playbook": "best-practice-researcher",
     "playbookVersion": "abc123",
-    "input": {
-      "context": "Repository state, prior memory, etc.",
-      "taskDescription": "The specific task given to the LLM"
-    },
-    "output": {
-      "raw": "Full LLM response text",
-      "structured": {
-        "recommendations": [],
-        "issuesOpened": []
-      }
-    },
-    "evaluation": {
-      "metrics": {
-        "evidenceQuality": 0.8,
-        "actionability": 0.7,
-        "coherence": 0.9
-      },
-      "humanFeedback": null,
-      "aiFeedback": {
-        "strengths": ["Well-sourced recommendations"],
-        "improvements": ["Could include more concrete code examples"],
-        "overallAssessment": "Good research depth, moderate actionability"
-      },
-      "score": 0.78
-    },
-    "metadata": {
-      "model": "gpt-5.3-codex",
-      "temperature": null,
-      "tokens": { "prompt": 12000, "completion": 3500 },
-      "latencyMs": 45000,
-      "timestamp": "2026-02-24T14:30:00.000Z"
+    "score": 0.78,
+    "hasAiFeedback": true,
+    "traceFilePath": "traces/data/2026-02-24-periodic-scans-best-practice.trace.json"
+  }
+}
+```
+
+This is safe to commit — it contains no sensitive payload data.
+
+### Layer 2: Full Trace Payload in Local Files (gitignored)
+
+The full trace data (input context, LLM output, feedback) is written to
+`agent-engine/workflow-memory/traces/data/{event-id}.trace.json`. This directory
+is in `.gitignore` and never committed.
+
+The full trace file contains the complete schema:
+
+```json
+{
+  "playbook": "best-practice-researcher",
+  "playbookVersion": "abc123",
+  "input": {
+    "context": "Repository state, prior memory, etc.",
+    "taskDescription": "The specific task given to the LLM"
+  },
+  "output": {
+    "raw": "Full LLM response text",
+    "structured": {
+      "recommendations": [],
+      "issuesOpened": []
     }
+  },
+  "evaluation": {
+    "metrics": {
+      "evidenceQuality": 0.8,
+      "actionability": 0.7,
+      "coherence": 0.9
+    },
+    "humanFeedback": null,
+    "aiFeedback": {
+      "strengths": ["Well-sourced recommendations"],
+      "improvements": ["Could include more concrete code examples"],
+      "overallAssessment": "Good research depth, moderate actionability"
+    },
+    "score": 0.78
+  },
+  "metadata": {
+    "model": "gpt-5.3-codex",
+    "temperature": null,
+    "tokens": { "prompt": 12000, "completion": 3500 },
+    "latencyMs": 45000,
+    "timestamp": "2026-02-24T14:30:00.000Z"
   }
 }
 ```
@@ -75,9 +104,50 @@ Each workflow-memory event can include an optional `trace` field:
 All fields except `playbook` are optional. Capture what you can — partial
 traces are still valuable for optimization.
 
+## Trace Capture Protocol
+
+When trace capture is enabled for an automation, follow this protocol to capture
+the LLM interaction data alongside the standard workflow-memory event.
+
+### Step-by-step
+
+1. **Before running**: Serialize the input context (task description, relevant
+   memory, repo state summary) to a temporary JSON file at
+   `agent-engine/workflow-memory/traces/tmp/trace-input.json`.
+2. **After running**: Serialize the output (raw LLM response and any structured
+   results) to `agent-engine/workflow-memory/traces/tmp/trace-output.json`.
+3. **Self-evaluation** (optional): Review your own output and score it on
+   relevant dimensions (evidence quality, actionability, coherence, relevance).
+   Generate natural language feedback about strengths and improvements.
+4. **Persist trace**: Add `--trace-*` flags to the `workflow-memory:add-entry`
+   command:
+
+```bash
+pnpm workflow-memory:add-entry \
+  ... \  # standard flags
+  --trace-playbook <automation-id> \
+  --trace-playbook-version "$(git log -1 --format=%H -- agent-engine/automations/<automation-id>/<automation-id>.md)" \
+  --trace-input @agent-engine/workflow-memory/traces/tmp/trace-input.json \
+  --trace-output @agent-engine/workflow-memory/traces/tmp/trace-output.json \
+  --trace-model MODEL_NAME \
+  --trace-tokens '{"prompt":N,"completion":N}' \
+  --trace-latency MILLISECONDS \
+  --trace-ai-feedback '{"strengths":[...],"improvements":[...],"overallAssessment":"..."}' \
+  --trace-score SCORE
+```
+
+The `add-entry` script will automatically:
+- Write the full trace payload to `traces/data/{event-id}.trace.json`
+- Store only a lightweight `traceRef` in the JSONL event
+
+5. **Cleanup**: Remove temporary trace JSON files after persisting.
+
+The `traces/tmp/` directory is gitignored and used only for passing data between
+automation steps. Never use `/tmp` — repo-local paths are safer and portable.
+
 ## Feedback Strategy: Independent Evaluation over Self-Evaluation
 
-A key insight from the GAPA paper: **self-evaluation during a run is biased**.
+A key insight from the GEPA paper: **self-evaluation during a run is biased**.
 The same model that produced the output rates its own work within the same
 context window, leading to inflated scores and blind spots.
 
@@ -103,7 +173,7 @@ context**. It:
 - Checks playbook alignment (blind evaluation first, then alignment check)
 - Produces structured feedback with specific justifications for each score
 
-This independent evaluation is the **natural language feedback** that GAPA uses
+This independent evaluation is the **natural language feedback** that GEPA uses
 for reflective prompt mutation. It's what makes future optimization possible.
 
 ### Example Evaluation Output
@@ -154,8 +224,8 @@ pnpm workflow-memory:add-entry \
   --status "open" \
   --trace-playbook best-practice-researcher \
   --trace-playbook-version abc123def \
-  --trace-input @/tmp/trace-input.json \
-  --trace-output @/tmp/trace-output.json \
+  --trace-input @agent-engine/workflow-memory/traces/tmp/trace-input.json \
+  --trace-output @agent-engine/workflow-memory/traces/tmp/trace-output.json \
   --trace-model gpt-5.3-codex \
   --trace-tokens '{"prompt":12000,"completion":3500}' \
   --trace-latency 45000 \
@@ -170,13 +240,14 @@ path, which is useful when the content is large.
 
 ```
 Phase 1 (this PR): Trace capture infrastructure
-  └── Automations write traces to workflow-memory events
+  └── Automations write trace refs to workflow-memory events
+  └── Full trace data stored locally in gitignored traces/data/
 
 Phase 2: Trace analysis tooling
   └── Scripts to extract, filter, and analyze traces
   └── Identify low-scoring runs and common failure patterns
 
-Phase 3: GAPA/DSPy optimization pipeline
+Phase 3: GEPA/DSPy optimization pipeline
   └── Feed traces into DSPy optimizers
   └── Current playbook + (input, output, feedback) examples → improved playbook
   └── A/B test optimized vs. original playbooks
@@ -189,16 +260,16 @@ Phase 4: Continuous optimization loop
 
 ## Integration with Workflow Memory
 
-Traces are stored inline within workflow-memory events (not in separate files).
-This means:
+Traces use a two-layer storage model (see "Trace Storage" above). This means:
 
 - Existing events without traces continue to work unchanged
-- Traces are queryable via the same retrieval tooling
+- Trace references are queryable via the same retrieval tooling
 - Index rows include `hasTrace: true` and `tracePlaybook` for filtering
+- Full trace data is available locally for analysis/optimization
 - Monthly summaries can reference trace quality trends
 
 ## References
 
-- [GAPA: Generalized Automatic Prompt Adaptation](https://arxiv.org/abs/2311.09558)
+- [GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning](https://arxiv.org/abs/2507.19457) (ICLR 2026 Oral)
 - [DSPy: Programming—not Prompting—Foundation Models](https://arxiv.org/abs/2310.03714)
 - [TextGrad: Automatic Differentiation via Text](https://arxiv.org/abs/2406.07496)

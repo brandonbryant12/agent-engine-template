@@ -24,9 +24,9 @@ This automation is the **independent feedback loop** for prompt optimization.
 Self-evaluation during an automation run is inherently biased — the same model
 that produced the output is rating its own work within the same context window.
 This trace evaluator operates with **fresh context** and serves as an objective
-"AI judge" whose feedback can drive future GAPA/DSPy optimization cycles.
+"AI judge" whose feedback can drive future GEPA/DSPy optimization cycles.
 
-The key insight from the GAPA paper: reflective prompt mutation requires
+The key insight from the GEPA paper: reflective prompt mutation requires
 **natural language feedback** from an evaluator that is independent of the
 original generation. This automation IS that evaluator.
 
@@ -42,7 +42,9 @@ original generation. This automation IS that evaluator.
 
 3. If no unevaluated traces exist, log a no-op memory entry and exit cleanly.
 
-4. Process up to **5 traces per run** to keep context manageable and
+4. **NEVER evaluate traces from `trace-evaluator` runs.** Skip any trace where `tracePlaybook === 'trace-evaluator'`. This prevents circular self-evaluation.
+
+5. Process up to **5 traces per run** to keep context manageable and
    evaluation quality high. Prioritize:
    - Traces from automations that have never been evaluated (cold-start)
    - Oldest unevaluated traces first (FIFO within priority tier)
@@ -157,7 +159,7 @@ pnpm workflow-memory:add-entry \
   --trigger "Unevaluated trace discovered" \
   --finding "Evaluation score: {score}. {one-line-summary}" \
   --evidence "Original event: {original-event-id}" \
-  --follow-up "Feed into GAPA optimization pipeline when available" \
+  --follow-up "Feed into GEPA optimization pipeline when available" \
   --owner "@automation" \
   --status "open" \
   --severity "low" \
@@ -168,10 +170,10 @@ pnpm workflow-memory:add-entry \
   --trace-playbook trace-evaluator \
   --trace-playbook-version "$(git log -1 --format=%H -- agent-engine/automations/trace-evaluator/trace-evaluator.md)" \
   --trace-input '{"evaluatedEventId":"{id}","evaluatedPlaybook":"{playbook}"}' \
-  --trace-output @/tmp/trace-eval-output.json \
+  --trace-output @agent-engine/workflow-memory/traces/tmp/trace-eval-output.json \
   --trace-model MODEL_NAME \
   --trace-score {score} \
-  --trace-ai-feedback @/tmp/trace-eval-feedback.json
+  --trace-ai-feedback @agent-engine/workflow-memory/traces/tmp/trace-eval-feedback.json
 ```
 
 Note: The evaluation feedback is stored as a **new trace** (the trace-evaluator's
@@ -235,39 +237,6 @@ pnpm workflow-memory:add-entry \
   append-only memory files and retry; only stop when conflicts include
   non-memory paths.
 
-## LLM Trace Capture (Optional)
+## LLM Trace Capture
 
-When trace capture is enabled for this automation, capture the LLM interaction
-data alongside the standard workflow-memory event. This supports future
-GAPA/DSPy prompt optimization.
-
-### Protocol
-
-1. **Before running**: Serialize the input context (task description, relevant
-   memory, repo state summary) to a temporary JSON file.
-2. **After running**: Serialize the output (raw LLM response and any structured
-   results) to a temporary JSON file.
-3. **Self-evaluation** (optional): Review your own output and score it on
-   relevant dimensions (evidence quality, actionability, coherence, relevance).
-   Generate natural language feedback about strengths and improvements.
-4. **Persist trace**: Add `--trace-*` flags to the `workflow-memory:add-entry`
-   command:
-
-```bash
-pnpm workflow-memory:add-entry \
-  ... \  # standard flags
-  --trace-playbook trace-evaluator \
-  --trace-playbook-version "$(git log -1 --format=%H -- agent-engine/automations/trace-evaluator/trace-evaluator.md)" \
-  --trace-input @/tmp/trace-input.json \
-  --trace-output @/tmp/trace-output.json \
-  --trace-model MODEL_NAME \
-  --trace-tokens '{"prompt":N,"completion":N}' \
-  --trace-latency MILLISECONDS \
-  --trace-ai-feedback '{"strengths":[...],"improvements":[...],"overallAssessment":"..."}' \
-  --trace-score SCORE
-```
-
-5. **Cleanup**: Remove temporary trace JSON files after persisting.
-
-See [`agent-engine/workflow-memory/traces/README.md`](../../workflow-memory/traces/README.md)
-for the full trace schema and optimization roadmap.
+For LLM trace capture, follow the protocol in [`traces/README.md`](../../workflow-memory/traces/README.md).

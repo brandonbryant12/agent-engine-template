@@ -9,6 +9,7 @@ import { refreshMonthlySummary } from "./summary-refresh";
 const MEMORY_DIR = path.join("agent-engine", "workflow-memory");
 const INDEX_PATH = path.join(MEMORY_DIR, "index.json");
 const EVENTS_DIR = path.join(MEMORY_DIR, "events");
+const TRACES_DATA_DIR = path.join(MEMORY_DIR, "traces", "data");
 
 const REQUIRED_ARGS = [
   "workflow",
@@ -99,9 +100,9 @@ Scenario flags:
 
 Trace flags:
   When any --trace-* flag is provided, --trace-playbook is required.
-  Traces capture LLM interaction data for future prompt optimization (GAPA/DSPy).
+  Traces capture LLM interaction data for future prompt optimization (GEPA/DSPy).
   --trace-input and --trace-output accept either a JSON string or a file path
-  (prefix with @ to read from file, e.g. --trace-input @/tmp/input.json).
+  (prefix with @ to read from file, e.g. --trace-input @agent-engine/workflow-memory/traces/tmp/input.json).
 `;
 
 function slug(value) {
@@ -557,7 +558,22 @@ async function buildEvent(args) {
 
   const trace = await buildTrace(args);
   if (trace) {
-    event.trace = trace;
+    // Store only a lightweight trace reference in the JSONL event.
+    // Full trace payloads (input/output/feedback) go to a separate local file
+    // outside git to avoid committing sensitive LLM context data.
+    event.traceRef = {
+      playbook: trace.playbook,
+      ...(trace.playbookVersion ? { playbookVersion: trace.playbookVersion } : {}),
+      ...(trace.evaluation?.score !== undefined ? { score: trace.evaluation.score } : {}),
+      hasAiFeedback: !!(trace.evaluation?.aiFeedback),
+      traceFilePath: path.join("traces", "data", `${event.id}.trace.json`),
+    };
+
+    // Write full trace payload to local gitignored file
+    await fs.mkdir(TRACES_DATA_DIR, { recursive: true });
+    const traceFilePath = path.join(TRACES_DATA_DIR, `${event.id}.trace.json`);
+    await fs.writeFile(traceFilePath, JSON.stringify(trace, null, 2) + "\n", "utf8");
+    console.log(`Trace data written: ${traceFilePath}`);
   }
 
   return event;
@@ -603,7 +619,7 @@ async function main() {
     ...(typeof event.confidence === "number" ? { confidence: event.confidence } : {}),
     ...(event.scenario ? { hasScenario: true, scenarioSkill: event.scenario.skill } : {}),
     ...(event.scan ? { scan: event.scan } : {}),
-    ...(event.trace ? { hasTrace: true, tracePlaybook: event.trace.playbook } : {}),
+    ...(event.traceRef ? { hasTrace: true, tracePlaybook: event.traceRef.playbook } : {}),
     eventFile: path.join("events", `${month}.jsonl`),
   };
 

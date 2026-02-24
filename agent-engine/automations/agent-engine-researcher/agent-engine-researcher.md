@@ -102,39 +102,6 @@ Append concise run memory including:
   non-memory paths.
 
 
-## LLM Trace Capture (Optional)
+## LLM Trace Capture
 
-When trace capture is enabled for this automation, capture the LLM interaction
-data alongside the standard workflow-memory event. This supports future
-GAPA/DSPy prompt optimization.
-
-### Protocol
-
-1. **Before running**: Serialize the input context (task description, relevant
-   memory, repo state summary) to a temporary JSON file.
-2. **After running**: Serialize the output (raw LLM response and any structured
-   results) to a temporary JSON file.
-3. **Self-evaluation** (optional): Review your own output and score it on
-   relevant dimensions (evidence quality, actionability, coherence, relevance).
-   Generate natural language feedback about strengths and improvements.
-4. **Persist trace**: Add `--trace-*` flags to the `workflow-memory:add-entry`
-   command:
-
-```bash
-pnpm workflow-memory:add-entry \
-  ... \  # standard flags
-  --trace-playbook agent-engine-researcher \
-  --trace-playbook-version "$(git log -1 --format=%H -- agent-engine/automations/agent-engine-researcher/agent-engine-researcher.md)" \
-  --trace-input @/tmp/trace-input.json \
-  --trace-output @/tmp/trace-output.json \
-  --trace-model MODEL_NAME \
-  --trace-tokens '{"prompt":N,"completion":N}' \
-  --trace-latency MILLISECONDS \
-  --trace-ai-feedback '{"strengths":[...],"improvements":[...],"overallAssessment":"..."}' \
-  --trace-score SCORE
-```
-
-5. **Cleanup**: Remove temporary trace JSON files after persisting.
-
-See [`agent-engine/workflow-memory/traces/README.md`](../../workflow-memory/traces/README.md)
-for the full trace schema and optimization roadmap.
+For LLM trace capture, follow the protocol in [`traces/README.md`](../../workflow-memory/traces/README.md).
