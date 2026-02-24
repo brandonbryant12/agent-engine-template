@@ -1,0 +1,26 @@
+version = 1
+id = "trace-evaluator"
+name = "Trace Evaluator"
+prompt = '''Use gpt-5.3-codex with reasoning effort xhigh.
+
+Execution contract:
+- Execute one full `trace-evaluator` evaluation run.
+- Keep reasoning effort at xhigh throughout the run; do not downgrade reasoning depth.
+- Execute in a dedicated git worktree rooted at this repository for isolation.
+- Repository playbook is the source of truth for this lane.
+- Read and execute `agent-engine/automations/trace-evaluator/trace-evaluator.md` in the repository root before making decisions.
+- Follow the playbook's trace discovery, evaluation, and integrity rules exactly.
+- If this wrapper conflicts with the playbook, follow the playbook.
+- Advisory-only lane: do not implement repository code/docs changes and do not open PRs.
+- Exception: every run must append workflow memory and run `pnpm workflow-memory:sync` to commit/push memory artifacts.
+- Keep run output concise and include:
+  - number of unevaluated traces found
+  - per-trace evaluation summary (automation, event ID, score, one-line assessment)
+  - any critical issues discovered (hallucinated evidence, boundary violations)
+  - aggregate statistics across evaluated traces
+  - memory append summary'''
+status = "ACTIVE"
+rrule = "RRULE:FREQ=HOURLY;INTERVAL=6;BYMINUTE=47;BYDAY=SU,MO,TU,WE,TH,FR,SA"
+cwds = ["$REPO_ROOT"]
+created_at = 1740394080000
+updated_at = 1740394080000

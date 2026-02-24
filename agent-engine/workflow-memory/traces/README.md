@@ -75,44 +75,52 @@ Each workflow-memory event can include an optional `trace` field:
 All fields except `playbook` are optional. Capture what you can — partial
 traces are still valuable for optimization.
 
-## AI Self-Evaluation
+## Feedback Strategy: Independent Evaluation over Self-Evaluation
 
-Since human feedback is expensive and inconsistent, automations can run a
-lightweight **AI self-evaluation** step after their main task. This provides
-a feedback signal that approximates human judgment.
+A key insight from the GAPA paper: **self-evaluation during a run is biased**.
+The same model that produced the output rates its own work within the same
+context window, leading to inflated scores and blind spots.
 
-### Evaluation Dimensions
+Instead, this system uses a two-tier feedback approach:
 
-Each automation defines relevant evaluation dimensions. Common ones:
+### Tier 1: Optional In-Run Self-Evaluation (Lightweight)
 
-- **Evidence quality** — Are claims backed by specific code/docs/URLs?
-- **Actionability** — Can someone act on this without further research?
-- **Coherence** — Is the output well-structured and internally consistent?
-- **Relevance** — Does the output address the actual task/context?
-- **Completeness** — Are important aspects covered?
+Automations *can* run a quick self-evaluation after their main task. This is
+cheap and immediate but inherently biased. Useful as a rough signal but not
+sufficient for optimization.
 
-### Self-Evaluation Protocol
+### Tier 2: Independent Trace Evaluator (Primary Feedback Source)
 
-After completing the main task, the automation:
+The [`trace-evaluator`](../../automations/trace-evaluator/trace-evaluator.md)
+automation runs on a separate schedule and evaluates traces with **fresh
+context**. It:
 
-1. Reviews its own output against the evaluation dimensions
-2. Scores each dimension 0-1
-3. Generates natural language feedback (strengths + improvements)
-4. Computes an overall score (weighted average of dimensions)
-5. Stores everything in `trace.evaluation`
+- Discovers traces that lack AI feedback
+- Evaluates output quality across 10 dimensions (evidence quality/validity,
+  actionability, coherence, relevance, completeness, accuracy, goal alignment,
+  protocol compliance, boundary respect)
+- Verifies citations and references are real
+- Checks playbook alignment (blind evaluation first, then alignment check)
+- Produces structured feedback with specific justifications for each score
 
-This step is **optional and configurable** per-automation. Add
-`self-evaluation: true` to the automation's behavior to enable it.
+This independent evaluation is the **natural language feedback** that GAPA uses
+for reflective prompt mutation. It's what makes future optimization possible.
 
-### Example Self-Evaluation Output
+### Example Evaluation Output
 
 ```json
 {
   "metrics": {
     "evidenceQuality": 0.85,
+    "evidenceValidity": 0.9,
     "actionability": 0.6,
     "coherence": 0.9,
-    "relevance": 0.95
+    "relevance": 0.95,
+    "completeness": 0.7,
+    "accuracy": 0.85,
+    "goalAlignment": 0.8,
+    "protocolCompliance": 0.9,
+    "boundaryRespect": 1.0
   },
   "aiFeedback": {
     "strengths": [
@@ -123,9 +131,10 @@ This step is **optional and configurable** per-automation. Add
       "Recommendation #2 lacks a concrete code example",
       "Could cross-reference with existing open issues"
     ],
+    "criticalIssues": [],
     "overallAssessment": "Strong research with good evidence. Actionability could improve with more implementation guidance."
   },
-  "score": 0.78
+  "score": 0.82
 }
 ```
 
