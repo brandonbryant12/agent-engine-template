@@ -22,7 +22,7 @@ Execution contract:
   - issue actions taken (changed/unchanged/commented) with URLs
   - memory append summary'''
 status = "ACTIVE"
-rrule = "RRULE:FREQ=MINUTELY;INTERVAL=5"
+rrule = "RRULE:FREQ=HOURLY;INTERVAL=12;BYMINUTE=0;BYDAY=SU,MO,TU,WE,TH,FR,SA"
 cwds = ["$REPO_ROOT"]
 created_at = 1771879712000
 updated_at = 1771879712000
