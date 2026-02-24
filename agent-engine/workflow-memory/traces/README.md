@@ -236,6 +236,62 @@ pnpm workflow-memory:add-entry \
 The `@` prefix for `--trace-input` and `--trace-output` reads JSON from a file
 path, which is useful when the content is large.
 
+## Dual-Write Strategy: Local + Langfuse
+
+Traces are written to **two destinations** for complementary purposes:
+
+### Local Traces (gitignored files)
+
+- Written to `traces/data/{event-id}.trace.json`
+- Used by the workflow-memory system and GEPA optimization pipeline
+- Available offline, no external dependency
+- The primary data source for DSPy/GEPA prompt optimization
+
+### Langfuse (centralized observability)
+
+- Sent via `agent-engine/scripts/langfuse/send-trace.sh` after the local write
+- Provides a dashboard for cost tracking, latency monitoring, quality trends
+- Enables team-wide visibility into automation performance
+- **Optional** — only runs when `LANGFUSE_HOST` is configured
+
+### Trace Protocol with Langfuse
+
+After the standard trace capture steps (persist local trace file), add:
+
+```bash
+# Optional: send to Langfuse (no-ops gracefully if unconfigured)
+agent-engine/scripts/langfuse/send-trace.sh \
+  --playbook "$AUTOMATION_ID" \
+  --run-id "$EVENT_ID" \
+  --playbook-version "$PLAYBOOK_VERSION" \
+  --model "$MODEL_NAME" \
+  --input @agent-engine/workflow-memory/traces/tmp/trace-input.json \
+  --output @agent-engine/workflow-memory/traces/tmp/trace-output.json \
+  --score "$SCORE" \
+  --tokens-prompt "$PROMPT_TOKENS" \
+  --tokens-completion "$COMPLETION_TOKENS" \
+  --latency-ms "$LATENCY_MS"
+```
+
+The script exits 0 even if Langfuse is unreachable, so it never breaks pipelines.
+
+### Trace Evaluator → Langfuse Scores
+
+The `trace-evaluator` automation sends its evaluation scores back to Langfuse
+as score annotations on the original trace. This creates a visible feedback loop
+in the Langfuse dashboard: you can see which runs scored well and which need
+improvement, filter by automation, and track quality trends over time.
+
+To send an evaluation score:
+
+```bash
+agent-engine/scripts/langfuse/send-trace.sh \
+  --run-id "$ORIGINAL_TRACE_ID" \
+  --playbook trace-evaluator \
+  --score "$EVALUATION_SCORE" \
+  --feedback "$EVALUATION_FEEDBACK_JSON"
+```
+
 ## Roadmap: From Traces to Optimization
 
 ```
