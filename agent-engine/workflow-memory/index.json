@@ -58,6 +58,22 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-feature-delivery-standardized-async-work-terminology-to-run-runs-across-web-surfa",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Standardized async-work terminology to Run/Runs across web surfaces",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev",
+      "frontend",
+      "ux-copy",
+      "testing"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-self-improvement-guarded-pr-closure-keywords-against-markdown-code-formatting",
     "date": "2026-02-24",
     "month": "2026-02",
