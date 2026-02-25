@@ -58,6 +58,25 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-periodic-scans-rfc-reviewer-issue-46-concurrent-finalization-during-active-run",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer: issue #46 concurrent finalization during active run",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "rfc-reviewer",
+      "periodic-scans",
+      "automation",
+      "race-condition",
+      "governance"
+    ],
+    "importance": 0.75,
+    "confidence": 0.9,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-self-improvement-guarded-pr-closure-keywords-against-markdown-code-formatting",
     "date": "2026-02-24",
     "month": "2026-02",
