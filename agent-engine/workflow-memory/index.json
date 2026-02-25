@@ -24,6 +24,22 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-feature-delivery-ready-for-dev-51-blocked-at-typecheck-gate",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Ready-for-dev #51 blocked at typecheck gate",
+    "severity": "high",
+    "status": "blocked",
+    "tags": [
+      "automation",
+      "ready-for-dev",
+      "validation",
+      "frontend"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-ready-for-dev-executor-mobile-chat-thread-controls",
     "date": "2026-02-25",
     "month": "2026-02",
