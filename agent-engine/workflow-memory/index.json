@@ -58,6 +58,29 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-periodic-scans-rfc-reviewer-no-target-run-blocked-by-placeholder-issue-persona-",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer no-target run blocked by placeholder issue/persona metadata",
+    "severity": "high",
+    "status": "open",
+    "tags": [
+      "rfc-reviewer",
+      "periodic-scans",
+      "automation",
+      "input-validation",
+      "no-target",
+      "capability:instruction-following",
+      "capability:tool-use",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.9,
+    "confidence": 0.95,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-self-improvement-guarded-pr-closure-keywords-against-markdown-code-formatting",
     "date": "2026-02-24",
     "month": "2026-02",
