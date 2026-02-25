@@ -99,6 +99,7 @@ async function startWorker(): Promise<void> {
   async function shutdown(): Promise<void> {
     if (isShuttingDown) return;
     isShuttingDown = true;
+    let shutdownFailed = false;
     console.log('\nShutting down gracefully...');
 
     const forceTimer = setTimeout(() => {
@@ -126,9 +127,10 @@ async function startWorker(): Promise<void> {
 
       console.log('Worker has stopped gracefully.');
     } catch (error) {
+      shutdownFailed = true;
       console.error('Error during shutdown:', error);
     } finally {
-      process.exit(0);
+      process.exit(shutdownFailed ? 1 : 0);
     }
   }
 

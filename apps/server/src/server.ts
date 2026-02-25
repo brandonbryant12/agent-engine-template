@@ -79,6 +79,7 @@ Hono
   const shutdown = async () => {
     if (isShuttingDown) return;
     isShuttingDown = true;
+    let shutdownFailed = false;
     console.log('\nShutting down gracefully...');
 
     const forceTimer = setTimeout(() => {
@@ -90,8 +91,10 @@ Hono
     try {
       await new Promise<void>((resolve) => {
         server.close((error) => {
-          if (error) console.error('Error closing HTTP server:', error);
-          else console.log('HTTP server closed');
+          if (error) {
+            shutdownFailed = true;
+            console.error('Error closing HTTP server:', error);
+          } else console.log('HTTP server closed');
           resolve();
         });
       });
@@ -114,9 +117,10 @@ Hono
 
       console.log('Server has stopped gracefully.');
     } catch (error) {
+      shutdownFailed = true;
       console.error('Error during shutdown:', error);
     } finally {
-      process.exit(0);
+      process.exit(shutdownFailed ? 1 : 0);
     }
   };
 

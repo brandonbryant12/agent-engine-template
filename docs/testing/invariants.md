@@ -87,6 +87,20 @@ Required for all agent-authored backend changes.
 | `Layer.sync` in non-test runtime files must receive class/factory-style constructor functions | Misusing sync layers for prebuilt values or plain objects |
 | `Layer.effect` in non-test runtime files must use Effect-backed constructor expressions or identifiers bound to `Effect.*` | Losing dependency-aware initialization semantics in runtime layer graphs |
 
+### Telemetry Lifecycle Invariants
+<!-- enforced-by: invariant-test -->
+
+**File:** `packages/testing/src/__tests__/telemetry-lifecycle.invariants.test.ts`
+
+| Rule | What It Prevents |
+|---|---|
+| `apps/server/src/server.ts` and `apps/worker/src/worker.ts` must initialize telemetry via `initTelemetry(...)` | Startup refactors that silently skip telemetry bootstrapping |
+| Both entrypoints must register `SIGINT`/`SIGTERM` graceful shutdown handlers | Drift that removes process-signal cleanup flow |
+| Both entrypoints must call `shutdownTelemetry()` in graceful shutdown | Losing exporter flush/shutdown and incident trace tails |
+| Both entrypoints must map graceful cleanup failures to non-zero exit code | False healthy shutdown signals (`process.exit(0)` on cleanup failure) |
+
+See lifecycle context in [`docs/architecture/observability.md`](../architecture/observability.md).
+
 ### Invariant Docs Sync
 <!-- enforced-by: invariant-test -->
 

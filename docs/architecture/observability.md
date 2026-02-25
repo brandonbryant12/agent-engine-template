@@ -19,3 +19,14 @@ Use protocol-aware logging levels from error classes:
 - `warn`
 - `error`
 - `error-with-stack`
+
+## Runtime Lifecycle Contract
+
+Server and worker entrypoints must preserve telemetry lifecycle and graceful-shutdown semantics:
+- Initialize telemetry at startup with `initTelemetry(...)`.
+- Register `SIGINT` and `SIGTERM` handlers that execute graceful cleanup.
+- Call `shutdownTelemetry()` during graceful shutdown.
+- Exit with non-zero status when any graceful-shutdown cleanup step fails.
+
+This contract is enforced by invariants in:
+- `packages/testing/src/__tests__/telemetry-lifecycle.invariants.test.ts`
