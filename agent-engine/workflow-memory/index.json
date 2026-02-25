@@ -24,6 +24,30 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-feature-delivery-ready-for-dev-executor-no-op",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev executor no-op",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "triage",
+      "no-op",
+      "ready-for-dev",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.5,
+    "recency": 1,
+    "confidence": 0.99,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-shipped-prompt-registry-for-chat-general",
     "date": "2026-02-25",
     "month": "2026-02",
