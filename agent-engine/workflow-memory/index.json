@@ -1,5 +1,30 @@
 [
   {
+    "id": "2026-02-25-architecture-adr-guard-rfc-reviewer-finalized-issue-46-with-approved-decision",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Architecture + ADR Guard",
+    "title": "RFC reviewer finalized issue #46 with approved decision",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "rfc-reviewer",
+      "architecture-adr-guard",
+      "github-issue",
+      "decision",
+      "labels",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-dynamics:write",
+      "capability:instruction-following",
+      "capability:planning",
+      "failure:env-drift"
+    ],
+    "importance": 0.84,
+    "confidence": 0.9,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
