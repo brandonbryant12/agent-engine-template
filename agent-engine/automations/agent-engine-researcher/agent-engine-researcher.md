@@ -9,6 +9,16 @@ Use gpt-5.3-codex with reasoning effort xhigh and keep reasoning at xhigh for th
 
 Preflight GitHub access first by running `gh auth status`, `gh repo view --json viewerPermission`, and `gh issue list --limit 1`; if any command fails, stop and report blocker details in inbox update and automation memory.
 
+Runtime bootstrap + preflight (required before research logic in fresh worktrees):
+1. Run `zsh -lic 'cd "$PWD" && pnpm install --frozen-lockfile --prefer-offline'`.
+2. If install fails due to transient network/DNS errors (`ENOTFOUND`, `EAI_AGAIN`, `ECONNRESET`, `ETIMEDOUT`):
+  - check registries: `npm config get registry` and `pnpm config get registry`
+  - retry: `npm_config_registry=https://registry.npmjs.org pnpm install --frozen-lockfile`
+  - retry once more: `npm_config_registry=https://registry.npmjs.com pnpm install --frozen-lockfile`
+  - if dependency-state corruption is indicated, remove `node_modules` once and retry install
+3. Run runtime preflight: `zsh -lic 'cd "$PWD" && pnpm workflow-memory:retrieve --workflow "Periodic Scans" --limit 1 --min-score 0'`.
+4. If bootstrap/preflight still fails, stop early before research execution and record diagnostics in run output and workflow memory (`node -v`, `pnpm -v`, `npm -v`, `nslookup registry.npmjs.org`, `curl -I https://registry.npmjs.org/`).
+
 GitHub interaction policy: use `gh` CLI for all GitHub interactions in this run (issue/PR search/read/write, comments, labels, reactions, and metadata). Do not use browser/manual edits or non-`gh` GitHub clients.
 
 Random-walk protocol:

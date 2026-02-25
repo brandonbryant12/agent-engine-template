@@ -8,6 +8,7 @@ const workflowsDir = resolve(scriptDir, "../../workflows");
 const registryPath = resolve(workflowsDir, "registry.json");
 const schemaPath = resolve(workflowsDir, "registry.schema.json");
 const repoRoot = resolve(workflowsDir, "../..");
+const AUTOMATION_LANE_FILE_EXTENSIONS = ["md", "toml"];
 
 async function pathExists(targetPath) {
   try {
@@ -116,20 +117,24 @@ export async function readWorkflowRegistry() {
     }
 
     for (const lane of entry.automationLanes ?? []) {
-      const lanePath = resolve(
-        repoRoot,
-        "agent-engine",
-        "automations",
-        lane,
-        `${lane}.md`,
-      );
-      validationTasks.push(
-        pathExists(lanePath).then((exists) => {
-          if (!exists) {
-            issues.push(`Missing automation lane for "${entry.id}": agent-engine/automations/${lane}/${lane}.md`);
-          }
-        }),
-      );
+      for (const extension of AUTOMATION_LANE_FILE_EXTENSIONS) {
+        const lanePath = resolve(
+          repoRoot,
+          "agent-engine",
+          "automations",
+          lane,
+          `${lane}.${extension}`,
+        );
+        validationTasks.push(
+          pathExists(lanePath).then((exists) => {
+            if (!exists) {
+              issues.push(
+                `Missing automation lane file for "${entry.id}": agent-engine/automations/${lane}/${lane}.${extension}`,
+              );
+            }
+          }),
+        );
+      }
     }
   }
 
