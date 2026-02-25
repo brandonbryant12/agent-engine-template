@@ -58,6 +58,30 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-periodic-scans-best-practice-researcher-meso-scan-backend-patterns-effect-use-c",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "best-practice-researcher: meso scan (backend-patterns-effect-use-case-repository)",
+    "severity": "high",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "best-practice-researcher",
+      "backend-patterns-effect-use-case-repository"
+    ],
+    "importance": 0.89,
+    "confidence": 0.86,
+    "scan": {
+      "walkMode": "weighted-random",
+      "scope": "meso",
+      "domain": "backend-patterns-effect-use-case-repository",
+      "signal": "4"
+    },
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-self-improvement-guarded-pr-closure-keywords-against-markdown-code-formatting",
     "date": "2026-02-24",
     "month": "2026-02",
