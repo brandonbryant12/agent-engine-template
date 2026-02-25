@@ -1,6 +1,14 @@
 import { useChat } from '@ai-sdk/react';
 import { eventIteratorToUnproxiedDataStream } from '@repo/api/client';
 import { Button } from '@repo/ui/components/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@repo/ui/components/dropdown-menu';
 import { Textarea } from '@repo/ui/components/textarea';
 import { useNavigate } from '@tanstack/react-router';
 import { type UIMessage } from 'ai';
@@ -19,6 +27,122 @@ import {
   saveThreads,
 } from '@/lib/chat-utils';
 import { readErrorMessage } from '@/lib/run-utils';
+
+interface ThreadListProps {
+  threads: StoredThread[];
+  activeThreadId: string | null;
+  onSelect: (threadId: string) => void;
+}
+
+function ThreadList({ threads, activeThreadId, onSelect }: ThreadListProps) {
+  if (threads.length === 0) {
+    return (
+      <div className="empty-state rounded-xl py-6">
+        <p className="text-sm text-muted-foreground">No threads yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="space-y-1">
+      {threads.map((thread, index) => (
+        <li
+          key={thread.id}
+          className={`animate-fade-in stagger-${String(Math.min(index + 1, 6))}`}
+        >
+          <button
+            type="button"
+            onClick={() => onSelect(thread.id)}
+            className={
+              thread.id === activeThreadId
+                ? 'w-full rounded-xl border border-primary/30 bg-primary/5 p-3 text-left transition-all duration-200'
+                : 'w-full rounded-xl border border-transparent p-3 text-left transition-all duration-200 hover:bg-muted/50'
+            }
+          >
+            <p className="truncate text-sm font-medium text-foreground">
+              {thread.title}
+            </p>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              {thread.messages.length === 0
+                ? 'No messages yet'
+                : extractMessageText(thread.messages[thread.messages.length - 1]!)}
+            </p>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+interface MobileThreadMenuProps {
+  threads: StoredThread[];
+  activeThreadId: string | null;
+  activeThreadTitle: string;
+  onCreateThread: () => void;
+  onSelectThread: (threadId: string) => void;
+}
+
+function MobileThreadMenu({
+  threads,
+  activeThreadId,
+  activeThreadTitle,
+  onCreateThread,
+  onSelectThread,
+}: MobileThreadMenuProps) {
+  return (
+    <div className="mb-4 flex items-center justify-between gap-3 lg:hidden">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="sm" aria-label="Open thread menu">
+            Threads ({threads.length})
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="start"
+          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[16rem]"
+        >
+          <DropdownMenuLabel>Switch thread</DropdownMenuLabel>
+          {threads.length === 0 ? (
+            <DropdownMenuItem disabled>No threads yet.</DropdownMenuItem>
+          ) : (
+            threads.map((thread) => (
+              <DropdownMenuItem
+                key={thread.id}
+                onSelect={() => onSelectThread(thread.id)}
+              >
+                {thread.id === activeThreadId ? 'Current - ' : ''}
+                {thread.title}
+              </DropdownMenuItem>
+            ))
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={onCreateThread}>+ New thread</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <p
+        className="max-w-[55%] truncate text-xs font-medium text-muted-foreground"
+        aria-live="polite"
+        aria-label="Current active thread"
+      >
+        {activeThreadTitle}
+      </p>
+    </div>
+  );
+}
+
+function MobileActiveThreadBadge({ title }: { title: string }) {
+  return (
+    <div className="mb-2 flex items-center justify-between rounded-xl border border-border/60 bg-background/60 px-3 py-2 lg:hidden">
+      <p className="text-meta">Active thread</p>
+      <p
+        className="max-w-[70%] truncate text-xs font-medium text-foreground"
+        aria-label="Current active thread"
+      >
+        {title}
+      </p>
+    </div>
+  );
+}
 
 export function ChatPage() {
   const { data: session } = authClient.useSession();
@@ -97,6 +221,12 @@ export function ChatPage() {
   const threadsWithActiveMessages = useMemo(
     () => applyActiveMessages(threads),
     [applyActiveMessages, threads],
+  );
+  const activeThread = useMemo(
+    () =>
+      threadsWithActiveMessages.find((thread) => thread.id === activeThreadId) ??
+      null,
+    [activeThreadId, threadsWithActiveMessages],
   );
 
   const threadsRef = useRef<StoredThread[]>(threadsWithActiveMessages);
@@ -177,47 +307,25 @@ export function ChatPage() {
           </Button>
         </div>
         <div className="flex-1 overflow-y-auto p-3 pt-0">
-          {threadsWithActiveMessages.length === 0 ? (
-            <div className="empty-state rounded-xl py-6">
-              <p className="text-sm text-muted-foreground">No threads yet.</p>
-            </div>
-          ) : (
-            <ul className="space-y-1">
-              {threadsWithActiveMessages.map((thread, index) => (
-                <li
-                  key={thread.id}
-                  className={`animate-fade-in stagger-${String(Math.min(index + 1, 6))}`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => selectThread(thread.id)}
-                    className={
-                      thread.id === activeThreadId
-                        ? 'w-full rounded-xl border border-primary/30 bg-primary/5 p-3 text-left transition-all duration-200'
-                        : 'w-full rounded-xl border border-transparent p-3 text-left transition-all duration-200 hover:bg-muted/50'
-                    }
-                  >
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {thread.title}
-                    </p>
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {thread.messages.length === 0
-                        ? 'No messages yet'
-                        : extractMessageText(
-                            thread.messages[thread.messages.length - 1]!,
-                          )}
-                    </p>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <ThreadList
+            threads={threadsWithActiveMessages}
+            activeThreadId={activeThreadId}
+            onSelect={selectThread}
+          />
         </div>
       </aside>
 
       {/* Chat Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+          <MobileThreadMenu
+            threads={threadsWithActiveMessages}
+            activeThreadId={activeThreadId}
+            activeThreadTitle={activeThread?.title ?? 'New chat'}
+            onCreateThread={createThread}
+            onSelectThread={selectThread}
+          />
+
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center">
               <div className="empty-state-lg w-full max-w-md animate-fade-in-up">
@@ -264,6 +372,7 @@ export function ChatPage() {
         {/* Composer */}
         <div className="shrink-0 border-t border-border bg-card/80 p-4 backdrop-blur-sm">
           <div className="mx-auto max-w-3xl">
+            <MobileActiveThreadBadge title={activeThread?.title ?? 'New chat'} />
             {error ? (
               <p className="mb-2 text-sm text-destructive">
                 {error.message || 'Streaming failed.'}
