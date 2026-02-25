@@ -1,4 +1,10 @@
 import { Schema } from 'effect';
+import type {
+  PromptKeyNotFoundError,
+  PromptVariableSchemaMismatchError,
+  PromptVersionBlockedError,
+  PromptVersionNotFoundError,
+} from './chat/prompts/errors';
 
 // =============================================================================
 // LLM Errors
@@ -246,4 +252,8 @@ export type AIError =
   | ImageGenRateLimitError
   | ImageGenContentFilteredError
   | ResearchError
-  | ResearchTimeoutError;
+  | ResearchTimeoutError
+  | PromptKeyNotFoundError
+  | PromptVersionNotFoundError
+  | PromptVersionBlockedError
+  | PromptVariableSchemaMismatchError;

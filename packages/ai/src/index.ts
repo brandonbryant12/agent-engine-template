@@ -91,7 +91,18 @@ export {
 } from './research';
 
 // Chat
-export { streamGeneralChat, type StreamGeneralChatInput } from './chat';
+export {
+  streamGeneralChat,
+  resolvePrompt,
+  PromptKeyNotFoundError,
+  PromptVersionNotFoundError,
+  PromptVersionBlockedError,
+  PromptVariableSchemaMismatchError,
+  type StreamGeneralChatInput,
+  type ResolvePromptInput,
+  type ResolvedPrompt,
+  type PromptResolverError,
+} from './chat';
 
 // Import for combined layer
 import type { ImageGen } from './image-gen';
