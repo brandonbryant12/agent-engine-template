@@ -15,7 +15,7 @@ Use this file to capture shipped ideas discovered through automation/research la
 - Date: 2026-02-25
 - Source lane/workflow: ready-for-dev-executor / Feature Delivery + Architecture + ADR Guard
 - Issue: https://github.com/brandonbryant12/agent-engine-template/issues/58
-- PR: pending (will be updated after PR creation)
+- PR: https://github.com/brandonbryant12/agent-engine-template/pull/71
 - Paper/reference links: https://opentelemetry.io/docs/languages/js/getting-started/nodejs/, https://nodejs.org/api/process.html#event-uncaughtexception
 - Idea(s) adopted: centralize fatal-process-event handling with bounded cleanup before forced exit so telemetry/lifecycle cleanup has a deterministic last-gasp window.
 - Implemented in: `packages/api/src/server/fatal-error-handler.ts`, `apps/server/src/server.ts`, `apps/worker/src/worker.ts`, and `packages/api/src/server/__tests__/fatal-error-handler.test.ts`.
