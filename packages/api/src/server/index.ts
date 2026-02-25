@@ -46,6 +46,9 @@ export {
   shutdownSSEPublisher,
 } from './publisher';
 
+// Export fatal process-event handler utilities
+export { createFatalErrorHandlers, type FatalErrorHandlerConfig } from './fatal-error-handler';
+
 export type AppRouter = typeof appRouter;
 
 export const createApi = ({
