@@ -21,6 +21,7 @@ Template scope:
 ## Directory Layout
 
 - `docs/architecture/` - boundaries, security, telemetry
+- `docs/architecture/prompt-registry.md` - prompt artifact/versioning and resolver policy
 - `docs/patterns/` - backend implementation patterns
 - `docs/frontend/` - web app architecture and conventions
 - `docs/testing/` - testing expectations by change type
