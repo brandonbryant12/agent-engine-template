@@ -1,5 +1,20 @@
 [
   {
+    "id": "2026-02-25-feature-delivery-shipped-prompt-registry-for-chat-general",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Shipped prompt registry for chat general",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev",
+      "prompts",
+      "ai"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-self-improvement-guarded-pr-closure-keywords-against-markdown-code-formatting",
     "date": "2026-02-24",
     "month": "2026-02",
