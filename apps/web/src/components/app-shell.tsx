@@ -128,7 +128,7 @@ function SignOutIcon() {
 const navItems = [
   { to: '/' as const, label: 'Dashboard', Icon: DashboardIcon, exact: true },
   { to: '/chat' as const, label: 'Chat', Icon: ChatIcon, exact: false },
-  { to: '/jobs' as const, label: 'Jobs', Icon: JobsIcon, exact: false },
+  { to: '/jobs' as const, label: 'Runs', Icon: JobsIcon, exact: false },
 ];
 
 /* ─── App Shell ─── */

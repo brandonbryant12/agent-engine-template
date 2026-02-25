@@ -219,9 +219,9 @@ export function DashboardPage() {
             <LayersSmallIcon />
           </div>
           <div>
-            <p className="action-card-title">Job Queue</p>
+            <p className="action-card-title">Run Queue</p>
             <p className="action-card-description">
-              View and manage background runs
+              View and manage runs
             </p>
           </div>
         </Link>
