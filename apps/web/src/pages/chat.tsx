@@ -281,16 +281,14 @@ export function ChatPage() {
         threadId: activeThreadId ?? undefined,
       });
       setDraft('');
-      toast.success('Background run queued.', {
+      toast.success('Run queued.', {
         action: {
-          label: 'View Jobs',
+          label: 'View Runs',
           onClick: () => void navigate({ to: '/jobs' }),
         },
       });
     } catch (queueError) {
-      toast.error(
-        readErrorMessage(queueError, 'Failed to queue background run.'),
-      );
+      toast.error(readErrorMessage(queueError, 'Failed to queue run.'));
     } finally {
       setIsQueueingRun(false);
     }
@@ -334,7 +332,7 @@ export function ChatPage() {
                 </div>
                 <p className="empty-state-title">Start a conversation</p>
                 <p className="empty-state-description">
-                  Send a message or queue a background run to get started.
+                  Send a message or queue a run to get started.
                 </p>
               </div>
             </div>
@@ -407,7 +405,7 @@ export function ChatPage() {
                     isQueueingRun || isStreaming || draft.trim().length === 0
                   }
                 >
-                  {isQueueingRun ? 'Queueing...' : 'Background Run'}
+                  {isQueueingRun ? 'Queueing...' : 'Queue Run'}
                 </Button>
                 <Button
                   size="sm"

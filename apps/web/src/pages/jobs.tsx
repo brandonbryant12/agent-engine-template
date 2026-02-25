@@ -174,11 +174,9 @@ export function JobsPage() {
     <div className="page-container animate-fade-in">
       {/* Header */}
       <div className="mb-8">
-        <p className="page-eyebrow">Jobs</p>
-        <h1 className="page-title">Job Queue</h1>
-        <p className="text-body mt-2">
-          Manage and monitor background runs.
-        </p>
+        <p className="page-eyebrow">Runs</p>
+        <h1 className="page-title">Run Queue</h1>
+        <p className="text-body mt-2">Manage and monitor runs.</p>
       </div>
 
       {/* Stats */}
@@ -230,7 +228,7 @@ export function JobsPage() {
               void onQueueRun();
             }
           }}
-          placeholder="Enter a prompt for the background run..."
+          placeholder="Enter a prompt for the run..."
           className="min-h-[80px] resize-none"
           aria-label="Run prompt"
         />
