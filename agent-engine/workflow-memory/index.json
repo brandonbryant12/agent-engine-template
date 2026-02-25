@@ -58,6 +58,25 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-self-improvement-ready-for-dev-executor-shipped-lane-preflight-wrapper-parity",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Self-Improvement",
+    "title": "ready-for-dev executor shipped lane preflight + wrapper parity",
+    "severity": "high",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev-executor",
+      "self-improvement",
+      "automation-lanes",
+      "workflow-registry"
+    ],
+    "importance": 0.88,
+    "recency": 1,
+    "confidence": 0.95,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-24-self-improvement-guarded-pr-closure-keywords-against-markdown-code-formatting",
     "date": "2026-02-24",
     "month": "2026-02",
