@@ -58,6 +58,37 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-periodic-scans-rfc-reviewer-fixed-target-placeholder-blocked-acknowledgement-on",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "rfc-reviewer fixed-target placeholder blocked acknowledgement on non-resolvable issue token",
+    "severity": "high",
+    "status": "open",
+    "tags": [
+      "automation",
+      "periodic-scans",
+      "rfc-reviewer",
+      "memory",
+      "workflow-memory",
+      "tool:gh",
+      "tool:workflow-memory:add-entry",
+      "tool:workflow-memory:sync",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:retrieve",
+      "memory-dynamics:write",
+      "capability:instruction-following",
+      "capability:tool-use",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.95,
+    "confidence": 0.99,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-periodic-scans-rfc-reviewer-fixed-target-placeholder-still-blocks-issue-interac",
     "date": "2026-02-25",
     "month": "2026-02",
