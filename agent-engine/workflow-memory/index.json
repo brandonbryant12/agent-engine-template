@@ -24,6 +24,26 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-25-feature-delivery-ready-for-dev-executor-no-op-triage",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor no-op triage",
+    "severity": "low",
+    "status": "resolved",
+    "tags": [
+      "ready-for-dev-executor",
+      "no-op",
+      "triage",
+      "tool:gh",
+      "tool:workflow-memory:add-entry",
+      "tool:workflow-memory:sync"
+    ],
+    "importance": 0.7,
+    "confidence": 0.94,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-shipped-prompt-registry-for-chat-general",
     "date": "2026-02-25",
     "month": "2026-02",
