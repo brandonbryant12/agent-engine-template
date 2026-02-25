@@ -1,5 +1,23 @@
 [
   {
+    "id": "2026-02-25-architecture-adr-guard-ready-for-dev-executor-merged-telemetry-lifecycle-bundle-56-57",
+    "date": "2026-02-25",
+    "month": "2026-02",
+    "workflow": "Architecture + ADR Guard",
+    "title": "ready-for-dev-executor merged telemetry lifecycle bundle (#56,#57)",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev-executor",
+      "observability",
+      "telemetry",
+      "invariants"
+    ],
+    "importance": 0.84,
+    "confidence": 0.93,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
