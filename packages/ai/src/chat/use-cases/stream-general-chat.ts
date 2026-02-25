@@ -6,7 +6,12 @@ import {
 } from 'ai';
 import { Effect } from 'effect';
 import { LLM } from '../../llm/service';
-import { resolvePrompt } from '../prompts';
+import {
+  GENERAL_CHAT_LEGACY_INLINE_FALLBACK,
+  GENERAL_CHAT_PROMPT_CHANNEL,
+  GENERAL_CHAT_PROMPT_KEY,
+  resolvePrompt,
+} from '../prompts';
 
 export interface StreamGeneralChatInput {
   readonly messages: UIMessage[];
@@ -40,7 +45,7 @@ const logPromptDecision = (
   }
 
   return baseLog.pipe(
-    Effect.annotateLogs('prompt.failure_reason', prompt.fallbackReason),
+    Effect.annotateLogs('prompt.failureReason', prompt.fallbackReason),
   );
 };
 
@@ -52,23 +57,16 @@ export const streamGeneralChat = (input: StreamGeneralChatInput) =>
       ? 'explicitVersion'
       : 'channelDefault';
     const prompt = yield* resolvePrompt({
-      key: 'chat.general.system',
-      channel: 'chat.general',
+      key: GENERAL_CHAT_PROMPT_KEY,
+      channel: GENERAL_CHAT_PROMPT_CHANNEL,
       version: input.promptVersion,
       compatibilityMode: input.promptCompatibilityMode ?? 'legacy-inline-fallback',
-      legacyFallback: `You are the default AI assistant for Agent Engine Template.
-
-Guidelines:
-- Be concise, clear, and practical.
-- Prefer structured answers when they help readability.
-- If you are uncertain, state assumptions explicitly.
-- Ask one clarifying question only when required.
-- Do not invent capabilities that are not requested.`,
+      legacyFallback: GENERAL_CHAT_LEGACY_INLINE_FALLBACK,
     }).pipe(
       Effect.withSpan('prompt.resolveForGeneralChat', {
         captureStackTrace: false,
         attributes: {
-          'prompt.key': 'chat.general.system',
+          'prompt.key': GENERAL_CHAT_PROMPT_KEY,
           'prompt.policy': promptPolicy,
         },
       }),
@@ -88,11 +86,18 @@ Guidelines:
 
     yield* logPromptDecision(promptPolicy, prompt);
 
-    return result.toUIMessageStream();
-  }).pipe(
-    Effect.withSpan('useCase.streamGeneralChat', {
-      attributes: {
-        'chat.messageCount': input.messages.length,
-      },
-    }),
-  );
+    return yield* Effect.sync(() => result.toUIMessageStream()).pipe(
+      Effect.withSpan('useCase.streamGeneralChat', {
+        attributes: {
+          'chat.messageCount': input.messages.length,
+          'prompt.key': prompt.key,
+          'prompt.version': prompt.version,
+          'prompt.policy': prompt.policy,
+          'prompt.outcome': prompt.outcome,
+          ...(prompt.fallbackReason
+            ? { 'prompt.failureReason': prompt.fallbackReason }
+            : {}),
+        },
+      }),
+    );
+  });

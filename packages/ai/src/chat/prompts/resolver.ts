@@ -45,9 +45,20 @@ export interface ResolvedPrompt {
 
 const EmptyVariablesSchema = Schema.Struct({});
 
+export const GENERAL_CHAT_PROMPT_KEY = 'chat.general.system';
+export const GENERAL_CHAT_PROMPT_CHANNEL: PromptChannel = 'chat.general';
+export const GENERAL_CHAT_LEGACY_INLINE_FALLBACK = `You are the default AI assistant for Agent Engine Template.
+
+Guidelines:
+- Be concise, clear, and practical.
+- Prefer structured answers when they help readability.
+- If you are uncertain, state assumptions explicitly.
+- Ask one clarifying question only when required.
+- Do not invent capabilities that are not requested.`;
+
 const PromptArtifacts: readonly PromptArtifact[] = [
   {
-    key: 'chat.general.system',
+    key: GENERAL_CHAT_PROMPT_KEY,
     version: 'v0',
     status: 'blocked',
     owner: 'ai-platform',
@@ -57,24 +68,17 @@ const PromptArtifacts: readonly PromptArtifact[] = [
     content: 'Blocked prompt placeholder',
   },
   {
-    key: 'chat.general.system',
+    key: GENERAL_CHAT_PROMPT_KEY,
     version: 'v1',
     status: 'active',
     owner: 'ai-platform',
     inputSchema: EmptyVariablesSchema,
     contentHash:
       'sha256:6632f5d91d856d5bfd2ec5cce9520517b5724345ee6f68d57743ce83a4d8b715',
-    content: `You are the default AI assistant for Agent Engine Template.
-
-Guidelines:
-- Be concise, clear, and practical.
-- Prefer structured answers when they help readability.
-- If you are uncertain, state assumptions explicitly.
-- Ask one clarifying question only when required.
-- Do not invent capabilities that are not requested.`,
+    content: GENERAL_CHAT_LEGACY_INLINE_FALLBACK,
   },
   {
-    key: 'chat.general.system',
+    key: GENERAL_CHAT_PROMPT_KEY,
     version: 'v2',
     status: 'deprecated',
     owner: 'ai-platform',
@@ -103,8 +107,8 @@ Guidelines:
 ];
 
 const PromptChannelDefaults: Record<PromptChannel, Record<string, string>> = {
-  'chat.general': {
-    'chat.general.system': 'v1',
+  [GENERAL_CHAT_PROMPT_CHANNEL]: {
+    [GENERAL_CHAT_PROMPT_KEY]: 'v1',
   },
 };
 
