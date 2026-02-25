@@ -6,6 +6,7 @@ configureProxy();
 
 import {
   configureSSEPublisher,
+  createFatalErrorHandlers,
   createServerRuntime,
   shutdownSSEPublisher,
   ssePublisher,
@@ -17,23 +18,17 @@ import { MAX_CONCURRENT_JOBS, QUEUE_DEFAULTS } from './constants';
 import { env } from './env';
 import { createUnifiedWorker } from './unified-worker';
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Promise Rejection:', {
-    reason:
-      reason instanceof Error
-        ? { message: reason.message, stack: reason.stack }
-        : reason,
-    promise: String(promise),
-  });
+const fatalHandlers = createFatalErrorHandlers({
+  processName: 'worker',
+  timeoutMs: 10_000,
+  cleanup: async () => {
+    await shutdownSSEPublisher();
+    await shutdownTelemetry();
+  },
 });
 
-process.on('uncaughtException', (error) => {
-  console.error('[FATAL] Uncaught Exception:', {
-    message: error.message,
-    stack: error.stack,
-  });
-  process.exit(1);
-});
+process.on('unhandledRejection', fatalHandlers.unhandledRejection);
+process.on('uncaughtException', fatalHandlers.uncaughtException);
 
 async function startWorker(): Promise<void> {
   initTelemetry({

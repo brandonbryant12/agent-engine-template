@@ -5,30 +5,28 @@ import { configureProxy } from './proxy';
 configureProxy();
 
 import { serve } from '@hono/node-server';
-import { shutdownSSEPublisher } from '@repo/api/server';
+import {
+  createFatalErrorHandlers,
+  shutdownSSEPublisher,
+} from '@repo/api/server';
 import { verifyDbConnection } from '@repo/db/client';
 import { initTelemetry, shutdownTelemetry } from '@repo/db/telemetry';
 import { env } from './env';
 import { shutdownRateLimiters } from './middleware/rate-limit';
 import app, { db, serverRuntime } from '.';
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Promise Rejection:', {
-    reason:
-      reason instanceof Error
-        ? { message: reason.message, stack: reason.stack }
-        : reason,
-    promise: String(promise),
-  });
+const fatalHandlers = createFatalErrorHandlers({
+  processName: 'server',
+  timeoutMs: 10_000,
+  cleanup: async () => {
+    await shutdownSSEPublisher();
+    await shutdownRateLimiters();
+    await shutdownTelemetry();
+  },
 });
 
-process.on('uncaughtException', (error) => {
-  console.error('[FATAL] Uncaught Exception:', {
-    message: error.message,
-    stack: error.stack,
-  });
-  process.exit(1);
-});
+process.on('unhandledRejection', fatalHandlers.unhandledRejection);
+process.on('uncaughtException', fatalHandlers.uncaughtException);
 
 const startServer = async () => {
   initTelemetry({
