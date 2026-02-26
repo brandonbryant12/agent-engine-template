@@ -16,6 +16,13 @@ Per-request context (current user, request id) is added at handler execution tim
 - Do not instantiate new runtimes inside handlers.
 - Keep runtime layer graph deterministic.
 - Inject test layers in integration tests.
+- Keep `Effect.runSync` calls at explicit transport/process boundaries only.
+
+## Approved `Effect.runSync` Boundaries
+
+- `packages/api/src/server/index.ts` inside oRPC `onError` interceptor.
+
+`Effect.runSync` in worker or use-case internals is forbidden; compose and return `Effect` values instead.
 
 ## Layer Constructor Policy
 

@@ -59,7 +59,7 @@ const withQueue = (queue: QueueService) =>
   Effect.provide(Layer.succeed(Queue, queue));
 
 describe('handleCompletedRun', () => {
-  it('emits run_completed for valid run results', () => {
+  it('emits run_completed for valid run results', async () => {
     const publishEvent = vi.fn<(userId: string, event: SSEEvent) => void>();
     const result: RunResult = {
       title: 'Title',
@@ -68,12 +68,14 @@ describe('handleCompletedRun', () => {
       nextActions: ['C'],
     };
 
-    handleCompletedRun(
-      publishEvent,
-      'user_test',
-      createJob({
-        result,
-      }),
+    await Effect.runPromise(
+      handleCompletedRun(
+        publishEvent,
+        'user_test',
+        createJob({
+          result,
+        }),
+      ),
     );
 
     expect(publishEvent).toHaveBeenCalledTimes(1);
@@ -87,15 +89,17 @@ describe('handleCompletedRun', () => {
     );
   });
 
-  it('emits run_failed for completed jobs with invalid result payload', () => {
+  it('emits run_failed for completed jobs with invalid result payload', async () => {
     const publishEvent = vi.fn<(userId: string, event: SSEEvent) => void>();
 
-    handleCompletedRun(
-      publishEvent,
-      'user_test',
-      createJob({
-        result: { nope: 'invalid' },
-      }),
+    await Effect.runPromise(
+      handleCompletedRun(
+        publishEvent,
+        'user_test',
+        createJob({
+          result: { nope: 'invalid' },
+        }),
+      ),
     );
 
     expect(publishEvent).toHaveBeenCalledTimes(1);

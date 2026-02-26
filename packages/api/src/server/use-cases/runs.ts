@@ -1,11 +1,16 @@
 import {
+  ForbiddenError,
+  Role,
+  type User,
+  withCurrentUser,
+} from '@repo/auth';
+import {
   Queue,
   QueueJobType,
   formatError,
   type TypedJob,
 } from '@repo/queue';
 import { Effect, Schema } from 'effect';
-import type { User } from '@repo/auth/policy';
 import {
   RunResultSchema,
   type CreateRunInput,
@@ -37,6 +42,8 @@ const CREATE_RUN_SOURCE_PATH =
   'packages/api/src/server/use-cases/runs.ts:createRunUseCase';
 const LIST_RUNS_SOURCE_PATH =
   'packages/api/src/server/use-cases/runs.ts:listRunsUseCase';
+const AUTHORIZATION_SOURCE_PATH =
+  'packages/api/src/server/use-cases/runs.ts:authorizeRunUseCaseUser';
 
 const toOptionalString = (value: unknown): string | null =>
   typeof value === 'string' && value.trim().length > 0 ? value : null;
@@ -86,6 +93,21 @@ const logRunResultDecodeFailure = (
     Effect.annotateLogs('parse.error.summary', parseErrorSummary),
   );
 
+const authorizeRunUseCaseUser = (user: User): Effect.Effect<void, ForbiddenError> =>
+  withCurrentUser(user)(
+    Effect.gen(function* () {
+      if (user.role !== Role.USER && user.role !== Role.ADMIN) {
+        return yield* Effect.fail(
+          new ForbiddenError({
+            message: 'Requires user or admin role',
+          }),
+        );
+      }
+
+      return;
+    }),
+  ).pipe(Effect.withSpan('runs.authorizeUser'));
+
 const toRunOutput = (
   job: RunJob,
   sourcePath: string,
@@ -128,6 +150,10 @@ const toRunOutput = (
 
 export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
   Effect.gen(function* () {
+    yield* authorizeRunUseCaseUser(user).pipe(
+      Effect.annotateLogs('source.path', AUTHORIZATION_SOURCE_PATH),
+    );
+
     const queue = yield* Queue;
     const publisher = yield* SSEPublisher;
 
@@ -159,6 +185,10 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
 
 export const listRunsUseCase = ({ user, input }: ListRunsUseCaseInput) =>
   Effect.gen(function* () {
+    yield* authorizeRunUseCaseUser(user).pipe(
+      Effect.annotateLogs('source.path', AUTHORIZATION_SOURCE_PATH),
+    );
+
     const queue = yield* Queue;
     const jobs = yield* queue.getJobsByUser(user.id, {
       type: QueueJobType.PROCESS_AI_RUN,

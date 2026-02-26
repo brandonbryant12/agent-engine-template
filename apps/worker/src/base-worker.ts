@@ -117,11 +117,13 @@ const logAndSwallow = (label: string, error: unknown) =>
  * Handle a job failure (error or defect) by marking it failed and notifying.
  * Shared between `catchAll` and `catchAllDefect` in the forked job pipeline.
  */
-const handleJobFailure = <TPayload>(
+const handleJobFailure = <TPayload, R extends SharedServices>(
   queue: QueueService,
   job: Job,
   errorMessage: string,
-  onJobComplete: ((job: Job<TPayload>) => void) | undefined,
+  onJobComplete:
+    | ((job: Job<TPayload>) => Effect.Effect<void, never, R>)
+    | undefined,
 ) =>
   queue.updateJobStatus(job.id, JobStatus.FAILED, undefined, errorMessage).pipe(
     Effect.tap((result) =>
@@ -130,7 +132,7 @@ const handleJobFailure = <TPayload>(
       ),
     ),
     Effect.tap((result) =>
-      Effect.sync(() => onJobComplete?.(result as Job<TPayload>)),
+      onJobComplete ? onJobComplete(result as Job<TPayload>) : Effect.void,
     ),
     Effect.catchAll((updateErr) =>
       Effect.logError(
@@ -149,7 +151,9 @@ export interface CreateWorkerOptions<
   processJob: (
     job: Job<TPayload>,
   ) => Effect.Effect<unknown, JobProcessingError, R>;
-  onJobComplete?: (job: Job<TPayload>) => void;
+  onJobComplete?: (
+    job: Job<TPayload>,
+  ) => Effect.Effect<void, never, R>;
   onPollCycle?: (
     pollCount: number,
   ) => Effect.Effect<void, never, SharedServices>;
@@ -194,7 +198,7 @@ export const createWorker = <
     );
 
   const notifyJobComplete = (job: Job) =>
-    Effect.sync(() => onJobComplete?.(job as Job<TPayload>));
+    onJobComplete ? onJobComplete(job as Job<TPayload>) : Effect.void;
 
   const closeJobScope = (scope: CloseableScope) =>
     Effect.sync(() => {
@@ -225,10 +229,15 @@ export const createWorker = <
         ),
         Effect.tap(notifyJobComplete),
         Effect.catchAll((err) =>
-          handleJobFailure(queue, job, formatError(err), onJobComplete),
+          handleJobFailure<TPayload, R>(
+            queue,
+            job,
+            formatError(err),
+            onJobComplete,
+          ),
         ),
         Effect.catchAllDefect((defect) =>
-          handleJobFailure(
+          handleJobFailure<TPayload, R>(
             queue,
             job,
             `Unexpected defect: ${formatError(defect)}`,
@@ -355,16 +364,14 @@ export const createWorker = <
       }),
     ).pipe(
       Effect.annotateLogs('worker', name),
+      Effect.tapError((error) =>
+        Effect.logWarning(`${name} error, will retry...`).pipe(
+          Effect.annotateLogs('error', String(error)),
+        ),
+      ),
       Effect.retry({
         schedule: retrySchedule,
-        while: (error) => {
-          Effect.runSync(
-            Effect.logWarning(`${name} error, will retry...`).pipe(
-              Effect.annotateLogs('error', String(error)),
-            ),
-          );
-          return true;
-        },
+        while: () => true,
       }),
       Effect.tapError((error) =>
         Effect.logError(
