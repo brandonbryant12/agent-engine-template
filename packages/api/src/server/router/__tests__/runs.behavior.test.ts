@@ -246,6 +246,8 @@ describe('runs router behavior', () => {
       let enqueueUserId: string | undefined;
 
       const queue = createMockQueueService({
+        getJobsByUser: (() =>
+          Effect.succeed([])) as QueueService['getJobsByUser'],
         enqueue: ((type, payload, userId) => {
           enqueueType = type;
           enqueuePayload = payload;
@@ -284,6 +286,7 @@ describe('runs router behavior', () => {
         prompt: 'Plan quarterly roadmap',
         threadId: 'thread_123',
         userId: TEST_USER.id,
+        idempotencyKey: expect.any(String),
       });
       expect(enqueueUserId).toBe(TEST_USER.id);
       expect(publish).toHaveBeenCalledTimes(1);
@@ -318,6 +321,8 @@ describe('runs router behavior', () => {
     it('maps queue failure to protocol-aware INTERNAL_ERROR response shape', async () => {
       const runtime = createRuntime(
         createMockQueueService({
+          getJobsByUser: (() =>
+            Effect.succeed([])) as QueueService['getJobsByUser'],
           enqueue: () =>
             Effect.fail(new QueueError({ message: 'queue unavailable' })),
         }),

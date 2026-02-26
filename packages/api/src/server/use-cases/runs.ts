@@ -8,18 +8,23 @@ import {
   Queue,
   QueueJobType,
   formatError,
+  type JobPayload,
   type TypedJob,
 } from '@repo/queue';
-import { Effect, Schema } from 'effect';
+import { Cause, Effect, Schedule, Schema } from 'effect';
 import {
   RunResultSchema,
   type CreateRunInput,
   type RunOutput,
   type RunResult,
 } from '../../contracts/runs';
-import { SSEPublisher } from '../sse-publisher-service';
+import {
+  SSEPublisher,
+  type SSEPublisherService,
+} from '../sse-publisher-service';
 
 type RunJob = TypedJob<typeof QueueJobType.PROCESS_AI_RUN>;
+type RunPayload = JobPayload<typeof QueueJobType.PROCESS_AI_RUN>;
 
 type ListRunsInput = {
   readonly limit?: number;
@@ -44,9 +49,72 @@ const LIST_RUNS_SOURCE_PATH =
   'packages/api/src/server/use-cases/runs.ts:listRunsUseCase';
 const AUTHORIZATION_SOURCE_PATH =
   'packages/api/src/server/use-cases/runs.ts:authorizeRunUseCaseUser';
+const RUN_PUBLISH_SOURCE_PATH =
+  'packages/api/src/server/use-cases/runs.ts:publishQueuedRunEvent';
+const RUN_CREATE_IDEMPOTENCY_WINDOW_MS = 2 * 60 * 1000;
+const RUN_CREATE_IDEMPOTENCY_RECENT_LIMIT = 25;
+const RUN_CREATE_EVENT_PUBLISH_RETRY_SCHEDULE = Schedule.intersect(
+  Schedule.exponential('100 millis'),
+  Schedule.recurs(3),
+);
 
 const toOptionalString = (value: unknown): string | null =>
   typeof value === 'string' && value.trim().length > 0 ? value : null;
+
+const normalizePrompt = (value: string): string => value.trim();
+const normalizeThreadId = (value: string | null | undefined): string | null => {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+const toCreateRunIdempotencyKey = (
+  userId: string,
+  prompt: string,
+  threadId: string | null,
+): string => `${userId}:${prompt}:${threadId ?? ''}`;
+
+const isRetryableRunStatus = (status: RunJob['status']): boolean =>
+  status === 'pending' || status === 'processing' || status === 'completed';
+
+const isRunInsideIdempotencyWindow = (
+  createdAt: Date,
+  nowMs: number,
+): boolean => nowMs - createdAt.getTime() <= RUN_CREATE_IDEMPOTENCY_WINDOW_MS;
+
+const payloadMatchesIdempotencyKey = (
+  payload: RunPayload,
+  idempotencyKey: string,
+): boolean => payload.idempotencyKey === idempotencyKey;
+
+const payloadMatchesLegacyCreateInputs = (
+  payload: RunPayload,
+  prompt: string,
+  threadId: string | null,
+): boolean =>
+  normalizePrompt(payload.prompt) === prompt &&
+  normalizeThreadId(payload.threadId) === threadId;
+
+const findIdempotentRun = (
+  runs: readonly RunJob[],
+  nowMs: number,
+  idempotencyKey: string,
+  prompt: string,
+  threadId: string | null,
+): RunJob | null =>
+  runs.find((run) => {
+    if (!isRetryableRunStatus(run.status)) return false;
+    if (!isRunInsideIdempotencyWindow(run.createdAt, nowMs)) return false;
+
+    const payload = run.payload as RunPayload;
+    return (
+      payloadMatchesIdempotencyKey(payload, idempotencyKey) ||
+      payloadMatchesLegacyCreateInputs(payload, prompt, threadId)
+    );
+  }) ?? null;
 
 type RunResultDecodeOutcome = {
   readonly result: RunResult | null;
@@ -92,6 +160,52 @@ const logRunResultDecodeFailure = (
     Effect.annotateLogs('source.path', sourcePath),
     Effect.annotateLogs('parse.error.summary', parseErrorSummary),
   );
+
+const publishQueuedRunEvent = ({
+  publisher,
+  userId,
+  runId,
+  prompt,
+  threadId,
+}: {
+  readonly publisher: SSEPublisherService;
+  readonly userId: string;
+  readonly runId: string;
+  readonly prompt: string;
+  readonly threadId: string | null;
+}) =>
+  Effect.gen(function* () {
+    const publishWithRetry = publisher
+      .publish(userId, {
+        type: 'run_queued',
+        runId,
+        prompt,
+        threadId,
+        timestamp: new Date().toISOString(),
+      })
+      .pipe(
+        Effect.catchAllCause((cause) => Effect.fail(cause)),
+        Effect.tapError((cause) =>
+          Effect.logWarning('runs.create.publish_retry').pipe(
+            Effect.annotateLogs('source.path', RUN_PUBLISH_SOURCE_PATH),
+            Effect.annotateLogs('enduser.id', userId),
+            Effect.annotateLogs('queue.job.id', runId),
+            Effect.annotateLogs('error.cause', Cause.pretty(cause)),
+          ),
+        ),
+        Effect.retry(RUN_CREATE_EVENT_PUBLISH_RETRY_SCHEDULE),
+        Effect.catchAll((cause) =>
+          Effect.logWarning('runs.create.publish_failed').pipe(
+            Effect.annotateLogs('source.path', RUN_PUBLISH_SOURCE_PATH),
+            Effect.annotateLogs('enduser.id', userId),
+            Effect.annotateLogs('queue.job.id', runId),
+            Effect.annotateLogs('error.cause', Cause.pretty(cause)),
+          ),
+        ),
+      );
+
+    yield* Effect.forkDaemon(publishWithRetry);
+  });
 
 const authorizeRunUseCaseUser = (user: User): Effect.Effect<void, ForbiddenError> =>
   withCurrentUser(user)(
@@ -156,13 +270,43 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
 
     const queue = yield* Queue;
     const publisher = yield* SSEPublisher;
+    const normalizedPrompt = normalizePrompt(input.prompt);
+    const normalizedThreadId = normalizeThreadId(input.threadId ?? null);
+    const idempotencyKey = toCreateRunIdempotencyKey(
+      user.id,
+      normalizedPrompt,
+      normalizedThreadId,
+    );
+    const nowMs = Date.now();
+    const recentRuns = yield* queue
+      .getJobsByUser(user.id, {
+        type: QueueJobType.PROCESS_AI_RUN,
+        sortByCreatedAt: 'desc',
+        limit: RUN_CREATE_IDEMPOTENCY_RECENT_LIMIT,
+      })
+      .pipe(
+        Effect.catchAll(() => Effect.succeed([] as RunJob[])),
+        Effect.catchAllCause(() => Effect.succeed([] as RunJob[])),
+      );
+    const existingRun = findIdempotentRun(
+      recentRuns,
+      nowMs,
+      idempotencyKey,
+      normalizedPrompt,
+      normalizedThreadId,
+    );
+
+    if (existingRun) {
+      return yield* toRunOutput(existingRun, CREATE_RUN_SOURCE_PATH);
+    }
 
     const created = yield* queue.enqueue(
       QueueJobType.PROCESS_AI_RUN,
       {
-        prompt: input.prompt,
-        threadId: input.threadId ?? null,
+        prompt: normalizedPrompt,
+        threadId: normalizedThreadId,
         userId: user.id,
+        idempotencyKey,
       },
       user.id,
     );
@@ -172,12 +316,12 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
       CREATE_RUN_SOURCE_PATH,
     );
 
-    yield* publisher.publish(user.id, {
-      type: 'run_queued',
+    yield* publishQueuedRunEvent({
+      publisher,
+      userId: user.id,
       runId: run.id,
       prompt: run.prompt,
       threadId: run.threadId,
-      timestamp: new Date().toISOString(),
     });
 
     return run;

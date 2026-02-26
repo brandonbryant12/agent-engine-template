@@ -15,6 +15,7 @@ export interface ProcessAiRunPayload {
   readonly userId: string;
   readonly prompt: string;
   readonly threadId?: string | null;
+  readonly idempotencyKey?: string;
 }
 
 export interface ProcessAiRunResult {
