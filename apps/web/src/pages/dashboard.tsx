@@ -1,7 +1,8 @@
 import { Badge } from '@repo/ui/components/badge';
+import { Button } from '@repo/ui/components/button';
 import { Spinner } from '@repo/ui/components/spinner';
 import { Link } from '@tanstack/react-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { rawApiClient } from '@/clients/api-client';
 import { authClient } from '@/clients/auth-client';
 import { EngineIcon } from '@/components/logo';
@@ -9,6 +10,7 @@ import { loadThreads } from '@/lib/chat-utils';
 import {
   type RunState,
   formatRunStatus,
+  readErrorMessage,
   formatTimestamp,
   sortRuns,
   toRunState,
@@ -111,19 +113,32 @@ export function DashboardPage() {
   const { data: session } = authClient.useSession();
   const [runs, setRuns] = useState<RunState[]>([]);
   const [runsLoading, setRunsLoading] = useState(true);
+  const [runsLoadError, setRunsLoadError] = useState<string | null>(null);
+  const [lastRunsUpdatedAt, setLastRunsUpdatedAt] = useState<string | null>(null);
+
+  const loadRuns = useCallback(async () => {
+    setRunsLoading(true);
+    setRunsLoadError(null);
+    try {
+      const result = await rawApiClient.runs.list({ limit: 10 });
+      setRuns(result.map(toRunState).sort(sortRuns));
+      setLastRunsUpdatedAt(new Date().toISOString());
+    } catch (error) {
+      setRunsLoadError(readErrorMessage(error, 'Failed to load runs.'));
+    } finally {
+      setRunsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
-      try {
-        const result = await rawApiClient.runs.list({ limit: 10 });
-        if (!cancelled) setRuns(result.map(toRunState).sort(sortRuns));
-      } catch {
-        /* ignore initial load errors */
-      } finally {
-        if (!cancelled) setRunsLoading(false);
+      if (cancelled) {
+        return;
       }
+
+      await loadRuns();
     };
 
     void load();
@@ -131,7 +146,7 @@ export function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadRuns]);
 
   const threadCount = useMemo(() => {
     if (!session?.user) return 0;
@@ -146,6 +161,11 @@ export function DashboardPage() {
     const failed = runs.filter((r) => r.status === 'failed').length;
     return { active, completed, failed };
   }, [runs]);
+
+  const runsStatsUnavailable = runsLoadError !== null;
+  const activeRunsValue = runsStatsUnavailable ? '—' : String(stats.active);
+  const completedRunsValue = runsStatsUnavailable ? '—' : String(stats.completed);
+  const failedRunsValue = runsStatsUnavailable ? '—' : String(stats.failed);
 
   return (
     <div className="page-container animate-fade-in">
@@ -176,7 +196,7 @@ export function DashboardPage() {
               <ActivityIcon />
             </div>
           </div>
-          <p className="stat-card-value">{stats.active}</p>
+          <p className="stat-card-value">{activeRunsValue}</p>
         </div>
         <div className="stat-card animate-fade-in stagger-3">
           <div className="stat-card-header">
@@ -185,7 +205,7 @@ export function DashboardPage() {
               <CheckIcon />
             </div>
           </div>
-          <p className="stat-card-value">{stats.completed}</p>
+          <p className="stat-card-value">{completedRunsValue}</p>
         </div>
         <div className="stat-card animate-fade-in stagger-4">
           <div className="stat-card-header">
@@ -194,9 +214,31 @@ export function DashboardPage() {
               <AlertIcon />
             </div>
           </div>
-          <p className="stat-card-value">{stats.failed}</p>
+          <p className="stat-card-value">{failedRunsValue}</p>
         </div>
       </div>
+
+      {runsLoadError ? (
+        <div className="card-padded mb-8 border-destructive/30 bg-destructive/5 text-destructive">
+          <p className="section-title text-destructive">Runs failed to load.</p>
+          <p className="mt-2 text-sm">{runsLoadError}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void loadRuns()}
+              disabled={runsLoading}
+            >
+              {runsLoading ? 'Retrying...' : 'Retry loading runs'}
+            </Button>
+            {lastRunsUpdatedAt ? (
+              <span className="text-xs text-muted-foreground">
+                Last updated {formatTimestamp(lastRunsUpdatedAt)}
+              </span>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       {/* Quick Actions */}
       <div className="section-header">
@@ -234,6 +276,11 @@ export function DashboardPage() {
             <h3>Recent Runs</h3>
             <span className="recent-section-count">{runs.length}</span>
           </div>
+          {lastRunsUpdatedAt ? (
+            <span className="text-xs text-muted-foreground">
+              Last updated {formatTimestamp(lastRunsUpdatedAt)}
+            </span>
+          ) : null}
           <Link to="/jobs" className="text-link">
             View all
           </Link>
@@ -242,6 +289,16 @@ export function DashboardPage() {
         {runsLoading ? (
           <div className="loading-center">
             <Spinner size="sm" />
+          </div>
+        ) : runsLoadError ? (
+          <div className="recent-section-empty">
+            <div className="empty-state-icon mb-3">
+              <AlertIcon />
+            </div>
+            <p className="text-sm text-destructive">Unable to load recent runs.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Retry to refresh dashboard run data.
+            </p>
           </div>
         ) : runs.length === 0 ? (
           <div className="recent-section-empty">
