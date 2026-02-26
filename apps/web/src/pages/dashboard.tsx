@@ -1,4 +1,5 @@
 import { Badge } from '@repo/ui/components/badge';
+import { Button } from '@repo/ui/components/button';
 import { Spinner } from '@repo/ui/components/spinner';
 import { Link } from '@tanstack/react-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -7,6 +8,7 @@ import { authClient } from '@/clients/auth-client';
 import { EngineIcon } from '@/components/logo';
 import { loadThreads } from '@/lib/chat-utils';
 import {
+  readErrorMessage,
   type RunState,
   formatRunStatus,
   formatTimestamp,
@@ -111,27 +113,55 @@ export function DashboardPage() {
   const { data: session } = authClient.useSession();
   const [runs, setRuns] = useState<RunState[]>([]);
   const [runsLoading, setRunsLoading] = useState(true);
+  const [runsLoadError, setRunsLoadError] = useState<string | null>(null);
+  const [lastSuccessfulRunsLoadAt, setLastSuccessfulRunsLoadAt] = useState<
+    string | null
+  >(null);
+  const hasSuccessfulRunsSnapshot = lastSuccessfulRunsLoadAt !== null;
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    const loadRuns = async () => {
+      setRunsLoading(true);
+      setRunsLoadError(null);
+
       try {
         const result = await rawApiClient.runs.list({ limit: 10 });
-        if (!cancelled) setRuns(result.map(toRunState).sort(sortRuns));
-      } catch {
-        /* ignore initial load errors */
+        if (cancelled) return;
+        setRuns(result.map(toRunState).sort(sortRuns));
+        setLastSuccessfulRunsLoadAt(new Date().toISOString());
+      } catch (error) {
+        if (!cancelled) {
+          setRunsLoadError(
+            readErrorMessage(error, 'Failed to load recent runs.'),
+          );
+        }
       } finally {
         if (!cancelled) setRunsLoading(false);
       }
     };
 
-    void load();
+    void loadRuns();
 
     return () => {
       cancelled = true;
     };
   }, []);
+
+  const retryRunsLoad = async () => {
+    setRunsLoading(true);
+    setRunsLoadError(null);
+    try {
+      const result = await rawApiClient.runs.list({ limit: 10 });
+      setRuns(result.map(toRunState).sort(sortRuns));
+      setLastSuccessfulRunsLoadAt(new Date().toISOString());
+    } catch (error) {
+      setRunsLoadError(readErrorMessage(error, 'Failed to load recent runs.'));
+    } finally {
+      setRunsLoading(false);
+    }
+  };
 
   const threadCount = useMemo(() => {
     if (!session?.user) return 0;
@@ -176,7 +206,9 @@ export function DashboardPage() {
               <ActivityIcon />
             </div>
           </div>
-          <p className="stat-card-value">{stats.active}</p>
+          <p className="stat-card-value">
+            {runsLoadError && !hasSuccessfulRunsSnapshot ? '—' : stats.active}
+          </p>
         </div>
         <div className="stat-card animate-fade-in stagger-3">
           <div className="stat-card-header">
@@ -185,7 +217,9 @@ export function DashboardPage() {
               <CheckIcon />
             </div>
           </div>
-          <p className="stat-card-value">{stats.completed}</p>
+          <p className="stat-card-value">
+            {runsLoadError && !hasSuccessfulRunsSnapshot ? '—' : stats.completed}
+          </p>
         </div>
         <div className="stat-card animate-fade-in stagger-4">
           <div className="stat-card-header">
@@ -194,7 +228,9 @@ export function DashboardPage() {
               <AlertIcon />
             </div>
           </div>
-          <p className="stat-card-value">{stats.failed}</p>
+          <p className="stat-card-value">
+            {runsLoadError && !hasSuccessfulRunsSnapshot ? '—' : stats.failed}
+          </p>
         </div>
       </div>
 
@@ -232,16 +268,46 @@ export function DashboardPage() {
         <div className="recent-section-header">
           <div className="recent-section-title">
             <h3>Recent Runs</h3>
-            <span className="recent-section-count">{runs.length}</span>
+            <span className="recent-section-count">
+              {runsLoadError && !hasSuccessfulRunsSnapshot ? '—' : runs.length}
+            </span>
           </div>
           <Link to="/jobs" className="text-link">
             View all
           </Link>
         </div>
+        {lastSuccessfulRunsLoadAt ? (
+          <p className="mb-3 text-xs text-muted-foreground">
+            Last successful update:{' '}
+            {formatTimestamp(lastSuccessfulRunsLoadAt)}
+          </p>
+        ) : null}
 
         {runsLoading ? (
           <div className="loading-center">
             <Spinner size="sm" />
+          </div>
+        ) : runsLoadError ? (
+          <div className="recent-section-empty" role="alert">
+            <div className="empty-state-icon mb-3">
+              <AlertIcon />
+            </div>
+            <p className="text-sm text-foreground">{runsLoadError}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {hasSuccessfulRunsSnapshot
+                ? 'Showing the last successful run snapshot until retry succeeds.'
+                : 'No successful run snapshot is available yet.'}
+            </p>
+            <Button
+              className="mt-4"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                void retryRunsLoad();
+              }}
+            >
+              Retry runs load
+            </Button>
           </div>
         ) : runs.length === 0 ? (
           <div className="recent-section-empty">
