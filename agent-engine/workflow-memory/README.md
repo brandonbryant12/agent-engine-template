@@ -93,6 +93,11 @@ standards.
 For `workflow: "Periodic Scans"` entries tagged `best-practice-researcher`, `scan`
 metadata is required and must be provided through
 `--scan-walk-mode`, `--scan-scope`, `--scan-domain`, and `--scan-signal`.
+Issue traceability is enforced through same-day issue URL correlation in
+`evidence` when `BEST_PRACTICE_TRACEABILITY_ENFORCE=1` is set during
+`pnpm scripts:lint` runs.
+Known legacy exceptions are documented in
+[`best-practice-traceability-exceptions.md`](./best-practice-traceability-exceptions.md).
 
 ## Index (Fast Retrieval)
 

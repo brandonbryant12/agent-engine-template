@@ -58,6 +58,34 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-26-periodic-scans-best-practice-researcher-traceability-backfill-for-2026-02-26-is",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Periodic Scans",
+    "title": "best-practice-researcher traceability backfill for 2026-02-26 issue set",
+    "severity": "medium",
+    "status": "open",
+    "tags": [
+      "best-practice-researcher",
+      "periodic-scans",
+      "workflow-memory",
+      "traceability",
+      "backfill",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-dynamics:write"
+    ],
+    "importance": 0.82,
+    "confidence": 0.87,
+    "scan": {
+      "walkMode": "weighted-random",
+      "scope": "macro",
+      "domain": "docs-and-guardrail-drift",
+      "signal": "4"
+    },
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
