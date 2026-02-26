@@ -131,34 +131,42 @@ const parseRunResult = (value: unknown): ParsedRunResult => {
   }
 };
 
-const logRunResultDecodeFailure = (jobId: string, parseErrorSummary: string) => {
-  Effect.runSync(
-    Effect.logWarning('run.result.decode_failed').pipe(
-      Effect.annotateLogs('queue.job.id', jobId),
-      Effect.annotateLogs('source.path', RUN_RESULT_DECODE_SOURCE_PATH),
-      Effect.annotateLogs('parse.error.summary', parseErrorSummary),
-    ),
+const logRunResultDecodeFailure = (jobId: string, parseErrorSummary: string) =>
+  Effect.logWarning('run.result.decode_failed').pipe(
+    Effect.annotateLogs('queue.job.id', jobId),
+    Effect.annotateLogs('source.path', RUN_RESULT_DECODE_SOURCE_PATH),
+    Effect.annotateLogs('parse.error.summary', parseErrorSummary),
   );
-};
 
 export const handleCompletedRun = (
   publishEvent: PublishEvent | undefined,
   userId: string,
   job: Job<RunJobPayload>,
-): void => {
-  const parsed = parseRunResult(job.result);
+): Effect.Effect<void, never> =>
+  Effect.gen(function* () {
+    const parsed = parseRunResult(job.result);
+    const runResult = parsed.result;
 
-  if (parsed.result) {
-    emitRunCompleted(publishEvent, userId, job.id, parsed.result);
-    return;
-  }
+    if (runResult) {
+      yield* Effect.sync(() =>
+        emitRunCompleted(publishEvent, userId, job.id, runResult),
+      );
+      return;
+    }
 
-  if (parsed.parseErrorSummary) {
-    logRunResultDecodeFailure(job.id, parsed.parseErrorSummary);
-  }
+    if (parsed.parseErrorSummary) {
+      yield* logRunResultDecodeFailure(job.id, parsed.parseErrorSummary);
+    }
 
-  emitRunFailed(publishEvent, userId, job.id, INVALID_COMPLETED_RUN_RESULT_ERROR);
-};
+    yield* Effect.sync(() =>
+      emitRunFailed(
+        publishEvent,
+        userId,
+        job.id,
+        INVALID_COMPLETED_RUN_RESULT_ERROR,
+      ),
+    );
+  });
 
 const shouldRunStaleCheck = (pollCount: number, checkEveryNPolls: number) =>
   pollCount > 0 && pollCount % checkEveryNPolls === 0;
@@ -285,7 +293,7 @@ export function createUnifiedWorker(config: UnifiedWorkerConfig): Worker {
     );
 
   const onJobComplete = (job: Job<RunJobPayload>) => {
-    if (job.type !== JobType.PROCESS_AI_RUN) return;
+    if (job.type !== JobType.PROCESS_AI_RUN) return Effect.void;
 
     const userId =
       typeof job.payload?.userId === 'string' && job.payload.userId.length > 0
@@ -293,18 +301,21 @@ export function createUnifiedWorker(config: UnifiedWorkerConfig): Worker {
         : job.createdBy;
 
     if (job.status === JobStatus.COMPLETED) {
-      handleCompletedRun(config.publishEvent, userId, job);
-      return;
+      return handleCompletedRun(config.publishEvent, userId, job);
     }
 
     if (job.status === JobStatus.FAILED) {
-      emitRunFailed(
-        config.publishEvent,
-        userId,
-        job.id,
-        job.error ?? 'Run failed',
+      return Effect.sync(() =>
+        emitRunFailed(
+          config.publishEvent,
+          userId,
+          job.id,
+          job.error ?? 'Run failed',
+        ),
       );
     }
+
+    return Effect.void;
   };
 
   return createWorker({

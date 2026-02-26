@@ -87,6 +87,15 @@ Required for all agent-authored backend changes.
 | `Layer.sync` in non-test runtime files must receive class/factory-style constructor functions | Misusing sync layers for prebuilt values or plain objects |
 | `Layer.effect` in non-test runtime files must use Effect-backed constructor expressions or identifiers bound to `Effect.*` | Losing dependency-aware initialization semantics in runtime layer graphs |
 
+### Effect Runner Boundary Invariants
+<!-- enforced-by: invariant-test -->
+
+**File:** `packages/testing/src/__tests__/effect-runner-boundaries.invariants.test.ts`
+
+| Rule | What It Prevents |
+|---|---|
+| `Effect.runSync` is forbidden in runtime internals outside explicit allowlisted transport boundaries | Imperative effect execution leaking into compositional worker/api internals |
+
 ### Telemetry Lifecycle Invariants
 <!-- enforced-by: invariant-test -->
 

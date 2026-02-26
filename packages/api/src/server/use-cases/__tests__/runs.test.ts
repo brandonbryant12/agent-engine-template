@@ -1,3 +1,4 @@
+import { type User } from '@repo/auth';
 import {
   Queue,
   QueueError,
@@ -9,7 +10,6 @@ import {
 } from '@repo/queue';
 import { Effect, Layer } from 'effect';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { User } from '@repo/auth/policy';
 import {
   SSEPublisher,
   type SSEPublisherService,
@@ -21,6 +21,11 @@ const TEST_USER: User = {
   email: 'test@example.com',
   name: 'Test User',
   role: 'user',
+};
+
+const UNAUTHORIZED_ROLE_USER = {
+  ...TEST_USER,
+  role: 'viewer' as unknown as User['role'],
 };
 
 type RunJob = TypedJob<typeof QueueJobType.PROCESS_AI_RUN>;
@@ -157,6 +162,34 @@ describe('runs use-cases', () => {
     expect(error.message).toBe('queue unavailable');
   });
 
+  it('fails create run with typed forbidden error for unauthorized roles', async () => {
+    let enqueueCalls = 0;
+
+    const queue = createMockQueueService({
+      enqueue: ((type, payload, userId) => {
+        enqueueCalls += 1;
+        return Effect.succeed(
+          createJob({ type, payload: payload as RunPayload, createdBy: userId }),
+        ) as ReturnType<QueueService['enqueue']>;
+      }) as QueueService['enqueue'],
+    });
+
+    const error = await Effect.runPromise(
+      Effect.flip(
+        createRunUseCase({
+          user: UNAUTHORIZED_ROLE_USER,
+          input: {
+            prompt: 'Plan quarterly roadmap',
+          },
+        }).pipe(withQueueAndPublisher(queue)),
+      ),
+    );
+
+    expect(error._tag).toBe('ForbiddenError');
+    expect(error.message).toContain('Requires user or admin role');
+    expect(enqueueCalls).toBe(0);
+  });
+
   it('scopes list runs to user ownership and delegates order + limit to queue', async () => {
     let listUserId: string | undefined;
     let listOptions: Parameters<QueueService['getJobsByUser']>[1] | undefined;
@@ -242,5 +275,31 @@ describe('runs use-cases', () => {
 
     expect(error._tag).toBe('QueueError');
     expect(error.message).toBe('query failed');
+  });
+
+  it('fails list runs with typed forbidden error for unauthorized roles', async () => {
+    let listCalls = 0;
+
+    const queue = createMockQueueService({
+      getJobsByUser: ((userId, _options) => {
+        listCalls += 1;
+        return Effect.succeed([
+          createJob({ id: 'job_1' as RunJob['id'], createdBy: userId }),
+        ]) as ReturnType<QueueService['getJobsByUser']>;
+      }) as QueueService['getJobsByUser'],
+    });
+
+    const error = await Effect.runPromise(
+      Effect.flip(
+        listRunsUseCase({
+          user: UNAUTHORIZED_ROLE_USER,
+          input: { limit: 1 },
+        }).pipe(withQueueAndPublisher(queue)),
+      ),
+    );
+
+    expect(error._tag).toBe('ForbiddenError');
+    expect(error.message).toContain('Requires user or admin role');
+    expect(listCalls).toBe(0);
   });
 });
