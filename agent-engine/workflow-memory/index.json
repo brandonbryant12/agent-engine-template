@@ -1,5 +1,27 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-ready-for-dev-executor-merged-docs-tooling-bundle-75-76",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor merged docs-tooling bundle 75-76",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "docs-tooling",
+      "spec-generation",
+      "skills",
+      "memory-form:external",
+      "memory-function:semantic",
+      "memory-dynamics:write"
+    ],
+    "importance": 0.9,
+    "confidence": 0.93,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-26-feature-delivery-ready-for-dev-executor-merged-issue-67",
     "date": "2026-02-26",
     "month": "2026-02",
