@@ -44,6 +44,10 @@ jobs:
       - name: Lint
         # Root lint script already runs `pnpm scripts:lint` first, then package lint tasks.
         # Keep this as the single scripts-lint execution path in CI.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEST_PRACTICE_TRACEABILITY_ENFORCE: "1"
+          BEST_PRACTICE_TRACEABILITY_LOOKBACK_DAYS: "1"
         run: pnpm lint
 
       - name: Test

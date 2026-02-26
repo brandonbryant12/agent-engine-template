@@ -86,6 +86,10 @@ Append concise run memory including:
 - related issues and new issue URLs
 - signal score 1-5
 - followability delta
+- deterministic correlation key for issue traceability:
+  - include each created issue URL verbatim in the Periodic Scans event `evidence` field
+  - keep event `date` aligned to issue creation date (same-run correlation)
+  - include `best-practice-researcher` tag and full `scan` metadata (`walkMode`, `scope`, `domain`, `signal`)
 - structured scan metadata for Periodic Scans events:
   - `--scan-walk-mode`
   - `--scan-scope`

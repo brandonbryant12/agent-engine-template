@@ -1,4 +1,6 @@
 import { promises as fs } from 'node:fs';
+import { execFile as execFileCallback } from 'node:child_process';
+import { promisify } from 'node:util';
 import path from 'node:path';
 import { parseSummaryMarker, SUMMARY_STALE_SENTINEL } from '../workflow-memory/summary-refresh';
 
@@ -45,6 +47,12 @@ const MARKDOWN_LINK_RE = /\[[^\]]+]\(([^)]+)\)/g;
 const INLINE_CODE_RE = /`([^`\r\n]+)`/g;
 const ABSOLUTE_OR_SCHEME_RE = /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i;
 const EXTRA_MARKDOWN_FILES = ['AGENTS.md', 'CLAUDE.md'] as const;
+const GITHUB_ISSUE_URL_RE = /https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/issues\/\d+/g;
+const TRACEABILITY_ENFORCE_ENV = 'BEST_PRACTICE_TRACEABILITY_ENFORCE';
+const TRACEABILITY_LOOKBACK_ENV = 'BEST_PRACTICE_TRACEABILITY_LOOKBACK_DAYS';
+const TRACEABILITY_LOOKBACK_DEFAULT_DAYS = 1;
+const TRACEABILITY_EXCEPTIONS = new Set<number>([56, 57, 58, 59, 60, 61, 67, 68, 69]);
+const execFile = promisify(execFileCallback);
 
 export type ScriptGuardrailIssue = {
   code:
@@ -57,9 +65,17 @@ export type ScriptGuardrailIssue = {
     | 'legacy-mjs-script'
     | 'missing-vitest-project'
     | 'broken-markdown-reference'
-    | 'stale-workflow-memory-summary';
+    | 'stale-workflow-memory-summary'
+    | 'best-practice-traceability';
   message: string;
   path?: string;
+};
+
+type TraceabilityIssueRecord = {
+  number: number;
+  title: string;
+  url: string;
+  createdAt: string;
 };
 
 type MarkdownRef = {
@@ -399,6 +415,209 @@ const checkWorkflowMemorySummaryFreshness = async (
   return issues;
 };
 
+const parseLookbackDays = (): number => {
+  const raw = process.env[TRACEABILITY_LOOKBACK_ENV];
+  if (!raw || raw.trim().length === 0) {
+    return TRACEABILITY_LOOKBACK_DEFAULT_DAYS;
+  }
+
+  const parsed = Number.parseInt(raw, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return TRACEABILITY_LOOKBACK_DEFAULT_DAYS;
+  }
+
+  return parsed;
+};
+
+const parseIssueDate = (createdAt: string): string | null => {
+  if (!/^\d{4}-\d{2}-\d{2}T/.test(createdAt)) {
+    return null;
+  }
+  return createdAt.slice(0, 10);
+};
+
+const hasStructuredScanMetadata = (value: unknown): boolean => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const scan = value as Record<string, unknown>;
+  const signalValue =
+    typeof scan.signal === 'number'
+      ? scan.signal
+      : typeof scan.signal === 'string'
+        ? Number.parseInt(scan.signal, 10)
+        : Number.NaN;
+  return (
+    typeof scan.walkMode === 'string' &&
+    scan.walkMode.length > 0 &&
+    typeof scan.scope === 'string' &&
+    scan.scope.length > 0 &&
+    typeof scan.domain === 'string' &&
+    scan.domain.length > 0 &&
+    Number.isFinite(signalValue)
+  );
+};
+
+const collectTraceabilityPairs = async (rootDir: string): Promise<Set<string>> => {
+  const traceabilityPairs = new Set<string>();
+  const eventsDir = path.join(rootDir, WORKFLOW_MEMORY_ROOT, 'events');
+  let entries;
+
+  try {
+    entries = await fs.readdir(eventsDir, { withFileTypes: true });
+  } catch (error) {
+    if (error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return traceabilityPairs;
+    }
+    throw error;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.jsonl')) {
+      continue;
+    }
+
+    const filePath = path.join(eventsDir, entry.name);
+    const raw = await fs.readFile(filePath, 'utf8');
+    const lines = raw.split(/\r?\n/);
+
+    for (const line of lines) {
+      if (!line.trim()) {
+        continue;
+      }
+
+      let record: Record<string, unknown>;
+      try {
+        record = JSON.parse(line) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
+
+      if (record.workflow !== 'Periodic Scans') {
+        continue;
+      }
+
+      const tags = Array.isArray(record.tags) ? record.tags.filter((tag) => typeof tag === 'string') : [];
+      if (!tags.includes('best-practice-researcher')) {
+        continue;
+      }
+
+      if (!hasStructuredScanMetadata(record.scan)) {
+        continue;
+      }
+
+      const eventDate = typeof record.date === 'string' ? record.date : '';
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) {
+        continue;
+      }
+
+      const evidence = typeof record.evidence === 'string' ? record.evidence : '';
+      const matches = evidence.match(GITHUB_ISSUE_URL_RE) ?? [];
+      for (const issueUrl of matches) {
+        traceabilityPairs.add(`${eventDate}|${issueUrl}`);
+      }
+    }
+  }
+
+  return traceabilityPairs;
+};
+
+const fetchBestPracticeIssues = async (
+  rootDir: string,
+  lookbackDays: number,
+): Promise<TraceabilityIssueRecord[]> => {
+  const sinceDate = new Date(Date.now() - lookbackDays * 24 * 60 * 60 * 1000);
+  const sinceIsoDate = sinceDate.toISOString().slice(0, 10);
+  const args = [
+    'issue',
+    'list',
+    '--state',
+    'all',
+    '--label',
+    'best-practice-researcher',
+    '--search',
+    `created:>=${sinceIsoDate}`,
+    '--limit',
+    '200',
+    '--json',
+    'number,title,url,createdAt',
+  ];
+  const result = await execFile('gh', args, { cwd: rootDir, encoding: 'utf8' });
+  const parsed = JSON.parse(result.stdout) as Array<Record<string, unknown>>;
+  const issues: TraceabilityIssueRecord[] = [];
+
+  for (const row of parsed) {
+    const number = row.number;
+    const title = row.title;
+    const url = row.url;
+    const createdAt = row.createdAt;
+    if (
+      typeof number !== 'number' ||
+      typeof title !== 'string' ||
+      typeof url !== 'string' ||
+      typeof createdAt !== 'string'
+    ) {
+      continue;
+    }
+
+    if (!title.startsWith('[Best Practice Researcher]')) {
+      continue;
+    }
+
+    issues.push({ number, title, url, createdAt });
+  }
+
+  return issues;
+};
+
+const checkBestPracticeTraceability = async (rootDir: string): Promise<ScriptGuardrailIssue[]> => {
+  if (process.env[TRACEABILITY_ENFORCE_ENV] !== '1') {
+    return [];
+  }
+
+  const issues: ScriptGuardrailIssue[] = [];
+  const lookbackDays = parseLookbackDays();
+  let bestPracticeIssues: TraceabilityIssueRecord[] = [];
+
+  try {
+    bestPracticeIssues = await fetchBestPracticeIssues(rootDir, lookbackDays);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    issues.push({
+      code: 'best-practice-traceability',
+      message: `Failed to query best-practice issues via gh CLI. Ensure gh is available and authenticated (or GH_TOKEN is provided). Underlying error: ${message}`,
+    });
+    return issues;
+  }
+
+  const traceabilityPairs = await collectTraceabilityPairs(rootDir);
+
+  for (const issue of bestPracticeIssues) {
+    if (TRACEABILITY_EXCEPTIONS.has(issue.number)) {
+      continue;
+    }
+
+    const createdDate = parseIssueDate(issue.createdAt);
+    if (!createdDate) {
+      issues.push({
+        code: 'best-practice-traceability',
+        message: `Issue #${issue.number} has an unexpected createdAt format ('${issue.createdAt}').`,
+      });
+      continue;
+    }
+
+    if (!traceabilityPairs.has(`${createdDate}|${issue.url}`)) {
+      issues.push({
+        code: 'best-practice-traceability',
+        message: `Missing Periodic Scans traceability event for issue #${issue.number}. Expected same-day memory evidence containing '${issue.url}' with tag 'best-practice-researcher' and full scan metadata (walkMode/scope/domain/signal).`,
+      });
+    }
+  }
+
+  return issues;
+};
+
 const checkEntryFileContracts = async (
   rootDir: string,
   repoPath: string,
@@ -501,6 +720,9 @@ export const checkScriptGuardrails = async (
 
   const summaryIssues = await checkWorkflowMemorySummaryFreshness(rootDir);
   issues.push(...summaryIssues);
+
+  const traceabilityIssues = await checkBestPracticeTraceability(rootDir);
+  issues.push(...traceabilityIssues);
 
   const rootVitestPath = path.join(rootDir, 'vitest.config.ts');
   const rootVitestSource = await fs.readFile(rootVitestPath, 'utf8');
