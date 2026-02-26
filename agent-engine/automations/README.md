@@ -91,6 +91,12 @@ For every lane:
 - The `.toml` wrapper should only load and execute that playbook.
 - If wrapper and playbook conflict, follow the playbook.
 
+## Required Automation Label Bootstrap
+
+Automation lanes that create issues or PRs must ensure required labels exist in-repo before issue operations. At minimum, bootstrap:
+
+- `gh label create codex-automation --color 5319E7 --description "Issue or PR created by Codex automation" --force`
+
 ## Required Contract For Any Code-Writing Automation
 
 Any automation that edits code must:

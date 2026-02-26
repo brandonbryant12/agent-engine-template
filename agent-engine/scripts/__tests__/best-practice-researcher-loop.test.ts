@@ -14,4 +14,23 @@ describe('best-practice researcher loop wrapper', () => {
       "pnpm workflow-memory:retrieve --workflow 'Periodic Scans' --limit 1 --min-score 0 >/dev/null",
     );
   });
+
+  it('documents deterministic missing-memory fallback from Periodic Scans scan metadata', async () => {
+    const playbookPath = path.join(
+      process.cwd(),
+      'agent-engine',
+      'automations',
+      'best-practice-researcher',
+      'best-practice-researcher.md',
+    );
+    const playbook = await readFile(playbookPath, 'utf8');
+
+    expect(playbook).toContain(
+      'pnpm workflow-memory:retrieve --workflow "Periodic Scans" --tags best-practice-researcher --limit 8 --min-score 0',
+    );
+    expect(playbook).toContain('scan` metadata (`walkMode`, `scope`, `domain`, `signal`)');
+    expect(playbook).toContain(
+      'append an initialization marker entry to `$CODEX_HOME/automations/best-practice-researcher/memory.md`',
+    );
+  });
 });

@@ -47,6 +47,7 @@ Research protocol:
 Issue policy:
 - Ensure label availability before issue operations:
   - `gh label create product-vision --color 0E8A16 --description "Strategic product vision opportunities" --force`
+  - `gh label create codex-automation --color 5319E7 --description "Issue or PR created by Codex automation" --force`
 - Search open and closed issues plus open PRs before creating anything.
 - Reuse/extend existing issues when possible.
 - If a recommendation is materially the same topic as a prior issue (same user outcome + same core intervention), reuse that issue instead of creating a new one. Update the issue body/comment with the latest debate result (keep/amend/reject), new evidence, and revised priority.
@@ -68,7 +69,7 @@ Issue policy:
   - Key idea(s) selected for this repo
   - Planned adaptation in this codebase (not generic advice)
   - Requirement that implementers append [`research/implemented-ideas.md`](../../../research/implemented-ideas.md) when shipped
-- Add labels `product-vision` and `codex-automation` when available.
+- Add labels `product-vision` and `codex-automation`.
 - Do not add `ready-for-dev` from this automation; `issue-evaluator` is the default label authority (humans may override when needed).
 
 Memory logging contract (required every run, including no-op):
