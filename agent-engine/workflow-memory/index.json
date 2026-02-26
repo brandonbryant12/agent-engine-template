@@ -58,6 +58,21 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-26-self-improvement-ready-for-dev-executor-no-op-triage",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Self-Improvement",
+    "title": "ready-for-dev executor no-op triage",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev",
+      "no-op"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
