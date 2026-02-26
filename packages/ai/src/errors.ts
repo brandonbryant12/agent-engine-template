@@ -6,6 +6,20 @@ import type {
   PromptVersionNotFoundError,
 } from './chat/prompts/errors';
 import type { ToolFailureTag, ToolRemediation } from './tools/remediation';
+import type {
+  ToolProviderError,
+  ToolRateLimitError,
+  ToolSchemaDriftError,
+  ToolTimeoutError,
+  ToolValidationError,
+} from './chat/tools/errors';
+export {
+  ToolProviderError,
+  ToolRateLimitError,
+  ToolSchemaDriftError,
+  ToolTimeoutError,
+  ToolValidationError,
+} from './chat/tools/errors';
 
 // =============================================================================
 // LLM Errors
@@ -325,7 +339,12 @@ export type AIError =
   | PromptKeyNotFoundError
   | PromptVersionNotFoundError
   | PromptVersionBlockedError
-  | PromptVariableSchemaMismatchError;
+  | PromptVariableSchemaMismatchError
+  | ToolValidationError
+  | ToolProviderError
+  | ToolTimeoutError
+  | ToolRateLimitError
+  | ToolSchemaDriftError;
 
 const TOOL_FAILURE_REMEDIATIONS: Record<ToolFailureTag, ToolRemediation> = {
   validation: {

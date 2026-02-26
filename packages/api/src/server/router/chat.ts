@@ -1,6 +1,7 @@
-import { streamGeneralChat } from '@repo/ai/chat';
+import { invokeWeatherTool, streamGeneralChat } from '@repo/ai/chat';
 import type { UIMessage } from 'ai';
 import {
+  handleEffectWithProtocol,
   handleEffectStreamWithProtocol,
 } from '../effect-handler';
 import { protectedProcedure } from '../orpc';
@@ -93,6 +94,22 @@ const chatRouter = {
         { requestId: context.requestId, span: 'api.chat.general' },
       );
     },
+  ),
+  weatherCurrent: protectedProcedure.chat.weatherCurrent.handler(
+    async ({ context, input, errors }) =>
+      handleEffectWithProtocol(
+        context.runtime,
+        context.user,
+        invokeWeatherTool({
+          input,
+          executionContext: 'interactive-chat',
+          user: context.user
+            ? { id: context.user.id, role: context.user.role }
+            : null,
+        }),
+        errors,
+        { requestId: context.requestId, span: 'api.chat.weatherCurrent' },
+      ),
   ),
 };
 

@@ -1,4 +1,8 @@
 import { oc, eventIterator, type } from '@orpc/contract';
+import {
+  WeatherToolInputSchema,
+  WeatherToolOutputSchema,
+} from '@repo/ai/chat';
 import { Schema } from 'effect';
 import type { UIMessageChunk } from 'ai';
 import { std } from './shared';
@@ -38,6 +42,8 @@ const ChatMessagesInputSchema = Schema.Struct({
 
 const ChatMessagesInput = std(ChatMessagesInputSchema);
 const ChatStreamOutput = eventIterator(type<UIMessageChunk>());
+const WeatherToolInput = std(WeatherToolInputSchema);
+const WeatherToolOutput = std(WeatherToolOutputSchema);
 
 const chatContract = oc
   .prefix('/chat')
@@ -47,6 +53,10 @@ const chatContract = oc
       .route({ method: 'POST', path: '/general' })
       .input(ChatMessagesInput)
       .output(ChatStreamOutput),
+    weatherCurrent: oc
+      .route({ method: 'POST', path: '/tools/weather/current' })
+      .input(WeatherToolInput)
+      .output(WeatherToolOutput),
   });
 
 export default chatContract;

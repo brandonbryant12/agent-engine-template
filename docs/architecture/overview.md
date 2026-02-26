@@ -21,3 +21,4 @@
 - Handler pipeline in `packages/api/src/server`
 - Persistence in `packages/db` and `packages/queue`
 - Auth in `packages/auth`
+- AI tool authoring standard in `docs/architecture/ai-sdk-tooling-standard.md`
