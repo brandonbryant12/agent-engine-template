@@ -101,10 +101,23 @@ The canonical repository CI contract lives at
 `.github/workflows/ci.yml`.
 
 For every PR to `main`, CI pins Node (`22.10.0`), installs with
-`pnpm install --frozen-lockfile`, and runs:
+`pnpm install --frozen-lockfile`, then:
+
+- resolves PR base/head SHAs with full checkout history (`fetch-depth: 0`)
+- runs Turbo affected-mode for Turbo-backed tasks when base/head resolve:
+  - `pnpm turbo run typecheck --affected`
+  - `pnpm turbo run lint --affected`
+  - `pnpm turbo run test --affected`
+  - `pnpm turbo run build --affected`
+- falls back to full-mode commands when base/head cannot be resolved
+- always runs non-Turbo repository guards:
+  - `pnpm scripts:lint`
+- `pnpm test:invariants`
+
+For `push` to `main`, CI always runs full validation:
 
 - `pnpm typecheck`
-- `pnpm lint`
+- `pnpm turbo run lint --continue -- --cache --cache-location .cache/.eslintcache --max-warnings=0`
 - `pnpm test`
 - `pnpm test:invariants`
 - `pnpm build`
