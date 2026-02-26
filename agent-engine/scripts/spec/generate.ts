@@ -31,7 +31,7 @@ const createSnapshotMetadataMarkdown = (input: {
   tables: number;
   enums: number;
   routes: number;
-  features: number;
+  modules: number;
 }): string => {
   const lines: string[] = [];
   lines.push('# Snapshot Metadata (Generated)');
@@ -49,7 +49,7 @@ const createSnapshotMetadataMarkdown = (input: {
   lines.push(`- Database tables: ${input.tables}`);
   lines.push(`- Database enums: ${input.enums}`);
   lines.push(`- UI routes: ${input.routes}`);
-  lines.push(`- UI feature modules: ${input.features}`);
+  lines.push(`- UI modules: ${input.modules}`);
   lines.push('');
   lines.push('## Generated Files');
   lines.push('');
@@ -86,7 +86,7 @@ const run = async (): Promise<void> => {
       tables: dataModel.tableCount,
       enums: dataModel.enumCount,
       routes: ui.routeCount,
-      features: ui.featureModuleCount,
+      modules: ui.moduleCount,
     }),
   );
 

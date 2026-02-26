@@ -29,8 +29,8 @@ Use this skill to run recurring repo scans and produce a prioritized backlog.
 - Cross-facet audit:
   - architecture boundary violations (`packages/api/src/server/router/` -> `packages/ai/src/{chat,tts}/use-cases/`)
   - authz gaps for mutating operations (`packages/api/src/server/router/`, `apps/server/src/`)
-  - query key/invalidation safety (`apps/web/src/features/*/hooks/`)
-  - frontend loading/error-state regressions (`apps/web/src/features/`, `apps/web/src/router.tsx`)
+  - query key/invalidation safety (`apps/web/src/query-client.ts`, `apps/web/src/clients/`, `apps/web/src/lib/`)
+  - frontend loading/error-state regressions (`apps/web/src/pages/`, `apps/web/src/components/`, `apps/web/src/router.tsx`)
   - performance regressions in route-level bundles and hot paths (`apps/web`, `apps/worker/src`, `packages/ai/src`)
   - security/dependency hygiene drift (`package.json`, `pnpm-lock.yaml`, `packages/*/package.json`)
   - agent-run/eval findings classified with `capability:*` and `failure:*` tags from [`agent-engine/workflow-memory/taxonomy.md`](../../../agent-engine/workflow-memory/taxonomy.md)

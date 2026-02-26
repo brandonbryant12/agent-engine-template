@@ -22,7 +22,7 @@ Use this skill for release trains, hotfixes, and production incidents.
 1. Triage severity and user impact.
 2. Stabilize first (rollback, feature flag, hotfix).
 3. Identify root cause with evidence from changed files and failing tests in `packages/*/src/**/__tests__/` or `apps/web/src/**/__tests__/`.
-4. Patch and validate in the narrowest layer first (`packages/media/src/*/use-cases/`, `packages/api/src/server/router/`, or `apps/web/src/features/`).
+4. Patch and validate in the narrowest layer first (`packages/media/src/*/use-cases/`, `packages/api/src/server/router/`, `apps/web/src/pages/`, or `apps/web/src/lib/`).
 5. Run self-improvement loop to prevent recurrence.
 
 ## Rollback Triggers (Examples)

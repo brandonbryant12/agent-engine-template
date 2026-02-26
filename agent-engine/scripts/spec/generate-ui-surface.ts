@@ -24,12 +24,68 @@ const extractRoutePaths = (source: string): string[] => {
   return [...routes].sort((a, b) => a.localeCompare(b));
 };
 
-const listFeatureModules = async (): Promise<readonly string[]> => {
-  const featuresDir = path.join(repoRoot, 'apps/web/src/features');
-  const entries = await fs.readdir(featuresDir, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
+const MODULE_EXTENSIONS = new Set(['.ts', '.tsx']);
+
+const shouldIncludeModuleFile = (entryName: string): boolean => {
+  if (
+    entryName.endsWith('.test.ts') ||
+    entryName.endsWith('.test.tsx') ||
+    entryName.endsWith('.spec.ts') ||
+    entryName.endsWith('.spec.tsx') ||
+    entryName.endsWith('.d.ts')
+  ) {
+    return false;
+  }
+
+  return MODULE_EXTENSIONS.has(path.extname(entryName));
+};
+
+const collectModulesFromDirectory = async (
+  root: string,
+  label: string,
+  prefix = '',
+): Promise<readonly string[]> => {
+  let entries: fs.Dirent[];
+  try {
+    entries = await fs.readdir(root, { withFileTypes: true });
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT') return [];
+    throw error;
+  }
+
+  const modules: string[] = [];
+  for (const entry of entries) {
+    const nextPrefix = prefix ? `${prefix}/${entry.name}` : entry.name;
+    const fullPath = path.join(root, entry.name);
+
+    if (entry.isDirectory()) {
+      const nested = await collectModulesFromDirectory(fullPath, label, nextPrefix);
+      modules.push(...nested);
+      continue;
+    }
+
+    if (!entry.isFile() || !shouldIncludeModuleFile(entry.name)) {
+      continue;
+    }
+
+    const modulePath = nextPrefix.replace(path.extname(nextPrefix), '');
+    modules.push(`${label}/${modulePath}`.replaceAll(path.sep, '/'));
+  }
+
+  return modules;
+};
+
+const listUiModules = async (): Promise<readonly string[]> => {
+  const webSrc = path.join(repoRoot, 'apps/web/src');
+  const modules = await Promise.all([
+    collectModulesFromDirectory(path.join(webSrc, 'pages'), 'pages'),
+    collectModulesFromDirectory(path.join(webSrc, 'components'), 'components'),
+    collectModulesFromDirectory(path.join(webSrc, 'lib'), 'lib'),
+  ]);
+
+  return modules
+    .flat()
     .sort((a, b) => a.localeCompare(b));
 };
 
@@ -42,14 +98,14 @@ const classifyAccess = (routePath: string): 'public' | 'protected' | 'shared' =>
 
 const formatUiSurfaceMarkdown = (
   routes: readonly string[],
-  features: readonly string[],
+  modules: readonly string[],
 ): string => {
   const lines: string[] = [];
 
   lines.push('# UI Surface (Generated)');
   lines.push('');
   lines.push(`- Routes: ${routes.length}`);
-  lines.push(`- Feature modules: ${features.length}`);
+  lines.push(`- UI modules: ${modules.length}`);
   lines.push('');
   lines.push('## Routes');
   lines.push('');
@@ -60,10 +116,10 @@ const formatUiSurfaceMarkdown = (
   }
 
   lines.push('');
-  lines.push('## Feature Modules');
+  lines.push('## UI Modules');
   lines.push('');
-  for (const feature of features) {
-    lines.push(`- \`${feature}\``);
+  for (const modulePath of modules) {
+    lines.push(`- \`${modulePath}\``);
   }
 
   return lines.join('\n');
@@ -71,22 +127,22 @@ const formatUiSurfaceMarkdown = (
 
 export type UiSurfaceStats = {
   readonly routeCount: number;
-  readonly featureModuleCount: number;
+  readonly moduleCount: number;
 };
 
 export const generateUiSurfaceArtifact = async (): Promise<UiSurfaceStats> => {
   const routeTreePath = path.join(repoRoot, 'apps/web/src/routeTree.gen.ts');
   const routeTreeSource = await fs.readFile(routeTreePath, 'utf8');
   const routes = extractRoutePaths(routeTreeSource);
-  const features = await listFeatureModules();
+  const modules = await listUiModules();
 
   await writeUtf8(
     path.join(generatedRoot, 'ui-surface.md'),
-    formatUiSurfaceMarkdown(routes, features),
+    formatUiSurfaceMarkdown(routes, modules),
   );
 
   return {
     routeCount: routes.length,
-    featureModuleCount: features.length,
+    moduleCount: modules.length,
   };
 };

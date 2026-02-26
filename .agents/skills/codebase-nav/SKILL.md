@@ -32,14 +32,14 @@ Backend layer paths:
 
 Frontend paths:
 
-- Route tree + screens: `apps/web/src/router.tsx`, `apps/web/src/routeTree.gen.ts`
-- Features: `apps/web/src/features/`
+- Route tree + screens: `apps/web/src/router.tsx`, `apps/web/src/routeTree.gen.ts`, `apps/web/src/pages/`
+- Shared UI + utilities: `apps/web/src/components/`, `apps/web/src/lib/`
 - App shell/providers: `apps/web/src/main.tsx`
 
 Cross-cutting paths:
 
 - Query/API clients: `apps/web/src/clients/{api-client,auth-client}.ts`, `apps/web/src/query-client.ts`
-- SSE client flows: `apps/web/src/features` + `packages/api/src/contracts/events.ts`
+- SSE client flows: `apps/web/src/pages/`, `apps/web/src/lib/` + `packages/api/src/contracts/events.ts`
 - Invariants: `packages/api/src/server/__tests__/effect-handler.invariants.test.ts`, `packages/testing/src/__tests__/docs-invariants.test.ts`
 - Docs source of truth: `docs/master-spec.md`, `docs/spec/generated/`
 
@@ -52,7 +52,7 @@ Cross-cutting paths:
 3. Add run lifecycle behavior:
    - `packages/db/src/schemas/jobs.ts` -> `packages/queue/src/` -> `apps/worker/src/` -> SSE events in `packages/api/src/contracts/events.ts`
 4. Add frontend data flow:
-   - update route/view logic in `apps/web/src/router.tsx` -> supporting hooks/components in `apps/web/src/features/` -> tests
+   - update route/view logic in `apps/web/src/router.tsx` -> supporting modules in `apps/web/src/pages/`, `apps/web/src/components/`, or `apps/web/src/lib/` -> tests
 5. Fix invariant drift:
    - open invariant test file first, then follow the reported banned pattern path
 
@@ -71,7 +71,7 @@ Use fast path discovery before broad search:
 rg --files packages/ai/src/{chat,tts}
 rg --files packages/api/src/{contracts,server/router}
 rg --files packages/db/src/{schemas,__tests__}
-rg --files apps/web/src/{features,clients}
+rg --files apps/web/src/{pages,components,lib,clients}
 rg -n "createFileRoute\(|queryOptions\(|handleEffectWithProtocol\(" apps/web/src packages/api/src
 ```
 

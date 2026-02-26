@@ -29,9 +29,10 @@ Use this skill before merge for agent-authored or high-risk human-authored chang
 - sanitize user-editable structured fields:
   - prompt/config inputs in `packages/ai/src/chat/use-cases/` and `packages/api/src/contracts/runs.ts`
 - query key invalidation safety (no hardcoded keys):
-  - `apps/web/src/features/*/hooks/`
+  - `apps/web/src/pages/`
+  - `apps/web/src/lib/`
 - explicit streaming state + typed stream contracts:
-  - `apps/web/src/features/*/hooks/use-*-chat.ts`
+  - `apps/web/src/lib/chat-utils.ts`
   - `packages/api/src/contracts/chat.ts`
 - unsafe casts at production boundaries:
   - changed files (`as never`, `as unknown as`)

@@ -9,7 +9,7 @@ Use this skill for performance-sensitive changes, weekly quality scans, and rele
 
 ## Performance + Cost Surfaces
 
-- route-level frontend bundles and load behavior in `apps/web/src/router.tsx` and `apps/web/src/features/`
+- route-level frontend bundles and load behavior in `apps/web/src/router.tsx`, `apps/web/src/pages/`, and `apps/web/src/components/`
 - backend hot paths and job throughput in `packages/ai/src/{chat,tts}/use-cases/` and `apps/worker/src/`
 - CI/test runtime and build time via `package.json` scripts and affected package test folders
 - AI/provider usage patterns and token/call cost in `packages/ai/src/` and provider call sites

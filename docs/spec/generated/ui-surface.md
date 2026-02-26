@@ -1,12 +1,25 @@
 # UI Surface (Generated)
 
-- Routes: 1
-- Feature modules: 0
+- Routes: 3
+- UI modules: 10
 
 ## Routes
 
 | Path | Access |
 |---|---|
 | / | public |
+| /chat | protected |
+| /jobs | protected |
 
-## Feature Modules
+## UI Modules
+
+- `components/app-shell`
+- `components/auth-gate`
+- `components/logo`
+- `components/weather-tool-panel`
+- `lib/chat-utils`
+- `lib/run-utils`
+- `lib/weather-tool`
+- `pages/chat`
+- `pages/dashboard`
+- `pages/jobs`

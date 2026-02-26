@@ -35,7 +35,7 @@ Extract the first concrete signal and follow it to source.
 - API contract mismatches:
   - compare `packages/api/src/contracts/*.ts` with router handler input/output use
 - Frontend query/mutation mismatches:
-  - verify query keys come from `queryOptions().queryKey` and hook wrappers under `apps/web/src/features/*/hooks/`
+  - verify query keys come from `queryOptions().queryKey` and wrappers under `apps/web/src/pages/` or shared logic in `apps/web/src/lib/`
 - Ownership/auth regressions:
   - verify ownership checks in use case before write/delete and ownership-scoped repo queries
 
