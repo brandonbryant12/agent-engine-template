@@ -1,5 +1,20 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-dashboard-runs-load-failure-ux-retry",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Dashboard runs load failure UX + retry",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev",
+      "frontend",
+      "reliability"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
