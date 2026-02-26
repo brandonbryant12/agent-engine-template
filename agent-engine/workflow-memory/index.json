@@ -1,5 +1,24 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-ready-for-dev-executor-shipped-67-after-51-closed",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor shipped #67 after #51 closed",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "queue",
+      "reliability",
+      "idempotency"
+    ],
+    "importance": 0.84,
+    "confidence": 0.88,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
