@@ -1,0 +1,2 @@
+ALTER TABLE "job" ADD COLUMN "idempotencyKey" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "job_createdBy_type_idempotencyKey_unique" ON "job" USING btree ("createdBy","type","idempotencyKey") WHERE "job"."idempotencyKey" IS NOT NULL;

@@ -16,11 +16,16 @@ import type {
 import type { JobId } from '@repo/db/schema';
 import type { Effect } from 'effect';
 
+export interface EnqueueOptions {
+  readonly idempotencyKey?: string | null;
+}
+
 export interface QueueService {
   readonly enqueue: <TType extends JobType>(
     type: TType,
     payload: JobPayload<TType>,
     userId: string,
+    options?: EnqueueOptions,
   ) => Effect.Effect<TypedJob<TType>, QueueError>;
 
   readonly getJob: (

@@ -96,6 +96,39 @@ describe.skipIf(!POSTGRES_URL)('Queue atomic job claim (integration)', () => {
     expect(result!.status).toBe(JobStatus.COMPLETED);
   });
 
+  it('deduplicates enqueue when idempotency key is reused', async () => {
+    const first = await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.enqueue(
+          JobType.PROCESS_AI_RUN,
+          { prompt: 'same request', userId: testUserId },
+          testUserId,
+          { idempotencyKey: 'run-create-retry-1' },
+        ),
+      ),
+    );
+
+    const second = await runEffect(
+      Effect.flatMap(Queue, (q) =>
+        q.enqueue(
+          JobType.PROCESS_AI_RUN,
+          { prompt: 'same request', userId: testUserId },
+          testUserId,
+          { idempotencyKey: 'run-create-retry-1' },
+        ),
+      ),
+    );
+
+    const rows = await db
+      .select()
+      .from(job)
+      .where(eq(job.createdBy, testUserId));
+
+    expect(first.id).toBe(second.id);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.id).toBe(first.id);
+  });
+
   it('returns null when no pending jobs exist', async () => {
     const result = await runEffect(
       Effect.flatMap(Queue, (q) =>

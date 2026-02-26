@@ -15,6 +15,13 @@
       "when": 1771879161707,
       "tag": "0001_rich_falcon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772089761353,
+      "tag": "0002_spooky_wallop",
+      "breakpoints": true
     }
   ]
 }

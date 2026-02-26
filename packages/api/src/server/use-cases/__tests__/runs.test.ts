@@ -93,14 +93,16 @@ describe('runs use-cases', () => {
     let enqueueType: string | undefined;
     let enqueuePayload: unknown;
     let enqueueUserId: string | undefined;
+    let enqueueOptions: Parameters<QueueService['enqueue']>[3] | undefined;
 
     const queue = createMockQueueService({
       getJobsByUser: (() =>
         Effect.succeed([])) as QueueService['getJobsByUser'],
-      enqueue: ((type, payload, userId) => {
+      enqueue: ((type, payload, userId, options) => {
         enqueueType = type;
         enqueuePayload = payload;
         enqueueUserId = userId;
+        enqueueOptions = options;
         return Effect.succeed(
           createJob({ payload: payload as RunPayload }),
         ) as ReturnType<QueueService['enqueue']>;
@@ -117,6 +119,7 @@ describe('runs use-cases', () => {
         user: TEST_USER,
         input: {
           prompt: 'Plan quarterly roadmap',
+          idempotencyKey: 'idempotency-key-123',
           threadId: 'thread_123',
         },
       }).pipe(withQueueAndPublisher(queue, publisher)),
@@ -130,16 +133,19 @@ describe('runs use-cases', () => {
       userId: TEST_USER.id,
       idempotencyKey: expect.any(String),
     });
-    expect(publish).toHaveBeenCalledTimes(1);
-    expect(publish).toHaveBeenCalledWith(
-      TEST_USER.id,
-      expect.objectContaining({
-        type: 'run_queued',
-        runId: 'job_test',
-        prompt: 'Plan quarterly roadmap',
-        threadId: 'thread_123',
-      }),
-    );
+    expect(enqueueOptions).toEqual({ idempotencyKey: 'idempotency-key-123' });
+    await vi.waitFor(() => {
+      expect(publish).toHaveBeenCalledTimes(1);
+      expect(publish).toHaveBeenCalledWith(
+        TEST_USER.id,
+        expect.objectContaining({
+          type: 'run_queued',
+          runId: 'job_test',
+          prompt: 'Plan quarterly roadmap',
+          threadId: 'thread_123',
+        }),
+      );
+    });
     expect(result.prompt).toBe('Plan quarterly roadmap');
     expect(result.threadId).toBe('thread_123');
   });
@@ -165,6 +171,32 @@ describe('runs use-cases', () => {
 
     expect(error._tag).toBe('QueueError');
     expect(error.message).toBe('queue unavailable');
+  });
+
+  it('returns success when queued-event publish fails after enqueue', async () => {
+    const queue = createMockQueueService({
+      enqueue: ((type, payload, userId) =>
+        Effect.succeed(
+          createJob({ type, payload: payload as RunPayload, createdBy: userId }),
+        )) as QueueService['enqueue'],
+    });
+
+    const publisher = createMockPublisherService({
+      publish: () => Effect.fail(new Error('sse unavailable')),
+    });
+
+    const result = await Effect.runPromise(
+      createRunUseCase({
+        user: TEST_USER,
+        input: {
+          prompt: 'Plan quarterly roadmap',
+          idempotencyKey: 'retry-key-1',
+        },
+      }).pipe(withQueueAndPublisher(queue, publisher)),
+    );
+
+    expect(result.id).toBe('job_test');
+    expect(result.prompt).toBe('Plan quarterly roadmap');
   });
 
   it('fails create run with typed forbidden error for unauthorized roles', async () => {

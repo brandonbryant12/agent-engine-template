@@ -58,6 +58,7 @@ describe('jobs schema', () => {
         nextActions: ['N'],
       },
       error: null,
+      idempotencyKey: null,
       createdBy: 'user_1',
       createdAt: now,
       updatedAt: now,

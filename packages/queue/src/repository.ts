@@ -93,22 +93,69 @@ const makeQueueService = Effect.gen(function* () {
     type: TType,
     payload: JobPayload<TType>,
     userId: string,
+    options?: { readonly idempotencyKey?: string | null },
   ): Effect.Effect<TypedJob<TType>, QueueError> =>
     runQuery(
       'enqueue',
       async (db) => {
-        const [row] = await db
+        const trimmedIdempotencyKey = options?.idempotencyKey?.trim();
+        const idempotencyKey =
+          trimmedIdempotencyKey && trimmedIdempotencyKey.length > 0
+            ? trimmedIdempotencyKey
+            : null;
+
+        if (!idempotencyKey) {
+          const [row] = await db
+            .insert(job)
+            .values({
+              type,
+              payload: payload as unknown as Record<string, unknown>,
+              createdBy: userId,
+              idempotencyKey: null,
+            })
+            .returning();
+
+          if (!row) throw new Error('Failed to insert job');
+
+          return mapRowToJob<TType>(row);
+        }
+
+        const [inserted] = await db
           .insert(job)
           .values({
             type,
             payload: payload as unknown as Record<string, unknown>,
             createdBy: userId,
+            idempotencyKey,
+          })
+          .onConflictDoNothing({
+            target: [job.createdBy, job.type, job.idempotencyKey],
           })
           .returning();
 
-        if (!row) throw new Error('Failed to insert job');
+        if (inserted) {
+          return mapRowToJob<TType>(inserted);
+        }
 
-        return mapRowToJob<TType>(row);
+        const [existing] = await db
+          .select()
+          .from(job)
+          .where(
+            and(
+              eq(job.createdBy, userId),
+              eq(job.type, type),
+              eq(job.idempotencyKey, idempotencyKey),
+            ),
+          )
+          .limit(1);
+
+        if (!existing) {
+          throw new Error(
+            'Failed to resolve idempotent enqueue after conflict',
+          );
+        }
+
+        return mapRowToJob<TType>(existing);
       },
       'Failed to enqueue job',
     ).pipe(
@@ -117,6 +164,7 @@ const makeQueueService = Effect.gen(function* () {
           'queue.job.id': j.id,
           'queue.job.type': type,
           'queue.user.id': userId,
+          'queue.job.idempotency_key': options?.idempotencyKey ?? 'none',
         }),
       ),
     );
