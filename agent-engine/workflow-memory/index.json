@@ -16,6 +16,37 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-26-feature-delivery-ready-for-dev-executor-merged-issues-73-74-82",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor merged issues #73 #74 #82",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "docs-tooling",
+      "ci",
+      "labels",
+      "memory",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:retrieve",
+      "memory-dynamics:write",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:tool-misuse"
+    ],
+    "importance": 0.87,
+    "confidence": 0.95,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-26-feature-delivery-ready-for-dev-executor-shipped-67-after-51-closed",
     "date": "2026-02-26",
     "month": "2026-02",
