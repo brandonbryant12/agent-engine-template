@@ -5,6 +5,7 @@ import type {
   PromptVersionBlockedError,
   PromptVersionNotFoundError,
 } from './chat/prompts/errors';
+import type { ToolFailureTag, ToolRemediation } from './tools/remediation';
 import type {
   ToolProviderError,
   ToolRateLimitError,
@@ -248,6 +249,70 @@ export class ResearchTimeoutError extends Schema.TaggedError<ResearchTimeoutErro
 }
 
 // =============================================================================
+// Tool Errors
+// =============================================================================
+
+/**
+ * Weather provider returned a payload that failed strict shape checks.
+ */
+export class WeatherToolSchemaDriftError extends Schema.TaggedError<WeatherToolSchemaDriftError>()(
+  'WeatherToolSchemaDriftError',
+  {
+    message: Schema.String,
+  },
+) {
+  static readonly httpStatus = 502 as const;
+  static readonly httpCode = 'SERVICE_UNAVAILABLE' as const;
+  static readonly httpMessage = 'Weather provider response was invalid';
+  static readonly logLevel = 'warn' as const;
+}
+
+/**
+ * Weather provider call timed out.
+ */
+export class WeatherToolTimeoutError extends Schema.TaggedError<WeatherToolTimeoutError>()(
+  'WeatherToolTimeoutError',
+  {
+    message: Schema.String,
+  },
+) {
+  static readonly httpStatus = 504 as const;
+  static readonly httpCode = 'SERVICE_UNAVAILABLE' as const;
+  static readonly httpMessage = 'Weather provider timed out';
+  static readonly logLevel = 'warn' as const;
+}
+
+/**
+ * Weather provider rejected the request due to quota/rate limits.
+ */
+export class WeatherToolRateLimitError extends Schema.TaggedError<WeatherToolRateLimitError>()(
+  'WeatherToolRateLimitError',
+  {
+    message: Schema.String,
+  },
+) {
+  static readonly httpStatus = 429 as const;
+  static readonly httpCode = 'RATE_LIMITED' as const;
+  static readonly httpMessage = 'Weather provider rate limit exceeded';
+  static readonly logLevel = 'warn' as const;
+}
+
+/**
+ * Weather provider call failed for non-timeout/non-rate-limit reasons.
+ */
+export class WeatherToolProviderError extends Schema.TaggedError<WeatherToolProviderError>()(
+  'WeatherToolProviderError',
+  {
+    message: Schema.String,
+  },
+) {
+  static readonly httpStatus = 502 as const;
+  static readonly httpCode = 'SERVICE_UNAVAILABLE' as const;
+  static readonly httpMessage = 'Weather provider unavailable';
+  static readonly logLevel = 'error' as const;
+}
+
+// =============================================================================
 // Error Union Types
 // =============================================================================
 
@@ -267,6 +332,10 @@ export type AIError =
   | ImageGenContentFilteredError
   | ResearchError
   | ResearchTimeoutError
+  | WeatherToolSchemaDriftError
+  | WeatherToolTimeoutError
+  | WeatherToolRateLimitError
+  | WeatherToolProviderError
   | PromptKeyNotFoundError
   | PromptVersionNotFoundError
   | PromptVersionBlockedError
@@ -276,3 +345,38 @@ export type AIError =
   | ToolTimeoutError
   | ToolRateLimitError
   | ToolSchemaDriftError;
+
+const TOOL_FAILURE_REMEDIATIONS: Record<ToolFailureTag, ToolRemediation> = {
+  validation: {
+    title: 'Invalid weather request input',
+    action: 'Edit the location values and try again.',
+  },
+  unauthorized: {
+    title: 'Sign in required',
+    action: 'Sign in and retry the weather request.',
+  },
+  forbidden: {
+    title: 'You do not have access to this tool',
+    action: 'Use an account with user or admin role.',
+  },
+  timeout: {
+    title: 'Weather service timed out',
+    action: 'Retry in a few moments.',
+  },
+  provider: {
+    title: 'Weather service is unavailable',
+    action: 'Retry later or disable weather tool temporarily.',
+  },
+  schemaDrift: {
+    title: 'Weather response format changed',
+    action: 'Disable the provider until schema compatibility is restored.',
+  },
+  rateLimited: {
+    title: 'Weather service is rate limited',
+    action: 'Retry after a short cooldown.',
+  },
+};
+
+export const readToolFailureRemediation = (
+  failureTag: ToolFailureTag,
+): ToolRemediation => TOOL_FAILURE_REMEDIATIONS[failureTag];

@@ -10,6 +10,7 @@ const convertToModelMessagesMock = vi.fn();
 vi.mock('ai', () => ({
   streamText: (...args: unknown[]) => streamTextMock(...args),
   convertToModelMessages: (...args: unknown[]) => convertToModelMessagesMock(...args),
+  jsonSchema: (schema: unknown) => schema,
 }));
 
 const testMessages: UIMessage[] = [
@@ -47,6 +48,9 @@ describe('streamGeneralChat', () => {
     expect(streamTextMock.mock.calls[0]?.[0]).toEqual(
       expect.objectContaining({
         system: expect.stringContaining('default AI assistant for Agent Engine Template'),
+        tools: expect.objectContaining({
+          'weather.current': expect.any(Object),
+        }),
       }),
     );
   });

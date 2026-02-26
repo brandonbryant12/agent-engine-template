@@ -88,6 +88,7 @@ const chatRouter = {
         context.user,
         streamGeneralChat({
           messages,
+          actorRole: context.user.role,
         }),
         errors,
         { requestId: context.requestId, span: 'api.chat.general' },
