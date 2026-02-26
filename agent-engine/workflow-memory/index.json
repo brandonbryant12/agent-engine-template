@@ -16,6 +16,38 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-26-feature-delivery-ready-for-dev-executor-merged-trusted-proxy-rate-limit-hardening",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor merged trusted-proxy rate-limit hardening",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "security",
+      "rate-limit",
+      "proxy-trust",
+      "memory",
+      "workflow-memory",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve",
+      "capability:planning",
+      "capability:tool-use",
+      "capability:instruction-following",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.9,
+    "confidence": 0.92,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-26-feature-delivery-ready-for-dev-executor-shipped-ai-tool-registry-weather-demo",
     "date": "2026-02-26",
     "month": "2026-02",
