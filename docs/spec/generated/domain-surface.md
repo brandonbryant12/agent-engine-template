@@ -5,7 +5,7 @@
 
 | Domain | Use Cases | API Endpoints |
 |---|---|---|
-| chat | 1 | 1 |
+| chat | 1 | 2 |
 | tts | 4 | n/a |
 
 ## Use Cases by Domain

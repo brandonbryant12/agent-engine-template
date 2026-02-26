@@ -5,6 +5,20 @@ import type {
   PromptVersionBlockedError,
   PromptVersionNotFoundError,
 } from './chat/prompts/errors';
+import type {
+  ToolProviderError,
+  ToolRateLimitError,
+  ToolSchemaDriftError,
+  ToolTimeoutError,
+  ToolValidationError,
+} from './chat/tools/errors';
+export {
+  ToolProviderError,
+  ToolRateLimitError,
+  ToolSchemaDriftError,
+  ToolTimeoutError,
+  ToolValidationError,
+} from './chat/tools/errors';
 
 // =============================================================================
 // LLM Errors
@@ -256,4 +270,9 @@ export type AIError =
   | PromptKeyNotFoundError
   | PromptVersionNotFoundError
   | PromptVersionBlockedError
-  | PromptVariableSchemaMismatchError;
+  | PromptVariableSchemaMismatchError
+  | ToolValidationError
+  | ToolProviderError
+  | ToolTimeoutError
+  | ToolRateLimitError
+  | ToolSchemaDriftError;

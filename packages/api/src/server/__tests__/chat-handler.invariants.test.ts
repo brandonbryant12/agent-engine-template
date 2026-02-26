@@ -14,10 +14,11 @@ const chatRouterPath = path.join(
 const readChatRouter = () => fs.readFileSync(chatRouterPath, 'utf-8');
 
 describe('chat handler invariants', () => {
-  it('routes use stream handler pipeline helper for protocol + spans', () => {
+  it('routes use shared effect-handler helpers for protocol + spans', () => {
     const source = readChatRouter();
 
     expect(source).toContain('handleEffectStreamWithProtocol');
+    expect(source).toContain('handleEffectWithProtocol');
   });
 
   it('routes do not call runtime.runPromise directly', () => {
@@ -30,7 +31,8 @@ describe('chat handler invariants', () => {
   it('routes declare api.chat spans for each handler', () => {
     const source = readChatRouter();
     const matches = source.match(/span:\s*'api\.chat\.[^']+'/g) ?? [];
+    const handlerCount = (source.match(/\.handler\(/g) ?? []).length;
 
-    expect(matches).toHaveLength(1);
+    expect(matches).toHaveLength(handlerCount);
   });
 });

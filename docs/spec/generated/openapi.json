@@ -129,6 +129,81 @@
         ]
       }
     },
+    "/chat/tools/weather/current": {
+      "post": {
+        "operationId": "chat.weatherCurrent",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "additionalProperties": false,
+                "properties": {
+                  "latitude": {
+                    "description": "a number less than or equal to 90",
+                    "maximum": 90,
+                    "minimum": -90,
+                    "title": "lessThanOrEqualTo(90)",
+                    "type": "number"
+                  },
+                  "locationLabel": {
+                    "description": "a string at most 80 character(s) long",
+                    "maxLength": 80,
+                    "minLength": 1,
+                    "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                    "title": "maxLength(80)",
+                    "type": "string"
+                  },
+                  "longitude": {
+                    "description": "a number less than or equal to 180",
+                    "maximum": 180,
+                    "minimum": -180,
+                    "title": "lessThanOrEqualTo(180)",
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude",
+                  "locationLabel"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "description": "Missing user session. Please log in!"
+          },
+          "403": {
+            "description": "You do not have enough permission to perform this action."
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "description": "INPUT_VALIDATION_FAILED error response"
+          },
+          "429": {
+            "description": "Too many requests. Please try again later."
+          },
+          "500": {
+            "description": "An internal error occurred. Please try again later."
+          },
+          "502": {
+            "description": "An external service is currently unavailable."
+          }
+        },
+        "tags": [
+          "chat"
+        ]
+      }
+    },
     "/events/": {
       "get": {
         "operationId": "events.subscribe",
