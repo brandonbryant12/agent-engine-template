@@ -16,6 +16,21 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-26-feature-delivery-shipped-ai-tooling-baseline-for-ready-for-dev-lane",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Shipped AI tooling baseline for ready-for-dev lane",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev",
+      "ai-tooling",
+      "weather-tool"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
