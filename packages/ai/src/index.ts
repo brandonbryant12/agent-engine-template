@@ -125,7 +125,7 @@ export {
 
 // Tools
 export {
-  invokeWeatherTool,
+  invokeWeatherTool as invokeWeatherToolDirect,
   WEATHER_PROVIDER_HOST,
   WEATHER_TOOL_CONTRACT_VERSION,
   WEATHER_TOOL_ID,
