@@ -1,4 +1,5 @@
 import type { StorageConfig } from '@repo/api/server';
+import { buildCredentialedCorsOriginConfig } from './cors-config';
 import { env } from './env';
 
 export const buildStorageConfig = (): StorageConfig => {
@@ -43,20 +44,10 @@ export const buildStorageConfig = (): StorageConfig => {
 };
 
 /**
- * CORS origins. Set CORS_ORIGINS=* for fully permissive mode (reflects
- * any requesting origin). Otherwise falls back to PUBLIC_WEB_URL.
+ * CORS allowlist for credentialed auth/API routes.
+ * Use explicit origins only; wildcard mode is rejected at startup.
  */
-export const corsOriginConfig: string[] | '*' = (() => {
-  if (env.CORS_ORIGINS === '*') return '*';
-  const origins = [env.PUBLIC_WEB_URL];
-  if (env.CORS_ORIGINS) {
-    origins.push(...env.CORS_ORIGINS.split(',').map((s) => s.trim()));
-  }
-  return origins.map((url) => {
-    try {
-      return new URL(url).origin;
-    } catch {
-      return url;
-    }
-  });
-})();
+export const corsOriginConfig = buildCredentialedCorsOriginConfig({
+  publicWebUrl: env.PUBLIC_WEB_URL,
+  corsOrigins: env.CORS_ORIGINS,
+});

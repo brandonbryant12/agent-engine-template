@@ -10,7 +10,7 @@ const authRateLimit = createAuthRateLimit({ redisUrl: env.SERVER_REDIS_URL });
 export const authRoute = new Hono()
   .use(
     cors({
-      origin: corsOriginConfig === '*' ? (origin) => origin : corsOriginConfig,
+      origin: corsOriginConfig,
       credentials: true,
       allowHeaders: ['Content-Type', 'Authorization'],
       allowMethods: ['POST', 'GET', 'OPTIONS'],

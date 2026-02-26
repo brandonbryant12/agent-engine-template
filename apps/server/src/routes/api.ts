@@ -10,7 +10,7 @@ const apiRateLimit = createApiRateLimit({ redisUrl: env.SERVER_REDIS_URL });
 export const apiRoute = new Hono<{ Variables: { requestId: string } }>()
   .use(
     cors({
-      origin: corsOriginConfig === '*' ? (origin) => origin : corsOriginConfig,
+      origin: corsOriginConfig,
       credentials: true,
     }),
   )

@@ -17,6 +17,13 @@ pnpm db:push
 pnpm dev
 ```
 
+Local CORS note (credentialed auth/API routes): avoid wildcard origins.
+Use explicit local allowlist values instead, for example:
+
+```bash
+CORS_ORIGINS=http://localhost:4173,http://127.0.0.1:8085
+```
+
 ## Quality Checks
 
 ```bash
