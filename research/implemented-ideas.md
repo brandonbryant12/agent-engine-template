@@ -12,6 +12,15 @@ Use this file to capture shipped ideas discovered through automation/research la
 
 ## Entries
 
+- Date: 2026-02-26
+- Source lane/workflow: ready-for-dev-executor / Feature Delivery
+- Issue: https://github.com/brandonbryant12/agent-engine-template/issues/88
+- PR: https://github.com/brandonbryant12/agent-engine-template/pull/96
+- Paper/reference links: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSNotSupportingCredentials, https://cheatsheetseries.owasp.org/cheatsheets/Cross_Origin_Resource_Sharing_Cheat_Sheet.html
+- Idea(s) adopted: reject wildcard origin mode for credentialed CORS at runtime startup and require explicit origin allowlists.
+- Implemented in: `apps/server/src/cors-config.ts`, `apps/server/src/config.ts`, `apps/server/src/routes/api.ts`, `apps/server/src/routes/auth.ts`, `apps/server/src/__tests__/cors-config.test.ts`, `apps/server/.env.example`, and `docs/setup.md`.
+- Follow-up: if route-level CORS policies diverge later, keep credentialed-route defaults strict and test each policy surface independently.
+
 - Date: 2026-02-25
 - Source lane/workflow: ready-for-dev-executor / Feature Delivery + Architecture + ADR Guard
 - Issue: https://github.com/brandonbryant12/agent-engine-template/issues/58
