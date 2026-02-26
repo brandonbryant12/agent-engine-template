@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { rawApiClient } from '@/clients/api-client';
 import { authClient } from '@/clients/auth-client';
 import { EngineIcon } from '@/components/logo';
+import { WeatherToolPanel } from '@/components/weather-tool-panel';
 import {
   type StoredThread,
   createEmptyThread,
@@ -376,6 +377,7 @@ export function ChatPage() {
                 {error.message || 'Streaming failed.'}
               </p>
             ) : null}
+            <WeatherToolPanel />
 
             <Textarea
               value={draft}
