@@ -95,6 +95,8 @@ describe('runs use-cases', () => {
     let enqueueUserId: string | undefined;
 
     const queue = createMockQueueService({
+      getJobsByUser: (() =>
+        Effect.succeed([])) as QueueService['getJobsByUser'],
       enqueue: ((type, payload, userId) => {
         enqueueType = type;
         enqueuePayload = payload;
@@ -126,6 +128,7 @@ describe('runs use-cases', () => {
       prompt: 'Plan quarterly roadmap',
       threadId: 'thread_123',
       userId: TEST_USER.id,
+      idempotencyKey: expect.any(String),
     });
     expect(publish).toHaveBeenCalledTimes(1);
     expect(publish).toHaveBeenCalledWith(
@@ -144,6 +147,8 @@ describe('runs use-cases', () => {
   it('preserves typed queue errors for create run failures', async () => {
     const queueError = new QueueError({ message: 'queue unavailable' });
     const queue = createMockQueueService({
+      getJobsByUser: (() =>
+        Effect.succeed([])) as QueueService['getJobsByUser'],
       enqueue: () => Effect.fail(queueError),
     });
 
@@ -166,6 +171,8 @@ describe('runs use-cases', () => {
     let enqueueCalls = 0;
 
     const queue = createMockQueueService({
+      getJobsByUser: (() =>
+        Effect.succeed([])) as QueueService['getJobsByUser'],
       enqueue: ((type, payload, userId) => {
         enqueueCalls += 1;
         return Effect.succeed(
@@ -188,6 +195,78 @@ describe('runs use-cases', () => {
     expect(error._tag).toBe('ForbiddenError');
     expect(error.message).toContain('Requires user or admin role');
     expect(enqueueCalls).toBe(0);
+  });
+
+  it('returns the existing run for idempotent retries without enqueueing a duplicate', async () => {
+    let enqueueCalls = 0;
+    const existing = createJob({
+      id: 'job_existing' as RunJob['id'],
+      payload: {
+        prompt: 'Plan quarterly roadmap',
+        threadId: 'thread_123',
+        userId: TEST_USER.id,
+        idempotencyKey: `${TEST_USER.id}:Plan quarterly roadmap:thread_123`,
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const queue = createMockQueueService({
+      getJobsByUser: (() =>
+        Effect.succeed([existing])) as QueueService['getJobsByUser'],
+      enqueue: ((type, payload, userId) => {
+        enqueueCalls += 1;
+        return Effect.succeed(
+          createJob({ type, payload: payload as RunPayload, createdBy: userId }),
+        ) as ReturnType<QueueService['enqueue']>;
+      }) as QueueService['enqueue'],
+    });
+
+    const publish = vi.fn<SSEPublisherService['publish']>(() =>
+      Effect.succeed(undefined),
+    );
+
+    const result = await Effect.runPromise(
+      createRunUseCase({
+        user: TEST_USER,
+        input: {
+          prompt: 'Plan quarterly roadmap',
+          threadId: 'thread_123',
+        },
+      }).pipe(withQueueAndPublisher(queue, createMockPublisherService({ publish }))),
+    );
+
+    expect(result.id).toBe('job_existing');
+    expect(enqueueCalls).toBe(0);
+  });
+
+  it('does not fail create run when publish throws after durable enqueue', async () => {
+    const queue = createMockQueueService({
+      getJobsByUser: (() =>
+        Effect.succeed([])) as QueueService['getJobsByUser'],
+      enqueue: ((type, payload, userId) =>
+        Effect.succeed(
+          createJob({ type, payload: payload as RunPayload, createdBy: userId }),
+        )) as QueueService['enqueue'],
+    });
+
+    const publisher = createMockPublisherService({
+      publish: () =>
+        Effect.die(new Error('transient publish failure')),
+    });
+
+    const result = await Effect.runPromise(
+      createRunUseCase({
+        user: TEST_USER,
+        input: {
+          prompt: 'Plan quarterly roadmap',
+          threadId: 'thread_123',
+        },
+      }).pipe(withQueueAndPublisher(queue, publisher)),
+    );
+
+    expect(result.id).toBe('job_test');
+    expect(result.prompt).toBe('Plan quarterly roadmap');
   });
 
   it('scopes list runs to user ownership and delegates order + limit to queue', async () => {
