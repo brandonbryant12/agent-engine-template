@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { rateLimiter } from '../middleware/rate-limit';
+import { rateLimiter, resolveRateLimitIdentity } from '../middleware/rate-limit';
 
 describe('rateLimiter middleware', () => {
   let app: Hono;
@@ -193,5 +193,62 @@ describe('rateLimiter middleware', () => {
 
     expect(res.status).toBe(429);
     expect(consume).toHaveBeenCalledOnce();
+  });
+
+  it('ignores spoofed forwarded headers when remote address is untrusted', () => {
+    const identity = resolveRateLimitIdentity({
+      remoteAddress: '198.51.100.9',
+      forwardedHeader: '203.0.113.1, 203.0.113.2',
+      realIpHeader: '203.0.113.3',
+      config: {
+        trustProxy: true,
+        trustedHops: 1,
+        trustedProxyMatchers: ['loopback', 'private'],
+      },
+    });
+
+    expect(identity).toBe('198.51.100.9');
+  });
+
+  it('uses trusted forwarded chain when request comes from trusted proxy', () => {
+    const identity = resolveRateLimitIdentity({
+      remoteAddress: '10.0.0.10',
+      forwardedHeader: '203.0.113.50, 198.51.100.7',
+      config: {
+        trustProxy: true,
+        trustedHops: 1,
+        trustedProxyMatchers: ['private'],
+      },
+    });
+
+    expect(identity).toBe('198.51.100.7');
+  });
+
+  it('normalizes IPv6-mapped IPv4 inputs', () => {
+    const identity = resolveRateLimitIdentity({
+      remoteAddress: '::ffff:10.0.0.10',
+      forwardedHeader: '::ffff:203.0.113.9',
+      config: {
+        trustProxy: true,
+        trustedHops: 1,
+        trustedProxyMatchers: ['private'],
+      },
+    });
+
+    expect(identity).toBe('203.0.113.9');
+  });
+
+  it('falls back to unknown when headers are malformed and remote is missing', () => {
+    const identity = resolveRateLimitIdentity({
+      forwardedHeader: 'not-an-ip',
+      realIpHeader: 'also-not-an-ip',
+      config: {
+        trustProxy: true,
+        trustedHops: 1,
+        trustedProxyMatchers: ['private'],
+      },
+    });
+
+    expect(identity).toBe('unknown');
   });
 });

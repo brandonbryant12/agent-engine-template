@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+import { getConnInfo } from '@hono/node-server/conninfo';
 import { createClient } from 'redis';
 import type { Context, MiddlewareHandler } from 'hono';
 
@@ -37,8 +39,24 @@ interface RateLimitStore {
   shutdown?: () => Promise<void>;
 }
 
+interface TrustedProxyConfig {
+  trustProxy: boolean;
+  trustedHops: number;
+  trustedProxyMatchers: readonly string[];
+}
+
+interface RateLimitIdentityInput {
+  remoteAddress?: string;
+  forwardedHeader?: string;
+  realIpHeader?: string;
+  config?: TrustedProxyConfig;
+}
+
 const DEFAULT_KEY_PREFIX = 'cs:rate-limit';
 const LOG_PREFIX = '[RateLimit]';
+const TRUST_PROXY_ENV = 'RATE_LIMIT_TRUST_PROXY';
+const TRUSTED_HOPS_ENV = 'RATE_LIMIT_TRUSTED_HOPS';
+const TRUSTED_PROXIES_ENV = 'RATE_LIMIT_TRUSTED_PROXIES';
 
 const REDIS_WINDOW_SCRIPT = `
 local current = redis.call('INCR', KEYS[1])
@@ -64,6 +82,162 @@ function toNumber(value: unknown, fallback: number): number {
     if (Number.isFinite(parsed)) return parsed;
   }
   return fallback;
+}
+
+function parseBoolean(value: string | undefined, fallback: boolean): boolean {
+  if (!value) return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
+}
+
+function parseTrustedHops(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) return fallback;
+  return parsed;
+}
+
+function normalizeIp(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  const withoutZone = trimmed.split('%')[0] ?? trimmed;
+  const unwrapped =
+    withoutZone.startsWith('[') && withoutZone.endsWith(']')
+      ? withoutZone.slice(1, -1)
+      : withoutZone;
+
+  if (unwrapped.toLowerCase().startsWith('::ffff:')) {
+    const mapped = unwrapped.slice('::ffff:'.length);
+    if (isIP(mapped) === 4) {
+      return mapped;
+    }
+  }
+
+  if (isIP(unwrapped)) {
+    return unwrapped;
+  }
+
+  return undefined;
+}
+
+function isLoopbackAddress(address: string): boolean {
+  return address === '127.0.0.1' || address === '::1';
+}
+
+function isPrivateAddress(address: string): boolean {
+  if (isIP(address) === 4) {
+    return (
+      address.startsWith('10.') ||
+      address.startsWith('192.168.') ||
+      /^172\.(1[6-9]|2\d|3[0-1])\./.test(address)
+    );
+  }
+
+  if (isIP(address) === 6) {
+    const lowered = address.toLowerCase();
+    return lowered.startsWith('fc') || lowered.startsWith('fd');
+  }
+
+  return false;
+}
+
+function isTrustedProxyAddress(
+  address: string,
+  trustedProxyMatchers: readonly string[],
+): boolean {
+  for (const matcher of trustedProxyMatchers) {
+    if (matcher === '*') return true;
+    if (matcher === 'loopback' && isLoopbackAddress(address)) return true;
+    if (matcher === 'private' && isPrivateAddress(address)) return true;
+    if (matcher === address) return true;
+  }
+
+  return false;
+}
+
+function parseForwardedHeader(header: string | undefined): string[] {
+  if (!header) return [];
+
+  const ips = header
+    .split(',')
+    .map((candidate) => normalizeIp(candidate))
+    .filter((candidate): candidate is string => Boolean(candidate));
+
+  return ips;
+}
+
+function getServerRemoteAddress(c: Context): string | undefined {
+  try {
+    return normalizeIp(getConnInfo(c).remote.address);
+  } catch {
+    return undefined;
+  }
+}
+
+function buildTrustedProxyConfig(): TrustedProxyConfig {
+  const trustProxy = parseBoolean(process.env[TRUST_PROXY_ENV], true);
+  const trustedHops = parseTrustedHops(process.env[TRUSTED_HOPS_ENV], 1);
+  const trustedProxyMatchers = (
+    process.env[TRUSTED_PROXIES_ENV] ?? 'loopback,private'
+  )
+    .split(',')
+    .map((matcher) => matcher.trim().toLowerCase())
+    .filter(Boolean);
+
+  return {
+    trustProxy,
+    trustedHops,
+    trustedProxyMatchers,
+  };
+}
+
+const trustedProxyConfig = buildTrustedProxyConfig();
+
+function selectClientIpFromForwardedChain(
+  forwardedIps: readonly string[],
+  trustedHops: number,
+): string | undefined {
+  if (forwardedIps.length === 0) return undefined;
+  const index = forwardedIps.length - trustedHops;
+  if (index < 0) return undefined;
+  return forwardedIps[index];
+}
+
+export function resolveRateLimitIdentity(input: RateLimitIdentityInput): string {
+  const config = input.config ?? trustedProxyConfig;
+  const remoteAddress = normalizeIp(input.remoteAddress);
+
+  if (!config.trustProxy) {
+    return remoteAddress ?? 'unknown';
+  }
+
+  const forwardedIps = parseForwardedHeader(input.forwardedHeader);
+  const realIp = normalizeIp(input.realIpHeader);
+
+  // In test/local harnesses, socket-derived remote address may be unavailable.
+  if (!remoteAddress) {
+    return realIp ?? forwardedIps[0] ?? 'unknown';
+  }
+
+  if (!isTrustedProxyAddress(remoteAddress, config.trustedProxyMatchers)) {
+    return remoteAddress;
+  }
+
+  const forwardedCandidate = selectClientIpFromForwardedChain(
+    forwardedIps,
+    config.trustedHops,
+  );
+
+  if (forwardedCandidate) {
+    return forwardedCandidate;
+  }
+
+  return realIp ?? remoteAddress;
 }
 
 function createInMemoryStore(cleanupIntervalMs: number): RateLimitStore {
@@ -234,15 +408,11 @@ export const rateLimiter = (opts: RateLimitOptions): MiddlewareHandler => {
 };
 
 function defaultKeyGenerator(c: Context): string {
-  const forwarded = c.req.header('x-forwarded-for');
-  if (forwarded) {
-    return forwarded.split(',')[0]!.trim();
-  }
-  const realIp = c.req.header('x-real-ip');
-  if (realIp) {
-    return realIp;
-  }
-  return 'unknown';
+  return resolveRateLimitIdentity({
+    remoteAddress: getServerRemoteAddress(c),
+    forwardedHeader: c.req.header('x-forwarded-for'),
+    realIpHeader: c.req.header('x-real-ip'),
+  });
 }
 
 export async function shutdownRateLimiters(): Promise<void> {
