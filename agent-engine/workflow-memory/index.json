@@ -1,5 +1,47 @@
 [
   {
+    "id": "2026-02-26-self-improvement-agent-engine-researcher-registry-mapping-and-tooling-drift-scan",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Self-Improvement",
+    "title": "agent-engine-researcher: registry mapping and tooling drift scan",
+    "severity": "high",
+    "status": "open",
+    "tags": [
+      "automation",
+      "agent-engine-researcher",
+      "self-improvement",
+      "memory",
+      "workflow-memory",
+      "workflow-registry",
+      "mapping-hygiene",
+      "skills",
+      "tooling",
+      "tool:gh",
+      "tool:pnpm",
+      "tool:workflow-memory:add-entry",
+      "tool:workflow-memory:sync",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve",
+      "capability:instruction-following",
+      "capability:tool-use",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.94,
+    "confidence": 0.95,
+    "scan": {
+      "walkMode": "weighted-random",
+      "scope": "meso",
+      "domain": "workflow-registry-optimization-and-mapping-hygiene",
+      "signal": "5"
+    },
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
