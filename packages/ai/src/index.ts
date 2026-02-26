@@ -104,6 +104,22 @@ export {
   type PromptResolverError,
 } from './chat';
 
+// Tools
+export {
+  invokeWeatherTool,
+  WEATHER_PROVIDER_HOST,
+  WEATHER_TOOL_CONTRACT_VERSION,
+  WEATHER_TOOL_ID,
+  WeatherInputSchema,
+  listToolMetadata,
+  resolveEnabledToolsForChannel,
+  type WeatherInput,
+  type WeatherToolResult,
+  type ToolMetadata,
+  type ToolFailureTag,
+  type ToolRemediation,
+} from './tools';
+
 // Import for combined layer
 import type { ImageGen } from './image-gen';
 import type { LLM } from './llm';

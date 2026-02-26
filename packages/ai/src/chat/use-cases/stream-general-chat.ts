@@ -6,6 +6,7 @@ import {
 } from 'ai';
 import { Effect } from 'effect';
 import { LLM } from '../../llm/service';
+import { resolveEnabledToolsForChannel } from '../../tools';
 import {
   GENERAL_CHAT_LEGACY_INLINE_FALLBACK,
   GENERAL_CHAT_PROMPT_CHANNEL,
@@ -15,6 +16,7 @@ import {
 
 export interface StreamGeneralChatInput {
   readonly messages: UIMessage[];
+  readonly actorRole?: string | null;
   readonly promptVersion?: string;
   readonly promptCompatibilityMode?: 'off' | 'legacy-inline-fallback';
 }
@@ -75,6 +77,9 @@ export const streamGeneralChat = (input: StreamGeneralChatInput) =>
     const modelMessages = yield* Effect.promise(() =>
       convertToModelMessages(input.messages),
     );
+    const tools = resolveEnabledToolsForChannel('chat.general', {
+      actorRole: input.actorRole,
+    });
 
     const result = streamText({
       model,
@@ -82,6 +87,7 @@ export const streamGeneralChat = (input: StreamGeneralChatInput) =>
       messages: modelMessages,
       maxOutputTokens: 1024,
       temperature: 0.4,
+      tools,
     });
 
     yield* logPromptDecision(promptPolicy, prompt);
@@ -94,6 +100,7 @@ export const streamGeneralChat = (input: StreamGeneralChatInput) =>
           'prompt.version': prompt.version,
           'prompt.policy': prompt.policy,
           'prompt.outcome': prompt.outcome,
+          'tool.count': Object.keys(tools).length,
           ...(prompt.fallbackReason
             ? { 'prompt.failureReason': prompt.fallbackReason }
             : {}),
