@@ -244,14 +244,16 @@ describe('runs router behavior', () => {
       let enqueueType: string | undefined;
       let enqueuePayload: unknown;
       let enqueueUserId: string | undefined;
+      let enqueueOptions: Parameters<QueueService['enqueue']>[3] | undefined;
 
       const queue = createMockQueueService({
         getJobsByUser: (() =>
           Effect.succeed([])) as QueueService['getJobsByUser'],
-        enqueue: ((type, payload, userId) => {
+        enqueue: ((type, payload, userId, options) => {
           enqueueType = type;
           enqueuePayload = payload;
           enqueueUserId = userId;
+          enqueueOptions = options;
 
           return Effect.succeed(
             createJob({ payload: payload as RunPayload }),
@@ -269,7 +271,7 @@ describe('runs router behavior', () => {
       );
 
       const created = await invokeProcedure<
-        { prompt: string; threadId?: string | null },
+        { prompt: string; idempotencyKey?: string; threadId?: string | null },
         Awaited<ReturnType<typeof runsRouter.create['~orpc']['handler']>>
       >({
         procedure: runsRouter.create,
@@ -277,6 +279,7 @@ describe('runs router behavior', () => {
         context: createMockContext(runtime, TEST_USER),
         input: {
           prompt: 'Plan quarterly roadmap',
+          idempotencyKey: 'idempotency-key-123',
           threadId: 'thread_123',
         },
       });
@@ -288,17 +291,20 @@ describe('runs router behavior', () => {
         userId: TEST_USER.id,
         idempotencyKey: expect.any(String),
       });
+      expect(enqueueOptions).toEqual({ idempotencyKey: 'idempotency-key-123' });
       expect(enqueueUserId).toBe(TEST_USER.id);
-      expect(publish).toHaveBeenCalledTimes(1);
-      expect(publish).toHaveBeenCalledWith(
-        TEST_USER.id,
-        expect.objectContaining({
-          type: 'run_queued',
-          runId: 'job_test',
-          prompt: 'Plan quarterly roadmap',
-          threadId: 'thread_123',
-        }),
-      );
+      await vi.waitFor(() => {
+        expect(publish).toHaveBeenCalledTimes(1);
+        expect(publish).toHaveBeenCalledWith(
+          TEST_USER.id,
+          expect.objectContaining({
+            type: 'run_queued',
+            runId: 'job_test',
+            prompt: 'Plan quarterly roadmap',
+            threadId: 'thread_123',
+          }),
+        );
+      });
       expect(created).toEqual({
         id: 'job_test',
         status: 'pending',
@@ -329,7 +335,7 @@ describe('runs router behavior', () => {
       );
 
       const error = await invokeProcedure<
-        { prompt: string; threadId?: string | null },
+        { prompt: string; idempotencyKey?: string; threadId?: string | null },
         never
       >({
         procedure: runsRouter.create,
@@ -347,12 +353,50 @@ describe('runs router behavior', () => {
       });
     });
 
+    it('returns success when queued-event publish fails after enqueue', async () => {
+      const runtime = createRuntime(
+        createMockQueueService({
+          enqueue: ((type, payload, userId) =>
+            Effect.succeed(
+              createJob({
+                type,
+                payload: payload as RunPayload,
+                createdBy: userId,
+              }),
+            )) as QueueService['enqueue'],
+        }),
+        createMockPublisherService({
+          publish: () => Effect.fail(new Error('sse unavailable')),
+        }),
+      );
+
+      const created = await invokeProcedure<
+        { prompt: string; idempotencyKey?: string; threadId?: string | null },
+        Awaited<ReturnType<typeof runsRouter.create['~orpc']['handler']>>
+      >({
+        procedure: runsRouter.create,
+        path: ['runs', 'create'],
+        context: createMockContext(runtime, TEST_USER),
+        input: {
+          prompt: 'Plan quarterly roadmap',
+          idempotencyKey: 'idempotency-key-123',
+        },
+      });
+
+      expect(created.id).toBe('job_test');
+      expect(created.prompt).toBe('Plan quarterly roadmap');
+      await expectMatchesContractOutput(
+        runsContract.create as unknown as ProcedureWithOutputSchema,
+        created,
+      );
+    });
+
     it('rejects unauthenticated context before handler execution', async () => {
       const runtime = createRuntime(createMockQueueService());
 
       try {
         await invokeProcedure<
-          { prompt: string; threadId?: string | null },
+          { prompt: string; idempotencyKey?: string; threadId?: string | null },
           never
         >({
           procedure: runsRouter.create,

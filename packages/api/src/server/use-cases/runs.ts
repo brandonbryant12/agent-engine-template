@@ -309,6 +309,9 @@ export const createRunUseCase = ({ user, input }: CreateRunUseCaseInput) =>
         idempotencyKey,
       },
       user.id,
+      {
+        idempotencyKey: input.idempotencyKey,
+      },
     );
 
     const run = yield* toRunOutput(

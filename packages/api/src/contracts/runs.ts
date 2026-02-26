@@ -35,6 +35,13 @@ const CreateRunInputSchema = Schema.Struct({
     Schema.minLength(1),
     Schema.maxLength(4000),
   ),
+  idempotencyKey: Schema.optional(
+    Schema.String.pipe(
+      Schema.trimmed(),
+      Schema.minLength(1),
+      Schema.maxLength(128),
+    ),
+  ),
   threadId: Schema.optional(
     Schema.String.pipe(Schema.trimmed(), Schema.maxLength(128)),
   ),

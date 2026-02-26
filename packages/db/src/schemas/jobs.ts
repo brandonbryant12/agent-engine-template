@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
   pgTable,
   text,
@@ -5,6 +6,7 @@ import {
   varchar,
   jsonb,
   index,
+  uniqueIndex,
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { Schema } from 'effect';
@@ -34,6 +36,7 @@ export const job = pgTable(
     payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
     result: jsonb('result').$type<Record<string, unknown>>(),
     error: text('error'),
+    idempotencyKey: text('idempotencyKey'),
     createdBy: text('createdBy')
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
@@ -56,6 +59,9 @@ export const job = pgTable(
       table.type,
       table.createdAt,
     ),
+    uniqueIndex('job_createdBy_type_idempotencyKey_unique')
+      .on(table.createdBy, table.type, table.idempotencyKey)
+      .where(sql`${table.idempotencyKey} IS NOT NULL`),
     index('job_status_idx').on(table.status),
     index('job_type_status_idx').on(table.type, table.status),
   ],
@@ -112,6 +118,7 @@ export interface JobSerializable {
   readonly status: JobStatus;
   readonly result: unknown;
   readonly error: string | null;
+  readonly idempotencyKey: string | null;
   readonly createdBy: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
