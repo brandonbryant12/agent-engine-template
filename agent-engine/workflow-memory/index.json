@@ -1,5 +1,23 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-no-actionable-ready-for-dev-issues",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "No actionable ready-for-dev issues",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev",
+      "automation",
+      "no-op"
+    ],
+    "importance": 0.42,
+    "recency": 0.95,
+    "confidence": 0.98,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-26-feature-delivery-ready-for-dev-executor-merged-issue-67",
     "date": "2026-02-26",
     "month": "2026-02",
