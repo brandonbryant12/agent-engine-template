@@ -16,6 +16,29 @@
     "eventFile": "events/2026-02.jsonl"
   },
   {
+    "id": "2026-02-26-feature-delivery-ready-for-dev-executor-no-op-no-ready-for-dev-issues",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor no-op: no ready-for-dev issues",
+    "severity": "low",
+    "status": "closed",
+    "tags": [
+      "automation",
+      "ready-for-dev",
+      "no-op",
+      "memory-form:external",
+      "memory-function:episodic",
+      "memory-dynamics:write",
+      "capability:planning",
+      "failure:env-drift"
+    ],
+    "importance": 0.46,
+    "recency": 0.99,
+    "confidence": 0.92,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-26-feature-delivery-ready-for-dev-executor-shipped-67-after-51-closed",
     "date": "2026-02-26",
     "month": "2026-02",
