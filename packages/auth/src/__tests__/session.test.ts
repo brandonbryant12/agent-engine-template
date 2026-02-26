@@ -59,9 +59,16 @@ describe('getSession', () => {
     } as unknown as AuthInstance;
     const headers = new Headers();
 
-    const result = await Effect.runPromise(getSession(auth, headers));
+    const exit = await Effect.runPromiseExit(getSession(auth, headers));
 
-    expect(result).toBeNull();
+    expect(exit._tag).toBe('Failure');
+    if (exit._tag === 'Failure') {
+      const failure = exit.cause;
+      expect(failure._tag).toBe('Fail');
+      if (failure._tag === 'Fail') {
+        expect(failure.error._tag).toBe('AuthSessionError');
+      }
+    }
   });
 });
 

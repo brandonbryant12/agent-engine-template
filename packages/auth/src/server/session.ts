@@ -1,8 +1,11 @@
 import { Effect } from 'effect';
 import type { AuthInstance } from './auth';
-import type { PolicyError } from '../errors';
 import type { User } from '../policy/types';
-import { UnauthorizedError } from '../errors';
+import {
+  AuthSessionError,
+  type PolicyError,
+  UnauthorizedError,
+} from '../errors';
 import { Policy } from '../policy/service';
 
 type Session = AuthInstance['$Infer']['Session'];
@@ -14,13 +17,21 @@ type Session = AuthInstance['$Infer']['Session'];
 export const getSession = (
   auth: AuthInstance,
   headers: Headers,
-): Effect.Effect<Session | null> =>
+): Effect.Effect<Session | null, AuthSessionError> =>
   Effect.tryPromise({
     try: () => auth.api.getSession({ headers }),
-    catch: (error) => error,
+    catch: (cause) =>
+      new AuthSessionError({
+        message: 'Failed to retrieve authentication session',
+        cause,
+      }),
   }).pipe(
     Effect.map((s) => s ?? null),
-    Effect.catchAll(() => Effect.succeed(null)),
+    Effect.tapError((error) =>
+      Effect.logWarning('auth.getSession.failed').pipe(
+        Effect.annotateLogs('auth.failure.tag', error._tag),
+      ),
+    ),
     Effect.withSpan('auth.getSession'),
   );
 
@@ -33,7 +44,7 @@ export const getSessionWithRole = (
   headers: Headers,
 ): Effect.Effect<
   { session: Session; user: User } | null,
-  PolicyError,
+  PolicyError | AuthSessionError,
   Policy
 > =>
   Effect.gen(function* () {
@@ -62,7 +73,7 @@ export const requireSession = (
   headers: Headers,
 ): Effect.Effect<
   { session: Session; user: User },
-  UnauthorizedError | PolicyError,
+  UnauthorizedError | PolicyError | AuthSessionError,
   Policy
 > =>
   getSessionWithRole(auth, headers).pipe(

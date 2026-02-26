@@ -31,4 +31,9 @@ export {
 } from './policy';
 
 // Re-export errors
-export { UnauthorizedError, ForbiddenError, PolicyError } from './errors';
+export {
+  UnauthorizedError,
+  ForbiddenError,
+  PolicyError,
+  AuthSessionError,
+} from './errors';

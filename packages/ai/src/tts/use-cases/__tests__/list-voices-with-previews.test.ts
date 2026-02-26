@@ -3,7 +3,10 @@ import { Storage, type StorageService } from '@repo/storage';
 import { Effect, Layer } from 'effect';
 import { describe, expect } from 'vitest';
 import { TTS, type TTSService, VOICES } from '../../index';
-import { listVoicesWithPreviews } from '../list-voices-with-previews';
+import {
+  listVoicesWithPreviews,
+  PREVIEW_RESOLUTION_CONCURRENCY,
+} from '../list-voices-with-previews';
 
 // =============================================================================
 // Mock Services
@@ -29,6 +32,36 @@ const createMockStorageService = (
   exists: (key) => Effect.succeed(existingKeys.has(key)),
   getUrl: (key) => Effect.succeed(`https://storage.example.com/${key}`),
 });
+
+const createConcurrencyTrackingStorageService = (): {
+  service: StorageService;
+  getPeakConcurrency: () => number;
+} => {
+  let current = 0;
+  let peak = 0;
+
+  const service: StorageService = {
+    upload: () => Effect.die('Not implemented in mock'),
+    download: () => Effect.die('Not implemented in mock'),
+    delete: () => Effect.die('Not implemented in mock'),
+    exists: () =>
+      Effect.async<boolean, never>((resume) => {
+        current += 1;
+        peak = Math.max(peak, current);
+
+        setTimeout(() => {
+          current -= 1;
+          resume(Effect.succeed(false));
+        }, 5);
+      }),
+    getUrl: (key) => Effect.succeed(`https://storage.example.com/${key}`),
+  };
+
+  return {
+    service,
+    getPeakConcurrency: () => peak,
+  };
+};
 
 // =============================================================================
 // Tests
@@ -128,4 +161,25 @@ describe('listVoicesWithPreviews', () => {
       ),
     ),
   );
+
+  it.effect('keeps preview resolution bounded while preserving full output', () => {
+    const tracker = createConcurrencyTrackingStorageService();
+
+    return Effect.gen(function* () {
+      const result = yield* listVoicesWithPreviews({});
+
+      expect(result).toHaveLength(VOICES.length);
+      expect(result.every((voice) => voice.previewUrl === null)).toBe(true);
+      expect(tracker.getPeakConcurrency()).toBeLessThanOrEqual(
+        PREVIEW_RESOLUTION_CONCURRENCY,
+      );
+    }).pipe(
+      Effect.provide(
+        Layer.merge(
+          Layer.succeed(TTS, createMockTTSService()),
+          Layer.succeed(Storage, tracker.service),
+        ),
+      ),
+    );
+  });
 });

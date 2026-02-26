@@ -71,6 +71,18 @@ describe('router handler invariants', () => {
     }
   });
 
+  it('forbids unsafe UIMessage casts in routers', () => {
+    const forbidden = /as unknown as UIMessage\[\]/;
+
+    for (const file of listRouterHandlerFiles()) {
+      const source = readRouterSource(file);
+
+      if (forbidden.test(source)) {
+        throw new Error(`Router ${file} must not cast to UIMessage[] unsafely`);
+      }
+    }
+  });
+
   it('forbids @repo/db/schema imports in routers unless allowlisted', () => {
     const forbiddenImport = /from ['"]@repo\/db\/schema['"]/;
 

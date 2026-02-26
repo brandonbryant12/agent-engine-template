@@ -14,6 +14,9 @@ export interface VoiceWithPreview extends VoiceInfo {
   readonly previewUrl: string | null;
 }
 
+// Tune this if preview lookup throughput requirements change.
+export const PREVIEW_RESOLUTION_CONCURRENCY = 8;
+
 // =============================================================================
 // Helpers
 // =============================================================================
@@ -45,6 +48,14 @@ export const listVoicesWithPreviews = (input: ListVoicesWithPreviewsInput) =>
     const tts = yield* TTS;
     const voices = yield* tts.listVoices({ gender: input.gender });
 
+    yield* Effect.logDebug('tts.listVoices.preview_resolution').pipe(
+      Effect.annotateLogs('tts.voice.count', voices.length),
+      Effect.annotateLogs(
+        'tts.preview.resolution.concurrency',
+        PREVIEW_RESOLUTION_CONCURRENCY,
+      ),
+    );
+
     return yield* Effect.all(
       voices.map((voice) =>
         resolvePreviewUrl(voice.id).pipe(
@@ -53,12 +64,14 @@ export const listVoicesWithPreviews = (input: ListVoicesWithPreviewsInput) =>
           ),
         ),
       ),
-      { concurrency: 'unbounded' },
+      { concurrency: PREVIEW_RESOLUTION_CONCURRENCY },
+    ).pipe(
+      Effect.withSpan('useCase.listVoicesWithPreviews', {
+        attributes: {
+          'filter.gender': input.gender,
+          'tts.voice.count': voices.length,
+          'tts.preview.resolution.concurrency': PREVIEW_RESOLUTION_CONCURRENCY,
+        },
+      }),
     );
-  }).pipe(
-    Effect.withSpan('useCase.listVoicesWithPreviews', {
-      attributes: {
-        'filter.gender': input.gender,
-      },
-    }),
-  );
+  });

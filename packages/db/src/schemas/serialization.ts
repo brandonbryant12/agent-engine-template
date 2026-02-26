@@ -41,16 +41,21 @@ export const createBatchEffectSerializer = <DbType, OutputType>(
   entityName: string,
   transform: (entity: DbType) => OutputType,
 ) => {
+  // Tune this if serialization throughput requirements change.
+  const SERIALIZATION_CONCURRENCY = 32;
   const serialize = createEffectSerializer(entityName, transform);
 
   return (
     entities: readonly DbType[],
   ): Effect.Effect<OutputType[], SerializationError> =>
-    Effect.all(entities.map(serialize), { concurrency: 'unbounded' }).pipe(
+    Effect.all(entities.map(serialize), {
+      concurrency: SERIALIZATION_CONCURRENCY,
+    }).pipe(
       Effect.withSpan(`serialize.${entityName}.batch`, {
         attributes: {
           'serialization.entity': entityName,
           'serialization.count': entities.length,
+          'serialization.concurrency': SERIALIZATION_CONCURRENCY,
         },
       }),
     );

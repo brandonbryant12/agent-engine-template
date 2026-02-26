@@ -75,6 +75,20 @@ describe('createBatchEffectSerializer', () => {
     const results = await Effect.runPromise(serializeBatch([]));
     expect(results).toEqual([]);
   });
+
+  it('serializes full output correctly for batches larger than concurrency cap', async () => {
+    const entities: TestEntity[] = Array.from({ length: 64 }, (_, index) => ({
+      id: `entity_${index}`,
+      name: `Entity ${index}`,
+      createdAt: new Date(`2024-01-${String((index % 28) + 1).padStart(2, '0')}`),
+    }));
+
+    const results = await Effect.runPromise(serializeBatch(entities));
+
+    expect(results).toHaveLength(64);
+    expect(results[0]!.id).toBe('entity_0');
+    expect(results[63]!.id).toBe('entity_63');
+  });
 });
 
 describe('createSyncSerializer', () => {
