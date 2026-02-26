@@ -1,5 +1,32 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-bundled-run-auth-effect-runner-boundary-hardening",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Bundled run auth + effect runner boundary hardening",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev-executor",
+      "ready-for-dev",
+      "bundle",
+      "auth",
+      "effect-runtime",
+      "memory-form:external",
+      "memory-form:parametric",
+      "memory-function:episodic",
+      "memory-function:semantic",
+      "memory-dynamics:write",
+      "memory-dynamics:retrieve",
+      "capability:instruction-following",
+      "capability:debugging",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
