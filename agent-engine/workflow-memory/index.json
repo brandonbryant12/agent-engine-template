@@ -1,5 +1,21 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-ready-for-dev-executor-merged-issue-67",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "ready-for-dev-executor merged issue #67",
+    "severity": "high",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev-executor",
+      "feature-delivery",
+      "queue",
+      "reliability"
+    ],
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-26-feature-delivery-ready-for-dev-executor-shipped-67-after-51-closed",
     "date": "2026-02-26",
     "month": "2026-02",
