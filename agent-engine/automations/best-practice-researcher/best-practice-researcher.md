@@ -19,6 +19,10 @@ GitHub interaction policy: use `gh` CLI for all GitHub interactions in this run 
 
 Random-walk protocol:
 1. Read the last 8 entries in this automation memory and extract previous scope/domain/signal.
+   - Deterministic fallback when the automation memory file is missing or empty:
+     1) Retrieve fallback history from workflow-memory using `pnpm workflow-memory:retrieve --workflow "Periodic Scans" --tags best-practice-researcher --limit 8 --min-score 0`.
+     2) Use only fallback rows that include structured `scan` metadata (`walkMode`, `scope`, `domain`, `signal`) when deriving previous scope/domain/signal.
+     3) If fallback rows are used, append an initialization marker entry to `$CODEX_HOME/automations/best-practice-researcher/memory.md` before proceeding so the next run has deterministic local memory state.
 2. Choose a primary focus with weighted transitions, not pure random:
 - Scope transitions: macro -> (macro|meso), meso -> (macro|meso|micro), micro -> (micro|meso).
 - Walk mix target: about 25 percent macro, 45 percent meso, 30 percent micro over time.
@@ -51,6 +55,7 @@ Research protocol:
 Issue policy:
 - Ensure label availability before issue operations:
   - `gh label create best-practice-researcher --color 0052CC --description "Best-practice random-walk research findings" --force`
+  - `gh label create codex-automation --color 5319E7 --description "Issue or PR created by Codex automation" --force`
 - Search open and closed issues plus open PRs before creating anything.
 - Reuse/extend existing issues when possible.
 - Open up to 3 high-signal non-duplicate issues when confidence >= 0.8.
@@ -68,7 +73,7 @@ Issue policy:
   - Key paper idea(s) selected for this repo
   - Planned adaptation in this codebase (not generic advice)
   - Requirement that implementers append [`research/implemented-ideas.md`](../../../research/implemented-ideas.md) when shipped
-- Add labels `best-practice-researcher` and `codex-automation` when available.
+- Add labels `best-practice-researcher` and `codex-automation`.
 - Do not add `ready-for-dev` from this automation; `issue-evaluator` is the default label authority (humans may override when needed).
 - Do not add `self-improvement` from this automation.
 

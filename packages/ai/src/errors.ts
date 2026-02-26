@@ -5,7 +5,6 @@ import type {
   PromptVersionBlockedError,
   PromptVersionNotFoundError,
 } from './chat/prompts/errors';
-import type { ToolFailureTag, ToolRemediation } from './tools/remediation';
 import type {
   ToolProviderError,
   ToolRateLimitError,
@@ -13,6 +12,7 @@ import type {
   ToolTimeoutError,
   ToolValidationError,
 } from './chat/tools/errors';
+import type { ToolFailureTag, ToolRemediation } from './tools/remediation';
 export {
   ToolProviderError,
   ToolRateLimitError,

@@ -42,6 +42,7 @@ Review protocol:
 Issue policy:
 - Ensure label availability before issue operations:
   - `gh label create product-owner --color 1D76DB --description "Product owner UX and journey improvements" --force`
+  - `gh label create codex-automation --color 5319E7 --description "Issue or PR created by Codex automation" --force`
 - Search open and closed issues plus open PRs before creating anything.
 - Reuse/extend existing issues when possible.
 - Open up to 4 high-signal non-duplicate issues when confidence >= 0.75.
@@ -55,7 +56,7 @@ Issue policy:
   - Acceptance Criteria
   - Issue Evaluation Gate: implementation only after `issue-evaluator` (or explicit human override) applies the `ready-for-dev` label.
 - If external docs/research are cited, include a `References` section with direct clickable URLs and short relevance notes.
-- Add labels `product-owner` and `codex-automation` when available.
+- Add labels `product-owner` and `codex-automation`.
 - Do not add `ready-for-dev` from this automation; `issue-evaluator` is the default label authority (humans may override when needed).
 
 Memory logging contract (required every run, including no-op):

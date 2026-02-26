@@ -67,6 +67,7 @@ Research protocol:
 Issue policy:
 - Ensure label availability before issue operations:
   - `gh label create agent-engine-researcher --color 1D76DB --description "Agent-engine research findings" --force`
+  - `gh label create codex-automation --color 5319E7 --description "Issue or PR created by Codex automation" --force`
 - Search open and closed issues plus open PRs first to avoid duplicates.
 - Reuse/extend existing issues when possible.
 - Open up to 3 high-signal non-duplicate issues per run only when confidence >= 0.8.
@@ -74,7 +75,7 @@ Issue policy:
   - broken or risky behavior
   - redundant/overcomplicated patterns
   - general improvement opportunities that materially improve reliability, clarity, velocity, or safety
-- Issue labels: `agent-engine-researcher`, `codex-automation`, and `self-improvement` when available.
+- Issue labels: `agent-engine-researcher`, `codex-automation`, and `self-improvement`.
 - Every created/updated issue must include:
   - Why This Change Makes Sense Now For Humans
   - Recommendation Metadata (rank, impact, effort, confidence)
