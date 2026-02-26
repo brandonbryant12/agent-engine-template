@@ -1,5 +1,28 @@
 [
   {
+    "id": "2026-02-26-feature-delivery-bundled-ready-for-dev-boundary-and-reliability-hardening",
+    "date": "2026-02-26",
+    "month": "2026-02",
+    "workflow": "Feature Delivery",
+    "title": "Bundled ready-for-dev boundary and reliability hardening",
+    "severity": "medium",
+    "status": "closed",
+    "tags": [
+      "ready-for-dev",
+      "bundle",
+      "automation",
+      "capability:instruction-following",
+      "capability:debugging",
+      "capability:tool-use",
+      "capability:long-term-reasoning",
+      "failure:env-drift"
+    ],
+    "importance": 0.81,
+    "recency": 1,
+    "confidence": 0.93,
+    "eventFile": "events/2026-02.jsonl"
+  },
+  {
     "id": "2026-02-25-feature-delivery-prompt-registry-rollout-completed-for-chat",
     "date": "2026-02-25",
     "month": "2026-02",
