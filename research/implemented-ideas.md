@@ -14,6 +14,15 @@ Use this file to capture shipped ideas discovered through automation/research la
 
 - Date: 2026-02-26
 - Source lane/workflow: ready-for-dev-executor / Feature Delivery
+- Issue: https://github.com/brandonbryant12/agent-engine-template/issues/84
+- PR: https://github.com/brandonbryant12/agent-engine-template/pull/102
+- Paper/reference links: https://turborepo.com/docs/crafting-your-repository/constructing-ci, https://github.com/actions/checkout
+- Idea(s) adopted: execute Turbo-backed CI gates in affected mode for pull requests with explicit base/head SHA resolution and deterministic fallback to full validation.
+- Implemented in: `.github/workflows/ci.yml` and `README.md`.
+- Follow-up: if affected selection ever misses required surfaces, keep fallback full-mode path available and revisit base/head resolution diagnostics.
+
+- Date: 2026-02-26
+- Source lane/workflow: ready-for-dev-executor / Feature Delivery
 - Issue: https://github.com/brandonbryant12/agent-engine-template/issues/88
 - PR: https://github.com/brandonbryant12/agent-engine-template/pull/96
 - Paper/reference links: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS/Errors/CORSNotSupportingCredentials, https://cheatsheetseries.owasp.org/cheatsheets/Cross_Origin_Resource_Sharing_Cheat_Sheet.html

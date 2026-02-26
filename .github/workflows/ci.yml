@@ -20,9 +20,72 @@ jobs:
     name: Validate
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      CI_MODE: full
+      CI_MODE_REASON: non-pr-event
+      TURBO_SCM_BASE: ""
+      TURBO_SCM_HEAD: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve PR affected mode
+        id: affected
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          BASE_REF="${{ github.event.pull_request.base.ref }}"
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+
+          if [[ -z "${BASE_SHA}" || -z "${HEAD_SHA}" ]]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo "reason=missing-pr-sha" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --no-tags origin "${BASE_REF}:${BASE_REF}" "${HEAD_REF}:${HEAD_REF}" || true
+
+          if git cat-file -e "${BASE_SHA}^{commit}" && git cat-file -e "${HEAD_SHA}^{commit}"; then
+            echo "mode=affected" >> "$GITHUB_OUTPUT"
+            echo "reason=resolved-pr-shas" >> "$GITHUB_OUTPUT"
+            echo "base_sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo "reason=unresolved-pr-shas" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set CI mode env
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ steps.affected.outputs.mode }}" == "affected" ]]; then
+            echo "CI_MODE=affected" >> "$GITHUB_ENV"
+            echo "CI_MODE_REASON=${{ steps.affected.outputs.reason }}" >> "$GITHUB_ENV"
+            echo "TURBO_SCM_BASE=${{ steps.affected.outputs.base_sha }}" >> "$GITHUB_ENV"
+            echo "TURBO_SCM_HEAD=${{ steps.affected.outputs.head_sha }}" >> "$GITHUB_ENV"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "CI_MODE=full" >> "$GITHUB_ENV"
+            echo "CI_MODE_REASON=${{ steps.affected.outputs.reason || 'base-unresolved-fallback' }}" >> "$GITHUB_ENV"
+            echo "TURBO_SCM_BASE=" >> "$GITHUB_ENV"
+            echo "TURBO_SCM_HEAD=" >> "$GITHUB_ENV"
+          fi
+
+      - name: CI mode summary
+        run: |
+          echo "CI mode: ${CI_MODE}"
+          echo "Reason: ${CI_MODE_REASON}"
+          if [[ "${CI_MODE}" == "affected" ]]; then
+            echo "TURBO_SCM_BASE=${TURBO_SCM_BASE}"
+            echo "TURBO_SCM_HEAD=${TURBO_SCM_HEAD}"
+          fi
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -38,23 +101,44 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
+      - name: Typecheck (Affected)
+        if: env.CI_MODE == 'affected'
+        run: pnpm turbo run typecheck --affected
+
+      - name: Typecheck (Full)
+        if: env.CI_MODE != 'affected'
         run: pnpm typecheck
 
-      - name: Lint
-        # Root lint script already runs `pnpm scripts:lint` first, then package lint tasks.
-        # Keep this as the single scripts-lint execution path in CI.
+      - name: Lint Scripts
         env:
           GH_TOKEN: ${{ github.token }}
           BEST_PRACTICE_TRACEABILITY_ENFORCE: "1"
           BEST_PRACTICE_TRACEABILITY_LOOKBACK_DAYS: "1"
-        run: pnpm lint
+        run: pnpm scripts:lint
 
-      - name: Test
+      - name: Lint (Affected)
+        if: env.CI_MODE == 'affected'
+        run: pnpm turbo run lint --affected -- --cache --cache-location .cache/.eslintcache --max-warnings=0
+
+      - name: Lint (Full)
+        if: env.CI_MODE != 'affected'
+        run: pnpm turbo run lint --continue -- --cache --cache-location .cache/.eslintcache --max-warnings=0
+
+      - name: Test (Affected)
+        if: env.CI_MODE == 'affected'
+        run: pnpm turbo run test --affected
+
+      - name: Test (Full)
+        if: env.CI_MODE != 'affected'
         run: pnpm test
 
       - name: Test Invariants
         run: pnpm test:invariants
 
-      - name: Build
+      - name: Build (Affected)
+        if: env.CI_MODE == 'affected'
+        run: pnpm turbo run build --affected
+
+      - name: Build (Full)
+        if: env.CI_MODE != 'affected'
         run: pnpm build
