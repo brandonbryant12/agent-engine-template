@@ -66,20 +66,20 @@ pnpm spec:generate
 <!-- BEGIN GENERATED:snapshot-metadata -->
 # Snapshot Metadata (Generated)
 
-- Generated at: 2026-02-23T18:29:21.999Z
-- Git branch: main
-- Git commit: fc63c4c
+- Generated at: 2026-02-26T15:32:24.665Z
+- Git branch: codex/ready-for-dev-75-202602261025
+- Git commit: 3daab14
 
 ## Inventory
 
-- API endpoints: 4
+- API endpoints: 5
 - API tags: 3
 - Domains: 2
 - Use cases: 5
 - Database tables: 5
 - Database enums: 1
-- UI routes: 1
-- UI feature modules: 0
+- UI routes: 3
+- UI modules: 10
 
 ## Generated Files
 
@@ -95,12 +95,13 @@ pnpm spec:generate
 <!-- BEGIN GENERATED:api-surface -->
 # API Contract Surface (Generated)
 
-- Endpoints: 4
+- Endpoints: 5
 - Tags: chat, events, runs
 
 | Method | Path | Operation ID | Tags | Streaming | Summary |
 |---|---|---|---|---|---|
 | POST | /chat/general | chat.general | chat | yes |  |
+| POST | /chat/tools/weather/current | chat.weatherCurrent | chat | no |  |
 | GET | /events/ | events.subscribe | events | yes |  |
 | GET | /runs/ | runs.list | runs | no | List runs |
 | POST | /runs/ | runs.create | runs | no | Create run |
@@ -116,7 +117,7 @@ pnpm spec:generate
 
 | Domain | Use Cases | API Endpoints |
 |---|---|---|
-| chat | 1 | 1 |
+| chat | 1 | 2 |
 | tts | 4 | n/a |
 
 ## Use Cases by Domain
@@ -163,14 +164,27 @@ pnpm spec:generate
 <!-- BEGIN GENERATED:ui-surface -->
 # UI Surface (Generated)
 
-- Routes: 1
-- Feature modules: 0
+- Routes: 3
+- UI modules: 10
 
 ## Routes
 
 | Path | Access |
 |---|---|
 | / | public |
+| /chat | protected |
+| /jobs | protected |
 
-## Feature Modules
+## UI Modules
+
+- `components/app-shell`
+- `components/auth-gate`
+- `components/logo`
+- `components/weather-tool-panel`
+- `lib/chat-utils`
+- `lib/run-utils`
+- `lib/weather-tool`
+- `pages/chat`
+- `pages/dashboard`
+- `pages/jobs`
 <!-- END GENERATED:ui-surface -->

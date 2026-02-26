@@ -1,19 +1,19 @@
 # Snapshot Metadata (Generated)
 
-- Generated at: 2026-02-23T18:29:21.999Z
-- Git branch: main
-- Git commit: fc63c4c
+- Generated at: 2026-02-26T15:32:24.665Z
+- Git branch: codex/ready-for-dev-75-202602261025
+- Git commit: 3daab14
 
 ## Inventory
 
-- API endpoints: 4
+- API endpoints: 5
 - API tags: 3
 - Domains: 2
 - Use cases: 5
 - Database tables: 5
 - Database enums: 1
-- UI routes: 1
-- UI feature modules: 0
+- UI routes: 3
+- UI modules: 10
 
 ## Generated Files
 

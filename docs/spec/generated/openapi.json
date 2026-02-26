@@ -290,6 +290,14 @@
                 "$schema": "http://json-schema.org/draft-07/schema#",
                 "additionalProperties": false,
                 "properties": {
+                  "idempotencyKey": {
+                    "description": "a string at most 128 character(s) long",
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "pattern": "^\\S[\\s\\S]*\\S$|^\\S$|^$",
+                    "title": "maxLength(128)",
+                    "type": "string"
+                  },
                   "prompt": {
                     "description": "a string at most 4000 character(s) long",
                     "maxLength": 4000,
